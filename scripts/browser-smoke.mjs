@@ -44,11 +44,15 @@ const server = await preview({
   preview: { host: '127.0.0.1', port: 4173, strictPort: false },
 });
 
-const siteUrl = server.resolvedUrls?.local?.[0];
-if (!siteUrl) {
+const previewUrl = server.resolvedUrls?.local?.[0];
+if (!previewUrl) {
   await server.close();
   throw new Error('Vite did not provide a local preview URL.');
 }
+
+// GitHub Pages `base_path` is `/AVL` without a trailing slash. Treat the preview
+// origin as a directory so `news/` resolves to `/AVL/news/`, not `/news/`.
+const siteUrl = previewUrl.endsWith('/') ? previewUrl : `${previewUrl}/`;
 
 const browser = await chromium.launch({ executablePath, headless: true });
 

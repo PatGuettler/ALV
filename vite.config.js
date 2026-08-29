@@ -2,10 +2,12 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 const generatedRoot = resolve(import.meta.dirname, '.generated');
+const trimmedBase = (process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
+const base = trimmedBase ? `/${trimmedBase}/` : '/';
 
 export default defineConfig({
   root: generatedRoot,
-  base: process.env.BASE_PATH || '/',
+  base,
   publicDir: resolve(generatedRoot, 'public'),
   build: {
     outDir: resolve(import.meta.dirname, 'dist'),
