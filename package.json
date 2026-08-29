@@ -8,13 +8,18 @@
     "prepare:site": "node scripts/prepare-site.mjs",
     "dev": "npm run prepare:site && vite --host 0.0.0.0",
     "build": "npm run prepare:site && vite build",
+    "extract:legacy": "node scripts/extract-legacy.mjs && npm run format",
+    "format": "prettier --write \"src/**/*.{html,css,js,json}\" \"scripts/**/*.mjs\" \"*.{js,json}\" README.md PRODUCTION_PLAN.md \".github/**/*.{yml,yaml}\"",
+    "format:check": "prettier --check \"src/**/*.{html,css,js,json}\" \"scripts/**/*.mjs\" \"*.{js,json}\" README.md PRODUCTION_PLAN.md \".github/**/*.{yml,yaml}\"",
     "preview": "vite preview --host 0.0.0.0",
     "test": "npm run test:site",
     "test:browser": "npm run build && node scripts/browser-smoke.mjs",
     "test:site": "node scripts/validate-site.mjs"
   },
   "devDependencies": {
+    "cheerio": "1.2.0",
     "playwright-core": "1.62.1",
+    "prettier": "3.9.6",
     "vite": "8.2.2"
   },
   "engines": {

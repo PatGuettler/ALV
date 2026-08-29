@@ -1,41 +1,59 @@
+import { createHash } from 'node:crypto';
 import { access, readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const projectRoot = resolve(import.meta.dirname, '..');
+const sourceRoot = resolve(projectRoot, 'src');
 const masterPath = resolve(projectRoot, 'avactivefinal_compressed.html');
 const retreatPath = resolve(projectRoot, 'warrior-retreat-application.html');
-
 const master = await readFile(masterPath, 'utf8');
 const retreat = await readFile(retreatPath, 'utf8');
+const manifest = JSON.parse(await readFile(resolve(sourceRoot, 'legacy-manifest.json'), 'utf8'));
 
 const failures = [];
-const requiredPageIds = [
-  'home',
-  'news',
-  'warrior',
-  'circle',
-  'active',
-  'topgolf',
-  'events',
-  'resources',
-  'about',
-];
+const pages = new Map([
+  ['home', ''],
+  ['news', 'news'],
+  ['warrior', 'warrior-retreat'],
+  ['circle', 'av-circle'],
+  ['active', 'av-active'],
+  ['topgolf', 'topgolf'],
+  ['events', 'events'],
+  ['resources', 'resources'],
+  ['about', 'about'],
+]);
 
-for (const pageId of requiredPageIds) {
-  if (!master.includes(`id="page-${pageId}"`)) {
-    failures.push(`Missing page section: ${pageId}`);
-  }
+const masterDigest = createHash('sha256').update(master).digest('hex');
+if (manifest.sourceSha256 !== masterDigest) {
+  failures.push('The modular source is out of sync with the approved baseline.');
 }
 
-for (const requiredText of [
-  '<!DOCTYPE html>',
-  '<title>Alabama Veteran',
-  'function showPage(',
-  'tel:988',
-  'class="nav-logo"',
+for (const pageId of pages.keys()) {
+  const source = await readFile(resolve(sourceRoot, 'pages', `${pageId}.html`), 'utf8');
+  if (!source.includes(`id="page-${pageId}"`)) failures.push(`Missing modular page: ${pageId}`);
+  if (source.includes('<style') || source.includes('<script')) {
+    failures.push(`${pageId} contains inline style or script elements.`);
+  }
+  if (source.includes('data:image/')) failures.push(`${pageId} contains an embedded image.`);
+}
+
+for (const component of [
+  'crisis-bar',
+  'ticker',
+  'navigation',
+  'crisis-float',
+  'footer',
+  'contact-modal',
 ]) {
-  if (!master.includes(requiredText)) {
-    failures.push(`Master site is missing required marker: ${requiredText}`);
+  await access(resolve(sourceRoot, 'components', `${component}.html`));
+}
+
+for (const script of ['ticker', 'navigation', 'forms', 'panels', 'events', 'resources']) {
+  const javascript = await readFile(resolve(sourceRoot, 'scripts', `${script}.js`), 'utf8');
+  try {
+    new Function(javascript);
+  } catch (error) {
+    failures.push(`${script}.js has invalid syntax: ${error.message}`);
   }
 }
 
@@ -45,30 +63,37 @@ for (const requiredText of ['<!DOCTYPE html>', 'name="applicant_type"', 'Warrior
   }
 }
 
-if (master.match(/id="page-[^"]+"/g)?.length !== requiredPageIds.length) {
-  failures.push('The master site page count changed unexpectedly.');
-}
-
 if (failures.length > 0) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
 
-console.log(`Validated ${requiredPageIds.length} site sections and the retreat application.`);
+console.log(
+  `Validated ${pages.size} modular pages, shared components, scripts, and the retreat application.`,
+);
 
 if (process.env.CHECK_BUILD === '1') {
-  const builtIndex = resolve(projectRoot, 'dist', 'index.html');
-  await access(builtIndex);
-  const builtSize = (await stat(builtIndex)).size;
-  const sourceSize = (await stat(masterPath)).size;
+  for (const [pageId, route] of pages) {
+    const output = route
+      ? resolve(projectRoot, 'dist', route, 'index.html')
+      : resolve(projectRoot, 'dist', 'index.html');
+    const html = await readFile(output, 'utf8');
+    if (!html.includes(`id="page-${pageId}"`)) failures.push(`Built route is incorrect: ${pageId}`);
+    if (html.includes('data:image/'))
+      failures.push(`Built route contains embedded images: ${pageId}`);
+  }
 
-  if (builtSize >= sourceSize) {
-    console.error('The built HTML was not reduced by asset extraction.');
+  const builtIndex = resolve(projectRoot, 'dist', 'index.html');
+  const builtSize = (await stat(builtIndex)).size;
+  if (builtSize > 100 * 1024)
+    failures.push('The homepage HTML exceeds its 100 KiB performance budget.');
+
+  if (failures.length > 0) {
+    console.error(failures.join('\n'));
     process.exit(1);
   }
 
   console.log(
-    `Built HTML reduced from ${(sourceSize / 1024).toFixed(0)} KiB to ` +
-      `${(builtSize / 1024).toFixed(0)} KiB.`,
+    `Validated ${pages.size} built routes; homepage HTML is ${(builtSize / 1024).toFixed(0)} KiB.`,
   );
 }

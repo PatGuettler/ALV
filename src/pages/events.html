@@ -1,0 +1,283 @@
+<div id="page-events" class="page active">
+  <section class="evp-hero">
+    <div class="container">
+      <div class="evp-hero-inner">
+        <div class="eyebrow ctr" style="margin-bottom: 14px">Alabama Veteran</div>
+        <h1>Events &amp; <span class="red">Calendar</span></h1>
+        <p class="evp-hero-sub">
+          From retreats and golf tournaments to community gatherings — every event is built around
+          one mission: bringing Alabama veterans together.
+        </p>
+        <div class="evp-hero-btns">
+          <a
+            href="#fundraising"
+            onclick="
+              document.getElementById('fundraising').scrollIntoView({ behavior: 'smooth' });
+              return false;
+            "
+            class="btn-r"
+            >Fundraising Events</a
+          ><a
+            href="#calendar"
+            onclick="
+              document.getElementById('calendar').scrollIntoView({ behavior: 'smooth' });
+              return false;
+            "
+            class="btn-ow"
+            >View Calendar</a
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="evp-fundraising" id="fundraising">
+    <div class="container">
+      <div class="evp-fund-header">
+        <div class="eyebrow ctr" style="margin-bottom: 14px">Signature Fundraising Events</div>
+        <h2>Make an <span class="red">Impact</span></h2>
+        <p
+          style="
+            font-size: 16px;
+            color: #666;
+            max-width: 520px;
+            margin: 10px auto 0;
+            line-height: 1.7;
+          "
+        >
+          These events fund everything we do. Your participation — whether you sponsor, register, or
+          simply show up — directly supports Alabama's veteran community.
+        </p>
+      </div>
+      <div class="evp-fund-grid">
+        <div class="evp-fund-card">
+          <div
+            style="
+              width: 100%;
+              height: 260px;
+              background: url(__BASE_PATH__assets/388a6ccc9a5a1294.webp) center/cover no-repeat;
+              position: relative;
+              overflow: hidden;
+            "
+          >
+            <img
+              src="https://alabamaveteran.org/wp-content/uploads/2025/02/AV-Initiative_War-on-The-Greens.png"
+              style="position: absolute; bottom: 14px; right: 14px; width: 203px"
+            />
+          </div>
+          <div class="evp-fund-card-body" id="wog-card">
+            <div class="evp-fund-eyebrow">Annual Golf Tournament · Fundraiser</div>
+            <div class="evp-fund-card-title">War on the Greens</div>
+            <div class="evp-fund-card-meta">
+              <div class="evp-fund-meta-row">📅 &nbsp;October 19, 2026 · 7:30 AM – 3:30 PM</div>
+              <div class="evp-fund-meta-row">📍 &nbsp;Inverness Country Club · Birmingham, AL</div>
+            </div>
+            <p class="evp-fund-card-desc">
+              Honoring Alabama's fallen heroes, one swing at a time. The War on the Greens pairs
+              veterans with players to foster camaraderie, share stories, and showcase the value of
+              those who served. Each year, the event is dedicated to a Gold Star family — ensuring
+              their loved one's sacrifice is never forgotten. Great golf, a powerful mission, and a
+              community that shows up.
+            </p>
+            <div class="wog-hsv-wrap" id="wog-hsv">
+              <button
+                class="wog-hsv-toggle"
+                onclick="
+                  var w = document.getElementById('wog-hsv');
+                  w.classList.toggle('open');
+                  this.querySelector('.wog-hsv-arrow').textContent = w.classList.contains('open')
+                    ? '▲'
+                    : '▼';
+                "
+                aria-expanded="false"
+              >
+                <div class="wog-hsv-preview">
+                  <span class="wog-hsv-badge">Also Annual</span
+                  ><span class="wog-hsv-loc">📍 Huntsville, AL — RTJ Hampton Cove</span
+                  ><span class="wog-hsv-yr">2027 · Date TBD</span>
+                </div>
+                <span class="wog-hsv-arrow">▼</span>
+              </button>
+              <div class="wog-hsv-body">
+                <div class="wog-hsv-eyebrow">Annual Golf Tournament · Fundraiser</div>
+                <div class="wog-hsv-title">War on the Greens — Huntsville</div>
+                <div class="wog-hsv-meta">
+                  <span>📅&nbsp; 2027 — Date Coming Soon</span
+                  ><span>📍&nbsp; RTJ Hampton Cove · Huntsville, AL</span>
+                </div>
+                <p class="wog-hsv-desc">
+                  The northern gateway of the Robert Trent Jones Golf Trail, Hampton Cove sits along
+                  the Flint River foothills featuring 54 championship holes. Same mission as
+                  Birmingham — honoring fallen heroes, pairing veterans with players, and dedicating
+                  each round to a Gold Star family.
+                </p>
+                <div class="wog-hsv-btns">
+                  <a
+                    href="https://events.alabamaveteran.org/home--alabama-veteran-page-2499-6960"
+                    class="btn-b"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="font-size: 11px; padding: 9px 16px"
+                    >Sponsorship Info</a
+                  >
+                  <a
+                    href="https://events.alabamaveteran.org/home--alabama-veteran-page-2499-6960-9200"
+                    class="btn-r"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="font-size: 11px; padding: 9px 16px"
+                    >Register Team</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="evp-fund-card-btns">
+              <button
+                class="btn-r"
+                onclick="document.getElementById('wog-team-modal').classList.add('open')"
+                style="border: none; cursor: pointer"
+              >
+                Team Info</button
+              ><a
+                href="https://onecau.se/wog"
+                id="wog-signup-link"
+                class="btn-r"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="font-size: 10px; padding: 10px 16px; background: var(--red); opacity: 0.85"
+                >Sign Up</a
+              ><button
+                class="btn-b"
+                onclick="document.getElementById('wog-sponsor-modal').classList.add('open')"
+                style="border: none; cursor: pointer"
+              >
+                Sponsorship Info
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="evp-fund-card dark">
+          <img
+            src="__BASE_PATH__assets/326f65d42793b7ac.webp"
+            alt="Salute to Service Gala"
+            class="evp-fund-card-img"
+            style="opacity: 0.5; object-position: center 12%"
+          />
+          <div class="evp-fund-card-body" id="salute-card">
+            <div class="evp-fund-eyebrow">Annual Gala · Fundraiser</div>
+            <div class="evp-fund-card-title">Salute to Service</div>
+            <div class="evp-fund-card-meta">
+              <div class="evp-fund-meta-row">📅 &nbsp;2027 — Date Coming Soon</div>
+              <div class="evp-fund-meta-row">📍 &nbsp;Birmingham, AL</div>
+            </div>
+            <div class="evp-anticipate">
+              <strong>Something Bigger Is Coming in 2027</strong>
+              We are revamping the Salute to Service Gala for 2027 — a bigger night, a bolder
+              mission, and an experience worthy of the veterans we serve. Stay connected and be the
+              first to know when details drop.
+            </div>
+            <p class="evp-fund-card-desc">
+              The Salute to Service Gala is Alabama Veteran's premier fundraising evening — bringing
+              together community leaders, supporters, and veterans for a night of recognition,
+              impact, and celebration. Every dollar raised goes directly to funding retreats,
+              resources, and programs for Alabama's veterans.
+            </p>
+            <div class="evp-fund-card-btns">
+              <a href="mailto:gala@alabamaveteran.org" class="btn-r">Stay Notified</a
+              ><a
+                href="mailto:gala@alabamaveteran.org"
+                class="btn-ow"
+                style="color: rgba(255, 255, 255, 0.7); border-color: rgba(255, 255, 255, 0.25)"
+                >Sponsorship Inquiries</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="evp-month-strip-section">
+    <div class="container">
+      <div class="evp-month-strip-title">What's Happening</div>
+      <div class="evp-month-strip" id="ev-month-strip"></div>
+    </div>
+  </section>
+  <section class="evp-cal-section" id="calendar">
+    <div class="container">
+      <div class="evp-cal-header">
+        <div class="eyebrow ctr" style="margin-bottom: 14px">All Events</div>
+        <h2>Event <span style="color: var(--red)">Calendar</span></h2>
+      </div>
+      <div class="evp-cal-wrap">
+        <div>
+          <div class="evp-cal">
+            <div class="evp-cal-nav">
+              <button onclick="avCalPrev()">←</button>
+              <h3 id="av-cal-month-label">June 2026</h3>
+              <button onclick="avCalNext()">→</button>
+            </div>
+            <div class="evp-cal-days-header">
+              <div class="evp-cal-day-label">Sun</div>
+              <div class="evp-cal-day-label">Mon</div>
+              <div class="evp-cal-day-label">Tue</div>
+              <div class="evp-cal-day-label">Wed</div>
+              <div class="evp-cal-day-label">Thu</div>
+              <div class="evp-cal-day-label">Fri</div>
+              <div class="evp-cal-day-label">Sat</div>
+            </div>
+            <div class="evp-cal-grid" id="av-cal-grid"></div>
+          </div>
+        </div>
+        <div>
+          <div class="evp-detail" id="av-ev-detail">
+            <div class="evp-detail-empty">
+              <p>Click a highlighted date to see event details.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="evp-subscribe" id="subscribe">
+    <div class="container">
+      <div class="evp-subscribe-inner">
+        <div class="eyebrow ctr" style="margin-bottom: 14px">Never Miss an Event</div>
+        <h2>Add to Your <span style="color: var(--red)">Calendar</span></h2>
+        <p>
+          Subscribe to the Alabama Veteran event calendar and get every event automatically on your
+          phone or computer.
+        </p>
+        <div class="evp-sub-btns">
+          <a
+            href="https://www.google.com/calendar/render?cid=webcal%3A%2F%2Falabamaveteran.org%2F%3Fpost_type%3Dtribe_events%26ical%3D1%26eventDisplay%3Dlist"
+            class="evp-sub-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >+ Google Calendar</a
+          ><a
+            href="webcal://alabamaveteran.org/?post_type=tribe_events&amp;ical=1&amp;eventDisplay=list"
+            class="evp-sub-btn"
+            >+ Apple / iCal</a
+          ><a
+            href="https://outlook.office.com/owa?path=/calendar/action/compose&amp;rru=addsubscription&amp;url=webcal%3A%2F%2Falabamaveteran.org%2F%3Fpost_type%3Dtribe_events%26ical%3D1%26eventDisplay%3Dlist&amp;name=Alabama+Veteran+Events"
+            class="evp-sub-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >+ Outlook 365</a
+          ><a
+            href="https://outlook.live.com/owa?path=/calendar/action/compose&amp;rru=addsubscription&amp;url=webcal%3A%2F%2Falabamaveteran.org%2F%3Fpost_type%3Dtribe_events%26ical%3D1%26eventDisplay%3Dlist&amp;name=Alabama+Veteran+Events"
+            class="evp-sub-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >+ Outlook Live</a
+          ><a
+            href="https://alabamaveteran.org/connect/?ical=1"
+            class="evp-sub-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >+ Download .ics</a
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

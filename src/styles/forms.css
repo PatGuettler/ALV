@@ -1,0 +1,214 @@
+.av-signup {
+  background: linear-gradient(135deg, #1a2030, #2d3548);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid #b21f24;
+  padding: 32px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  border-radius: 2px;
+}
+.av-signup .su-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #b21f24;
+  margin-bottom: 8px;
+}
+.av-signup h3 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 30px;
+  text-transform: uppercase;
+  color: #fff;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.av-signup .su-text p {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+  max-width: 430px;
+}
+.av-signup .su-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 300px;
+  flex: 1;
+  max-width: 440px;
+}
+.av-signup .su-fields {
+  display: flex;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+.av-signup input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 16px;
+  color: #fff;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 14px;
+}
+.av-signup input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+.av-signup .su-fields button {
+  background: #b21f24;
+  border: none;
+  padding: 14px 26px;
+  color: #fff;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.av-signup .su-fields button:hover {
+  background: #891519;
+}
+.av-signup .su-note {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+}
+.av-signup .su-ok {
+  display: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 0;
+}
+@media (max-width: 680px) {
+  .av-signup {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 26px 22px;
+  }
+  .av-signup .su-form {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+}
+.cm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 22, 0.72);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.cm-overlay.open {
+  display: flex;
+}
+.cm-box {
+  position: relative;
+  background: #fff;
+  max-width: 520px;
+  width: 100%;
+  padding: 42px 40px;
+  border-top: 5px solid #b21f24;
+  border-radius: 2px;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-family: 'Libre Franklin', sans-serif;
+}
+.cm-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 30px;
+  line-height: 1;
+  color: #9a9590;
+  cursor: pointer;
+}
+.cm-close:hover {
+  color: #1a2030;
+}
+.cm-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #b21f24;
+  margin-bottom: 8px;
+}
+.cm-box h3 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 38px;
+  text-transform: uppercase;
+  color: #48536a;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.cm-sub {
+  font-size: 13.5px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+.cm-sub a {
+  color: #b21f24;
+  font-weight: 700;
+  text-decoration: none;
+}
+.cm-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cm-box input,
+.cm-box textarea {
+  border: 1.5px solid #e0ddd7;
+  border-radius: 2px;
+  padding: 13px 15px;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.cm-box input:focus,
+.cm-box textarea:focus {
+  border-color: #48536a;
+}
+.cm-send {
+  background: #b21f24;
+  color: #fff;
+  border: none;
+  padding: 15px;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+.cm-send:hover {
+  background: #891519;
+}
+.cm-addr {
+  margin-top: 18px;
+  font-size: 11.5px;
+  color: #9a9590;
+  line-height: 1.5;
+  text-align: center;
+}

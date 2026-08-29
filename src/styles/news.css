@@ -1,0 +1,113 @@
+#page-news {
+  font-family: 'Libre Franklin', sans-serif;
+}
+#page-news .nc-hero {
+  position: relative;
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, #1a2030 0%, #48536a 100%);
+  overflow: hidden;
+  padding: 90px 24px;
+}
+#page-news .nc-hero::before {
+  content: 'AV NEWS';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(120px, 26vw, 360px);
+  color: rgba(255, 255, 255, 0.04);
+  letter-spacing: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  line-height: 1;
+}
+#page-news .nc-stripe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 5px;
+  background: #b21f24;
+}
+#page-news .nc-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+}
+#page-news .nc-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #b21f24;
+  margin-bottom: 18px;
+}
+#page-news .nc-inner h1 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(64px, 12vw, 128px);
+  line-height: 0.9;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+}
+#page-news .nc-inner h1 .red {
+  color: #b21f24;
+}
+#page-news .nc-inner p {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.75;
+  max-width: 540px;
+  margin: 0 auto 36px;
+}
+#page-news .nc-btns {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+#page-news .nc-btn {
+  background: #b21f24;
+  color: #ffffff;
+  padding: 15px 32px;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+}
+#page-news .nc-btn:hover {
+  background: #891519;
+  transform: translateY(-2px);
+}
+#page-news .nc-btn-o {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 13px 30px;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+#page-news .nc-btn-o:hover {
+  border-color: #ffffff;
+}

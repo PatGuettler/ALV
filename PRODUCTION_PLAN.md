@@ -10,21 +10,21 @@ The production end state should keep the public website static at the edge and p
 
 ## Target architecture
 
-| Concern | Production service | Why |
-| --- | --- | --- |
-| DNS and TLS | Route 53 + ACM | Managed domain records and automatic certificate renewal |
-| Public web assets | Private S3 bucket behind CloudFront | Durable origin, global caching, no public bucket access |
-| Edge protection | AWS WAF on CloudFront/API Gateway | Rate limiting, managed bot/common exploit rules, IP controls |
-| Web application | Static pages built with Vite; migrate content pages to Astro as they are separated | Fast HTML, minimal client JavaScript, real URLs, strong SEO |
-| User identity | Amazon Cognito User Pool | Sign-up/sign-in, MFA, password reset, social/OIDC options, JWTs |
-| API | API Gateway HTTP API + Lambda | Autoscaling request layer with no idle server fleet |
-| Relational data | Aurora Serverless v2 PostgreSQL + RDS Proxy | Appropriate for users, applications, event registration, roles, and reporting |
-| Simple high-volume lookups | DynamoDB where access patterns are key/value oriented | Predictable scale for resource/event feeds when relational queries are unnecessary |
-| Files and uploads | Dedicated private S3 bucket with presigned uploads | Keeps large files out of the API and controls access |
-| Secrets | Secrets Manager / SSM Parameter Store | No credentials in GitHub, JavaScript, or repository files |
-| Transactional email | SES | Managed email delivery, suppression, and bounce handling |
-| Observability | CloudWatch logs/metrics/alarms, CloudTrail, AWS Budgets | Operational visibility, audit history, and cost alerts |
-| CI/CD | GitHub Actions using AWS OIDC roles | Short-lived credentials; separate staging and production environments |
+| Concern                    | Production service                                                                 | Why                                                                                |
+| -------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| DNS and TLS                | Route 53 + ACM                                                                     | Managed domain records and automatic certificate renewal                           |
+| Public web assets          | Private S3 bucket behind CloudFront                                                | Durable origin, global caching, no public bucket access                            |
+| Edge protection            | AWS WAF on CloudFront/API Gateway                                                  | Rate limiting, managed bot/common exploit rules, IP controls                       |
+| Web application            | Static pages built with Vite; migrate content pages to Astro as they are separated | Fast HTML, minimal client JavaScript, real URLs, strong SEO                        |
+| User identity              | Amazon Cognito User Pool                                                           | Sign-up/sign-in, MFA, password reset, social/OIDC options, JWTs                    |
+| API                        | API Gateway HTTP API + Lambda                                                      | Autoscaling request layer with no idle server fleet                                |
+| Relational data            | Aurora Serverless v2 PostgreSQL + RDS Proxy                                        | Appropriate for users, applications, event registration, roles, and reporting      |
+| Simple high-volume lookups | DynamoDB where access patterns are key/value oriented                              | Predictable scale for resource/event feeds when relational queries are unnecessary |
+| Files and uploads          | Dedicated private S3 bucket with presigned uploads                                 | Keeps large files out of the API and controls access                               |
+| Secrets                    | Secrets Manager / SSM Parameter Store                                              | No credentials in GitHub, JavaScript, or repository files                          |
+| Transactional email        | SES                                                                                | Managed email delivery, suppression, and bounce handling                           |
+| Observability              | CloudWatch logs/metrics/alarms, CloudTrail, AWS Budgets                            | Operational visibility, audit history, and cost alerts                             |
+| CI/CD                      | GitHub Actions using AWS OIDC roles                                                | Short-lived credentials; separate staging and production environments              |
 
 Aurora and DynamoDB should not both be introduced automatically. Start with Aurora PostgreSQL if the first dynamic features involve related user/application/event records. Add DynamoDB only for a workload whose measured access pattern benefits from it.
 
@@ -116,4 +116,3 @@ Before Phase 1 begins, obtain written answers for:
 The Pages site is public. Protect `main`, require the build workflow, and use pull requests for review. GitHub repository settings must have **Pages → Source: GitHub Actions** enabled. Every push to `main` then builds and deploys the site; manual deployment is also available from the Actions tab.
 
 When a custom staging domain is added, configure it in GitHub Pages, add the documented DNS record, enable HTTPS, and add a `CNAME` file to the generated public assets. Do not point the production apex domain to GitHub Pages if AWS is the selected production platform.
-

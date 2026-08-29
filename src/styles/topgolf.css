@@ -1,0 +1,205 @@
+#page-topgolf {
+  padding-top: 146px;
+}
+.tgp-hero {
+  background: var(--blue-dp);
+  position: relative;
+  overflow: hidden;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+}
+.tgp-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.22;
+  display: block;
+}
+.tgp-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(26, 32, 48, 0.72) 40%, rgba(26, 32, 48, 0.3));
+}
+.tgp-hero-inner {
+  position: relative;
+  z-index: 2;
+  padding: 80px 0;
+}
+.tgp-hero h1 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 76px;
+  text-transform: uppercase;
+  color: var(--white);
+  letter-spacing: 1px;
+  line-height: 0.95;
+  margin-bottom: 18px;
+}
+.tgp-hero h1 .red {
+  color: var(--red);
+}
+.tgp-hero-sub {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.65);
+  max-width: 540px;
+  line-height: 1.72;
+  margin-bottom: 32px;
+}
+.tgp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  transition: color 0.2s;
+}
+.tgp-back:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+.tgp-back::before {
+  content: '←';
+}
+#page-topgolf .tg-hours-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 56px;
+}
+#page-topgolf .tg-hour-card {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 32px 20px;
+  text-align: center;
+  border-top: 3px solid var(--red);
+  transition: background 0.2s;
+}
+#page-topgolf .tg-hour-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+#page-topgolf .tg-day {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+#page-topgolf .tg-time {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 26px;
+  text-transform: uppercase;
+  color: var(--white);
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+#page-topgolf .tg-note {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+#page-topgolf .tgp-body {
+  background: var(--blue-dp);
+  padding: 80px 0;
+}
+#page-topgolf .tg-how-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+#page-topgolf .tg-how-header h3 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 42px;
+  text-transform: uppercase;
+  color: var(--white);
+  letter-spacing: 1px;
+}
+#page-topgolf .tg-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 56px;
+}
+#page-topgolf .tg-step {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 32px 24px;
+  border-top: 3px solid rgba(178, 31, 36, 0.4);
+}
+#page-topgolf .tg-step-num {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 52px;
+  color: var(--red);
+  opacity: 0.4;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+#page-topgolf .tg-step-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+#page-topgolf .tg-step-body {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.65;
+}
+#page-topgolf .tg-rules {
+  background: rgba(178, 31, 36, 0.08);
+  border: 1px solid rgba(178, 31, 36, 0.25);
+  padding: 36px 40px;
+  margin-bottom: 56px;
+}
+#page-topgolf .tg-rules h3 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 30px;
+  text-transform: uppercase;
+  color: var(--white);
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+#page-topgolf .tg-rules-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 48px;
+}
+#page-topgolf .tg-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.6;
+}
+#page-topgolf .tg-rule-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+#page-topgolf .tg-cta-row {
+  text-align: center;
+}
+#page-topgolf .tg-cta-row p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}

@@ -1,0 +1,139 @@
+.avnews-section {
+  background: #ffffff;
+  padding: 88px 0;
+}
+.avnews-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+}
+.avnews-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #b21f24;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.avnews-eyebrow::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: #b21f24;
+}
+.avnews-title {
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(40px, 5vw, 60px);
+  line-height: 0.95;
+  color: #48536a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.avnews-all {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #b21f24;
+  text-decoration: none;
+  white-space: nowrap;
+  padding-bottom: 6px;
+}
+.avnews-all:hover {
+  color: #891519;
+}
+.avnews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  background: #e8e5df;
+}
+.avnews-card {
+  background: #ffffff;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.avnews-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(26, 32, 48, 0.12);
+}
+.avnews-img {
+  height: 180px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+}
+.avnews-tag {
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #b21f24;
+  padding: 5px 11px;
+  border-radius: 2px;
+}
+.avnews-body {
+  padding: 26px 24px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.avnews-date {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #9a9590;
+}
+.avnews-body h3 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 25px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #48536a;
+  letter-spacing: 0.5px;
+}
+.avnews-body p {
+  font-size: 13.5px;
+  color: #666;
+  line-height: 1.65;
+  flex: 1;
+}
+.avnews-read {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #b21f24;
+  margin-top: 4px;
+}
+@media (max-width: 860px) {
+  .avnews-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .avnews-section {
+    padding: 56px 0;
+  }
+  .avnews-grid {
+    grid-template-columns: 1fr;
+  }
+}

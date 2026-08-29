@@ -14,12 +14,16 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: resolve(generatedRoot, 'index.html'),
-        'warrior-retreat-application': resolve(
-          generatedRoot,
-          'warrior-retreat-application.html',
-        ),
+        about: resolve(generatedRoot, 'about', 'index.html'),
+        active: resolve(generatedRoot, 'av-active', 'index.html'),
+        circle: resolve(generatedRoot, 'av-circle', 'index.html'),
+        events: resolve(generatedRoot, 'events', 'index.html'),
+        news: resolve(generatedRoot, 'news', 'index.html'),
+        resources: resolve(generatedRoot, 'resources', 'index.html'),
+        topgolf: resolve(generatedRoot, 'topgolf', 'index.html'),
+        warrior: resolve(generatedRoot, 'warrior-retreat', 'index.html'),
+        'warrior-retreat-application': resolve(generatedRoot, 'warrior-retreat-application.html'),
       },
     },
   },
 });
-

@@ -33,7 +33,9 @@ jobs:
         run: npm ci
 
       - name: Validate source
-        run: npm test
+        run: |
+          npm run format:check
+          npm test
 
       - name: Build staging site
         env:
@@ -42,10 +44,12 @@ jobs:
 
       - name: Validate build
         env:
-          CHECK_BUILD: "1"
+          CHECK_BUILD: '1'
         run: npm run test:site
 
       - name: Run browser smoke test
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: node scripts/browser-smoke.mjs
 
       - name: Upload Pages artifact
