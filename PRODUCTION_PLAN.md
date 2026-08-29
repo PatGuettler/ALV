@@ -41,6 +41,8 @@ Suggested initial data domains:
 
 The current GoHighLevel embeds and email-client form behavior are staging integrations, not a final private-data architecture. Before accepting real submissions, document whether GHL or AWS is the system of record and execute the appropriate privacy/security review.
 
+Warrior Retreat staff review is in the same category. The standalone application artifact currently uses a shared client-side passcode and hardcoded sample applicant records. That is a prototype of an admin UI, not a production intake or staff workspace. Do not treat it as live, and do not put real credentials or applicant PII into the static site. See **Warrior Retreat applications and staff access** below.
+
 ## Delivery phases
 
 ### Phase 0 — public visual staging (implemented in this repository)
@@ -49,6 +51,7 @@ The current GoHighLevel embeds and email-client form behavior are staging integr
 - Preserve the customer baseline while extracting embedded images into cacheable build assets.
 - Run source and build checks on every deployment.
 - Keep staging free of secrets, private submissions, and test user data.
+- Do not present the prototype **Staff Login** on `warrior-retreat-application.html` as a working staff tool. It is a client-side demo against sample records.
 
 Exit criterion: the customer approves desktop and mobile visual fidelity and signs off on the page/content inventory.
 
@@ -88,6 +91,78 @@ Exit criterion: repeatable deployments, tested rollback, production domain/TLS, 
 
 Exit criterion: security review completed, privacy/retention policy approved, load targets met, and operational ownership assigned.
 
+## Warrior Retreat applications and staff access
+
+Customer feedback from Chris Montz (August 2026):
+
+- After **Apply for a Retreat**, staff expect a **Staff Login** control at the bottom of the screen. Chris does not see a working login on the Warrior Retreat marketing page and reports that the control on the application does not work for him.
+- Once signed in, staff need to review the information that flows through the application.
+- The current shared passcode is not an acceptable security model. Chris is not sure how to store applications in a database, and wants the team to keep using **GoHighLevel** because it is already easy for staff.
+
+### Where the login actually is today
+
+The public Warrior Retreat page (`/warrior-retreat/`) has no staff login. **Apply for a Retreat** opens the standalone file `warrior-retreat-application.html`. That file’s footer contains a **Staff Login** button. Chris’s working Claude artifact uses `window.prompt()` (`openAdmin()`).
+
+That placement is easy to miss if someone stays on the marketing page. Do not document or copy the shared passcode into this plan, extra files, or email threads.
+
+### Transfer finding (August 29, 2026)
+
+Chris confirmed the Claude-built tool works for him and sent `WarriorRetreat_ApplicationSystem.7z` after the transferred site rejected staff login. Comparing that archive to the copy then in this repository:
+
+- Form fields, admin views, sample records, and GHL/grant CSV export were the same product.
+- During transfer the HTML was minified, `prompt()` was replaced with a custom overlay (`submitStaffLogin` / `staff-login-overlay`), and the client-side passcode string was changed to a different value than the one staff use.
+- Staff typing the known passcode therefore always failed. Nothing in the archive linked to an external site or database; it is the same in-browser prototype.
+
+The customer-sent HTML is restored as `warrior-retreat-application.html` so staging matches the Claude tool. This is still not production security. The archive itself is gitignored and must not be committed.
+
+### What the current artifact actually does
+
+This is a front-end prototype, not a staff system:
+
+- Access is a JavaScript string comparison. Anyone can read the passcode from the page source. There are no individual accounts, MFA, lockout, audit logs, or server-side authorization.
+- The admin view is filled with **hardcoded sample applicant records** (names, emails, phones, service and health-related fields) shipped in the HTML. Form submissions are not saved. There is no database.
+- **Export to GoHighLevel** downloads a CSV of selected fields. It does not write into GHL. A marketing-oriented GHL field list exists in the same file; it is not a live webhook.
+- GitHub Pages is a public host. A real staff inbox, real applications, and any shared password must not live there.
+
+### Recommended production shape
+
+Keep the public Apply experience on the static site. Put identity, storage, and staff review behind a system that is not the public HTML bundle.
+
+Pick a **system of record**. A hybrid is allowed only if ownership of each field is written down.
+
+**Option A — GoHighLevel owns review (fits current staff workflow)**
+
+Use this if staff should keep working in GHL and GHL’s permissions are acceptable for the data involved.
+
+- The public form posts into a GHL form, survey, or inbound webhook.
+- Staff log into **GoHighLevel**, not the public website. Remove **Staff Login** from the static application.
+- Tags cover retreat type, session, past attendee, and application status. Grant reporting uses GHL export or a scheduled extract, not a public admin page.
+- Confirm whether health, service-connected, and similar answers may live in GHL, who can see them, and how long they are retained.
+
+**Option B — AWS owns the full application (required if GHL cannot hold this data)**
+
+Use this if the application is private case data rather than a CRM contact.
+
+- Anonymous public POST to API Gateway + Lambda; store in Aurora PostgreSQL with encryption at rest.
+- Staff authenticate with Cognito (individual users, MFA, password reset). Every read/update is authorized on the server. No shared passcode.
+- Optional: after intake, push a **marketing-safe subset** (name, email, phone, retreat tags) into GHL so fundraising still happens in the tool staff already use. Health and grant fields stay in AWS.
+
+Do not run two live staff inboxes. If both products exist, GHL is the CRM; AWS (or GHL) is the application file of record.
+
+### Near-term staging rules
+
+- Do not advertise the prototype staff login as a working tool.
+- Strip or disable sample applicant PII before any public URL is treated as customer-facing staging of real applications.
+- Do not add a real password, API key, or GHL private webhook secret to the static site.
+- If a demo of the admin UI is needed, use a private preview, not GitHub Pages.
+
+### Customer decisions still required
+
+- Is GHL the system of record for retreat applications, or only the CRM that receives a contact subset?
+- Which staff roles need the full application versus marketing fields only?
+- Should the public site have **no** staff login (recommended if GHL owns review)?
+- Retention, who deletes records, and whether health/wellbeing answers may live in GHL.
+
 ## Performance and traffic targets
 
 Use budgets as acceptance criteria, not aspirations:
@@ -105,7 +180,8 @@ Before Phase 1 begins, obtain written answers for:
 
 - Which delivered file/page list is authoritative. The handoff names `avactivefinal_compressed.html`, but other repository artifacts include Store and an integrated application page that are absent from that named master.
 - Whether Store is in launch scope and which hosted commerce provider owns checkout.
-- Whether retreat applications and contact/volunteer submissions belong in GoHighLevel or the new AWS system.
+- Whether retreat applications and contact/volunteer submissions belong in GoHighLevel or the new AWS system. Chris’s preference is that staff keep using GHL; confirm whether GHL may hold the full application or only a marketing contact subset. See **Warrior Retreat applications and staff access**.
+- Whether the public site should expose any staff login at all, or staff should authenticate only in GHL / Cognito.
 - Whether public visitors create accounts, or accounts are only for members/staff.
 - Who can publish news/events/resources and whether approvals are required.
 - Data retention, privacy policy, accessibility owner, analytics provider, and incident contact.

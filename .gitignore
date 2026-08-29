@@ -3,4 +3,6 @@ dist/
 .generated/
 .DS_Store
 *.log
+*.7z
+WarriorRetreat_ApplicationSystem.7z
 
