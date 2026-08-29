@@ -1,0 +1,23 @@
+{
+  "name": "alabama-veteran-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static staging build for the Alabama Veteran website.",
+  "scripts": {
+    "prepare:site": "node scripts/prepare-site.mjs",
+    "dev": "npm run prepare:site && vite --host 0.0.0.0",
+    "build": "npm run prepare:site && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "npm run test:site",
+    "test:browser": "npm run build && node scripts/browser-smoke.mjs",
+    "test:site": "node scripts/validate-site.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.62.1",
+    "vite": "8.2.2"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
