@@ -12,17 +12,12 @@ const base = import.meta.env.BASE_URL;
     </p>
     <div class="cta-btns">
       <a href="#levels" class="btn-red">Join the AV Circle</a><a
-        href="#"
+        href="mailto:avcircle@alabamaveteran.org"
         class="btn-white"
-        onclick="
-            openContact(
-              'avcircle@alabamaveteran.org',
-              'AV Circle Sponsorship',
-              'AV Circle Sponsorship Inquiry from',
-            );
-            return false;
-          "
-        >Contact Us About Sponsorship</a
+        data-contact
+        data-contact-email="avcircle@alabamaveteran.org"
+        data-contact-title="AV Circle Sponsorship"
+        data-contact-subject="AV Circle Sponsorship Inquiry from">Contact Us About Sponsorship</a
       >
     </div>
   </div>

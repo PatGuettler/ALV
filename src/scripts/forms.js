@@ -1,32 +1,73 @@
-var _cTo = 'info@alabamaveteran.org',
-  _cSubj = 'Website Contact from';
-function openContact(email, title, subj) {
-  _cTo = email || 'info@alabamaveteran.org';
-  _cSubj = subj || 'Website Contact from';
-  var t = document.getElementById('cm-title');
-  if (t) t.textContent = title || 'Contact Alabama Veteran';
-  var em = document.getElementById('cm-email');
-  if (em) {
-    em.textContent = _cTo;
-    em.href = 'mailto:' + _cTo;
+const defaultContact = {
+  email: 'info@alabamaveteran.org',
+  title: 'Contact Alabama Veteran',
+  subject: 'Website Contact from',
+};
+
+let currentContact = { ...defaultContact };
+let previousFocus = null;
+
+function openContact(trigger) {
+  const modal = document.getElementById('contact-modal');
+  if (!modal) return;
+
+  currentContact = {
+    email: trigger.dataset.contactEmail || defaultContact.email,
+    title: trigger.dataset.contactTitle || defaultContact.title,
+    subject: trigger.dataset.contactSubject || defaultContact.subject,
+  };
+
+  const title = document.getElementById('cm-title');
+  const email = document.getElementById('cm-email');
+  if (title) title.textContent = currentContact.title;
+  if (email) {
+    email.textContent = currentContact.email;
+    email.href = `mailto:${currentContact.email}`;
   }
-  document.getElementById('contact-modal').classList.add('open');
+
+  previousFocus = document.activeElement;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  modal.querySelector('input')?.focus();
 }
+
 function closeContact() {
-  document.getElementById('contact-modal').classList.remove('open');
+  const modal = document.getElementById('contact-modal');
+  if (!modal?.classList.contains('open')) return;
+
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  previousFocus?.focus?.();
 }
-function sendContact(f) {
-  var subj = encodeURIComponent(_cSubj + ' ' + f.cname.value);
-  var body = encodeURIComponent(
-    'From: ' + f.cname.value + ' (' + f.cemail.value + ')\n\n' + f.cmsg.value,
-  );
-  window.location.href = 'mailto:' + _cTo + '?subject=' + subj + '&body=' + body;
-  return false;
+
+function sendContact(form) {
+  const data = new FormData(form);
+  const name = String(data.get('cname') || '');
+  const email = String(data.get('cemail') || '');
+  const message = String(data.get('cmsg') || '');
+  const subject = encodeURIComponent(`${currentContact.subject} ${name}`);
+  const body = encodeURIComponent(`From: ${name} (${email})\n\n${message}`);
+  window.location.href = `mailto:${currentContact.email}?subject=${subject}&body=${body}`;
 }
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') closeContact();
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-contact]').forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      openContact(trigger);
+    });
+  });
+
+  document.querySelector('[data-contact-close]')?.addEventListener('click', closeContact);
+  document.querySelector('[data-contact-overlay]')?.addEventListener('click', (event) => {
+    if (event.target === event.currentTarget) closeContact();
+  });
+  document.querySelector('[data-contact-form]')?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    sendContact(event.currentTarget);
+  });
 });
 
-window.openContact = openContact;
-window.closeContact = closeContact;
-window.sendContact = sendContact;
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeContact();
+});

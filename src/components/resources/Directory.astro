@@ -1,7 +1,3 @@
----
-const base = import.meta.env.BASE_URL;
----
-
 <div class="res-body" style="padding: 0 48px">
   <div id="section-all" class="cat-section visible">
     <div class="sec-head">
@@ -18,14 +14,17 @@ const base = import.meta.env.BASE_URL;
     <div class="filter-row">
       <span class="filter-label">Filter by type:</span><button
         class="f-btn active"
-        onclick="filterType('all', this)">All</button
-      ><button class="f-btn" onclick="filterType('federal', this)">Federal</button><button
+        type="button"
+        data-resource-filter="all">All</button
+      ><button class="f-btn" type="button" data-resource-filter="federal">Federal</button><button
         class="f-btn"
-        onclick="filterType('state', this)">State of Alabama</button
-      ><button class="f-btn" onclick="filterType('local', this)">Local</button><button
+        type="button"
+        data-resource-filter="state">State of Alabama</button
+      ><button class="f-btn" type="button" data-resource-filter="local">Local</button><button
         class="f-btn"
-        onclick="filterType('nonprofit', this)">Nonprofits</button
-      ><button class="f-btn" onclick="filterType('hotline', this)">Hotlines</button>
+        type="button"
+        data-resource-filter="nonprofit">Nonprofits</button
+      ><button class="f-btn" type="button" data-resource-filter="hotline">Hotlines</button>
     </div>
     <div class="res-grid" id="all-grid"></div>
     <div class="no-results" id="no-results">
@@ -474,15 +473,11 @@ const base = import.meta.env.BASE_URL;
         veteran who needs it.
       </p>
       <div class="rs-btns">
-        <button
-          class="rs-btn"
-          onclick="
-              openContact();
-              return false;
-            "
+        <button class="rs-btn" type="button" data-contact> Suggest a Resource</button><button
+          class="rs-btn-o"
+          type="button"
+          data-print-page>Print This Guide</button
         >
-          Suggest a Resource</button
-        ><button class="rs-btn-o" onclick="window.print()">Print This Guide</button>
       </div>
       <div
         style="

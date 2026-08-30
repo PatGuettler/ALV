@@ -22,11 +22,8 @@ const base = import.meta.env.BASE_URL;
           financial claims must be sourced from approved organizational records before publication.
         </p>
         <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px">
-          <a href={`${base}about/`} class="btn-r">About Us</a><button
-            class="btn-b"
-            onclick="document.getElementById('board').scrollIntoView({ behavior: 'smooth' })"
-          >
-            Meet the Board</button
+          <a href={`${base}about/`} class="btn-r">About Us</a><a href="#board" class="btn-b"
+            >Meet the Board</a
           ><a
             href="https://projects.propublica.org/nonprofits/organizations/813938705/"
             class="btn-ow"

@@ -1,17 +1,13 @@
----
-const base = import.meta.env.BASE_URL;
----
-
-<div id="contact-modal" class="cm-overlay" onclick="if (event.target === this) closeContact();">
-  <div class="cm-box">
-    <button class="cm-close" onclick="closeContact()" aria-label="Close">×</button>
+<div id="contact-modal" class="cm-overlay" data-contact-overlay aria-hidden="true">
+  <div class="cm-box" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+    <button class="cm-close" type="button" aria-label="Close" data-contact-close>×</button>
     <div class="cm-eyebrow">Get In Touch</div>
     <h3 id="cm-title">Contact Alabama Veteran</h3>
     <p class="cm-sub">
       Send us a message and we’ll get back to you. You can also email us directly at
       <a id="cm-email" href="mailto:info@alabamaveteran.org">info@alabamaveteran.org</a>.
     </p>
-    <form onsubmit="return sendContact(this);">
+    <form data-contact-form>
       <input name="cname" type="text" placeholder="Your name" required="" /><input
         name="cemail"
         type="email"

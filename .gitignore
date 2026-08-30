@@ -1,8 +1,8 @@
 node_modules/
 dist/
 .generated/
+.astro/
 .DS_Store
 *.log
 *.7z
 WarriorRetreat_ApplicationSystem.7z
-

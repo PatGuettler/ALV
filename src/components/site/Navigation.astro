@@ -24,7 +24,13 @@ const base = import.meta.env.BASE_URL;
       >
     </li>
   </ul>
-  <button class="nav-burger" aria-label="Open menu" aria-expanded="false" onclick="toggleMenu()">
+  <button
+    class="nav-burger"
+    type="button"
+    aria-label="Open menu"
+    aria-expanded="false"
+    data-menu-toggle
+  >
     <span></span><span></span><span></span>
   </button>
 </nav>

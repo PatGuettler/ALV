@@ -14,17 +14,6 @@ function toggleMenu() {
   menuButton.setAttribute('aria-expanded', String(isOpen));
 }
 
-function toggleFaq(trigger) {
-  const item = trigger.closest('.faq-item');
-  if (!item) return;
-
-  const wasOpen = item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach((openItem) => {
-    openItem.classList.remove('open');
-  });
-  if (!wasOpen) item.classList.add('open');
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const pageId = document.documentElement.dataset.page;
   const activeItem = document.getElementById(`nb-${pageId}`);
@@ -35,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .forEach((control) => {
       control.addEventListener('click', () => closeMenu());
     });
-});
 
-window.toggleMenu = toggleMenu;
-window.toggleFaq = toggleFaq;
+  document.querySelector('[data-menu-toggle]')?.addEventListener('click', toggleMenu);
+});

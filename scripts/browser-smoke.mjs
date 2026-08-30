@@ -110,6 +110,16 @@ try {
   await desktop.waitForURL(/\/about\/$/);
   await desktop.locator('#page-about.active').waitFor({ state: 'visible' });
 
+  await loadRoute(desktop, 'circle', 'av-circle/', desktopErrors);
+  await desktop.locator('[data-panel="indiv"]').click();
+  await desktop.locator('#panel-indiv.active').waitFor({ state: 'visible' });
+
+  await loadRoute(desktop, 'warrior', 'warrior-retreat/', desktopErrors);
+  await desktop.locator('[data-contact]').first().click();
+  await desktop.locator('#contact-modal.open[aria-hidden="false"]').waitFor({ state: 'visible' });
+  await desktop.locator('[data-contact-close]').click();
+  await desktop.locator('#contact-modal[aria-hidden="true"]').waitFor({ state: 'hidden' });
+
   const mobileContext = await browser.newContext({
     viewport: { width: 412, height: 915 },
     screen: { width: 412, height: 915 },
@@ -156,7 +166,7 @@ try {
   await mobileContext.close();
   await desktop.close();
   console.log(
-    `Browser smoke test passed for ${routes.size} responsive routes and the retreat application.`,
+    `Browser smoke test passed for ${routes.size} responsive routes and the retreat status route.`,
   );
 } finally {
   await browser.close();
