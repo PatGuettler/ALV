@@ -1,0 +1,31 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="ava-hero">
+  <div class="container">
+    <div class="ava-hero-inner">
+      <div style="margin-bottom: 28px">
+        <img
+          src={`${base}assets/7de9226ffa42f5e4.webp`}
+          alt="AV Active"
+          style="height: 140px; width: auto; display: block; margin: 0 auto"
+        />
+      </div>
+      <h1>GET <span class="red">AV ACTIVE</span></h1>
+      <p class="ava-hero-sub">
+        An app built for Alabama's veteran community — keeping vets connected, engaged, and moving
+        forward long after the uniform comes off.
+      </p>
+      <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap">
+        <a href="mailto:avactive@alabamaveteran.org" class="btn-r">Get Early Access</a><a
+          class="btn-ow"
+          style="color: var(--red); border-color: rgba(178, 31, 36, 0.5)"
+          href={`${base}topgolf/`}
+        >
+          Free Topgolf Program</a
+        ><a href="mailto:avactive@alabamaveteran.org" class="btn-ow">Become a Sponsor</a>
+      </div>
+    </div>
+  </div>
+</section>

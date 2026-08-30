@@ -1,333 +1,418 @@
 # Alabama Veteran production plan
 
-## Decision
-
-Use **GitHub Pages for public staging** and **AWS for production**.
-
-GitHub Pages is an excellent fit for customer review of the current static site: deployment is simple, the content is delivered through a CDN, and there is no server to maintain. It is not the right production boundary once the site owns user accounts, private form data, administrative tools, or database-backed content.
-
-The production end state should keep the public website static at the edge and put only genuinely dynamic operations behind authenticated APIs. That gives the high-traffic public pages the lowest cost and largest scaling margin while keeping personal data out of the browser bundle and static hosting layer.
-
-## Target architecture
-
-| Concern                    | Production service                                                                 | Why                                                                                |
-| -------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| DNS and TLS                | Route 53 + ACM                                                                     | Managed domain records and automatic certificate renewal                           |
-| Public web assets          | Private S3 bucket behind CloudFront                                                | Durable origin, global caching, no public bucket access                            |
-| Edge protection            | AWS WAF on CloudFront/API Gateway                                                  | Rate limiting, managed bot/common exploit rules, IP controls                       |
-| Web application            | Static pages built with Vite; migrate content pages to Astro as they are separated | Fast HTML, minimal client JavaScript, real URLs, strong SEO                        |
-| User identity              | Amazon Cognito User Pool                                                           | Invite-only staff/admin, MFA, password reset, JWTs to API Gateway                  |
-| API                        | API Gateway HTTP API + Lambda                                                      | Autoscaling request layer with no idle server fleet                                |
-| Relational data            | Aurora Serverless v2 PostgreSQL + RDS Proxy                                        | Appropriate for users, applications, event registration, roles, and reporting      |
-| Simple high-volume lookups | DynamoDB where access patterns are key/value oriented                              | Predictable scale for resource/event feeds when relational queries are unnecessary |
-| Files and uploads          | Dedicated private S3 bucket with presigned uploads                                 | Keeps large files out of the API and controls access                               |
-| Secrets                    | Secrets Manager / SSM Parameter Store                                              | No credentials in GitHub, JavaScript, or repository files                          |
-| Transactional email        | SES                                                                                | Managed email delivery, suppression, and bounce handling                           |
-| Observability              | CloudWatch logs/metrics/alarms, CloudTrail, AWS Budgets                            | Operational visibility, audit history, and cost alerts                             |
-| Infrastructure as code     | Terraform                                                                          | Repeatable AWS resources, remote state, plan-on-PR and apply-on-merge              |
-| CI/CD                      | GitHub Actions using AWS OIDC roles                                                | Short-lived credentials; `terraform apply` on every merge to `main`                |
-
-Aurora and DynamoDB should not both be introduced automatically. Start with Aurora PostgreSQL if the first dynamic features involve related user/application/event records. Add DynamoDB only for a workload whose measured access pattern benefits from it.
-
-## Application boundaries
-
-The browser may contain public content and call public or authenticated APIs. It must never contain database credentials, AWS access keys, GHL private keys, or administrator tokens.
-
-Suggested initial data domains:
-
-1. **Public content:** news, events, veteran resources, board profiles, sponsors. Render these into static pages during deployment and cache them at CloudFront.
-2. **Identity and roles:** Cognito identities with application roles such as visitor, member, editor, and administrator. Enforce authorization again in every API operation.
-3. **Private submissions:** retreat applications, contact requests, volunteer inquiries, and file uploads. Encrypt at rest, retain only what is necessary, log access, and define deletion/retention rules before launch.
-4. **Commerce and donations:** continue redirecting to a PCI-compliant hosted provider. Do not collect card data in this application.
-
-The current GoHighLevel embeds and email-client form behavior are staging integrations, not a final private-data architecture. Before accepting real submissions, document whether GHL or AWS is the system of record and execute the appropriate privacy/security review.
-
-Warrior Retreat staff review is in the same category. The standalone application artifact currently uses a shared client-side passcode and hardcoded sample applicant records. That is a prototype of an admin UI, not a production intake or staff workspace. Do not treat it as live, and do not put real credentials or applicant PII into the static site. See **Warrior Retreat applications and staff access** below.
-
-## Delivery phases
-
-### Phase 0 — public visual staging (implemented in this repository)
-
-- Deploy the approved concept to GitHub Pages.
-- Preserve the customer baseline while extracting embedded images into cacheable build assets.
-- Run source and build checks on every deployment.
-- Keep staging free of secrets, private submissions, and test user data.
-- Do not present the prototype **Staff Login** on `warrior-retreat-application.html` as a working staff tool. It is a client-side demo against sample records.
-
-Exit criterion: the customer approves desktop and mobile visual fidelity and signs off on the page/content inventory.
-
-### Phase 1 — production-ready public site
-
-- Split the current JavaScript-switched sections into real routes such as `/about/`, `/events/`, and `/resources/`.
-- Move shared navigation, footer, buttons, forms, and cards into components.
-- Move resources/events/news into validated content files or a headless editorial source.
-- Add page-specific titles, descriptions, canonical URLs, Open Graph images, sitemap, robots rules, and structured data.
-- Self-host optimized fonts/images where licensing allows; generate responsive image variants and dimensions.
-- Meet WCAG 2.2 AA: keyboard navigation, visible focus, landmarks, labels, contrast, reduced-motion behavior, and screen-reader testing.
-- Add consent-aware analytics only after the customer chooses a provider and privacy policy.
-
-Recommended framework for this phase: **Astro with small vanilla/TypeScript islands** for the calendar, resource search, menu, and modals. The current Vite staging shell is intentionally low-risk; Astro can reuse the same browser-side modules as routes are separated.
-
-Exit criterion: Lighthouse/accessibility budgets pass, every route is shareable, redirects are mapped, and customer content is final.
-
-### Phase 2 — AWS foundation (Terraform)
-
-- Create separate AWS accounts or, at minimum, separate Terraform roots/workspaces for non-production and production.
-- Check in Terraform under `infra/` as specified in **Terraform layout** below. Do not click-ops login, API, or database resources.
-- Create the S3 + DynamoDB remote state backend once (bootstrapped out of band), then all later changes go through Git.
-- Wire GitHub Actions OIDC to an IAM role. **Every merge to `main` runs `terraform apply`.** Pull requests run `terraform plan` only.
-- Apply cache policy: hashed assets `public, max-age=31536000, immutable`; HTML short-lived with revalidation.
-- Configure CloudFront security headers and a Content Security Policy without broad `unsafe-inline` allowances after scripts/styles are modularized.
-- Add uptime checks, error alarms, cost budgets, backup policies, and a rollback/runbook.
-
-Exit criterion: `terraform plan` is a required PR check, merge to `main` applies cleanly, rollback is documented, and production domain/TLS/WAF/monitoring exist.
-
-### Phase 3 — authenticated and database-backed features
-
-- Replace the prototype Staff Login with the **login infrastructure** below (Cognito, no shared passcode in HTML).
-- Add API Gateway, Lambda, and Aurora PostgreSQL/RDS Proxy through the same Terraform root.
-- Use least-privilege IAM, JWT validation, server-side authorization, input validation, rate limits, CSRF-safe patterns, and audit events.
-- Add CAPTCHA/bot controls to anonymous forms and malware scanning for uploads.
-- Test backup restoration, account recovery, data export/deletion, and incident response.
-- Load-test APIs with representative read/write ratios; scale from evidence rather than traffic guesses.
-
-Exit criterion: security review completed, privacy/retention policy approved, load targets met, and operational ownership assigned.
-
-## Warrior Retreat applications and staff access
-
-Customer feedback from Chris Montz (August 2026):
-
-- After **Apply for a Retreat**, staff expect a **Staff Login** control at the bottom of the screen. Chris does not see a working login on the Warrior Retreat marketing page and reports that the control on the application does not work for him.
-- Once signed in, staff need to review the information that flows through the application.
-- The current shared passcode is not an acceptable security model. Chris is not sure how to store applications in a database, and wants the team to keep using **GoHighLevel** because it is already easy for staff.
-
-### Where the login actually is today
-
-The public Warrior Retreat page (`/warrior-retreat/`) has no staff login. **Apply for a Retreat** opens the standalone file `warrior-retreat-application.html`. That file’s footer contains a **Staff Login** button. Chris’s working Claude artifact uses `window.prompt()` (`openAdmin()`).
-
-That placement is easy to miss if someone stays on the marketing page. Do not document or copy the shared passcode into this plan, extra files, or email threads.
-
-### Transfer finding (August 29, 2026)
-
-Chris confirmed the Claude-built tool works for him and sent `WarriorRetreat_ApplicationSystem.7z` after the transferred site rejected staff login. Comparing that archive to the copy then in this repository:
-
-- Form fields, admin views, sample records, and GHL/grant CSV export were the same product.
-- During transfer the HTML was minified, `prompt()` was replaced with a custom overlay (`submitStaffLogin` / `staff-login-overlay`), and the client-side passcode string was changed to a different value than the one staff use.
-- Staff typing the known passcode therefore always failed. Nothing in the archive linked to an external site or database; it is the same in-browser prototype.
-
-The customer-sent HTML is restored as `warrior-retreat-application.html` so staging matches the Claude tool. This is still not production security. The archive itself is gitignored and must not be committed.
-
-### What the current artifact actually does
-
-This is a front-end prototype, not a staff system:
-
-- Access is a JavaScript string comparison. Anyone can read the passcode from the page source. There are no individual accounts, MFA, lockout, audit logs, or server-side authorization.
-- The admin view is filled with **hardcoded sample applicant records** (names, emails, phones, service and health-related fields) shipped in the HTML. Form submissions are not saved. There is no database.
-- **Export to GoHighLevel** downloads a CSV of selected fields. It does not write into GHL. A marketing-oriented GHL field list exists in the same file; it is not a live webhook.
-- GitHub Pages is a public host. A real staff inbox, real applications, and any shared password must not live there.
-
-### Recommended production shape
-
-Keep the public Apply experience on the static site. Put identity, storage, and staff review behind a system that is not the public HTML bundle.
-
-Pick a **system of record**. A hybrid is allowed only if ownership of each field is written down.
-
-**Option A — GoHighLevel owns review (fits current staff workflow)**
-
-Use this if staff should keep working in GHL and GHL’s permissions are acceptable for the data involved.
-
-- The public form posts into a GHL form, survey, or inbound webhook.
-- Staff log into **GoHighLevel**, not the public website. Remove **Staff Login** from the static application.
-- Tags cover retreat type, session, past attendee, and application status. Grant reporting uses GHL export or a scheduled extract, not a public admin page.
-- Confirm whether health, service-connected, and similar answers may live in GHL, who can see them, and how long they are retained.
-
-**Option B — AWS owns the full application (required if GHL cannot hold this data)**
-
-Use this if the application is private case data rather than a CRM contact.
-
-- Anonymous public POST to API Gateway + Lambda; store in Aurora PostgreSQL with encryption at rest.
-- Staff authenticate with Cognito (individual users, MFA, password reset). Every read/update is authorized on the server. No shared passcode.
-- Optional: after intake, push a **marketing-safe subset** (name, email, phone, retreat tags) into GHL so fundraising still happens in the tool staff already use. Health and grant fields stay in AWS.
-
-Do not run two live staff inboxes. If both products exist, GHL is the CRM; AWS (or GHL) is the application file of record.
-
-### Near-term staging rules
-
-- Do not advertise the prototype staff login as a working tool.
-- Strip or disable sample applicant PII before any public URL is treated as customer-facing staging of real applications.
-- Do not add a real password, API key, or GHL private webhook secret to the static site.
-- If a demo of the admin UI is needed, use a private preview, not GitHub Pages.
-
-### Customer decisions still required
-
-- Is GHL the system of record for retreat applications, or only the CRM that receives a contact subset?
-- Which staff roles need the full application versus marketing fields only?
-- Should the public site have **no** staff login (recommended if GHL owns review)?
-- Retention, who deletes records, and whether health/wellbeing answers may live in GHL.
-
-## Login infrastructure
-
-The prototype `prompt()` plus a shared passcode is staging-only. Production staff login is AWS-hosted identity. Applicants do not create accounts.
-
-### Actors
-
-| Actor            | Authentication                         | What they can do                                                                |
-| ---------------- | -------------------------------------- | ------------------------------------------------------------------------------- |
-| Public applicant | None                                   | Submit a retreat application; receive a confirmation                            |
-| Staff            | Cognito user, MFA required             | List, filter, open, and update applications assigned to their role              |
-| Admin            | Cognito user in the `admin` group, MFA | Manage sessions, export grant/GHL files, invite or disable staff, change status |
-
-No self-sign-up. Staff are invited by an admin (Cognito admin create user + temporary password + forced reset). Password reset and MFA enrollment use Cognito, not custom email/SMS code in the static site.
-
-### Request path
-
-1. Public **Apply** stays a static page. Submit `POST`s to API Gateway (unauthenticated route) with bot controls. Lambda validates and writes to Aurora. Optional: enqueue a marketing-safe contact subset for GHL.
-2. **Staff Login** on the application page redirects to **Cognito Hosted UI** (or a small first-party login page that uses the Cognito SDK). It must not compare a passcode in JavaScript.
-3. After sign-in, Cognito returns tokens to a staff-only origin (or a dedicated `/staff/` route). The browser stores tokens per Cognito SPA guidance (memory + refresh via the SDK; not `localStorage` for the ID token if a tighter model is chosen).
-4. Staff API calls send the access token. API Gateway JWT authorizer validates the token against the user-pool issuer and audience. Lambda checks the Cognito group (`staff` or `admin`) before any read or write.
-5. Application PII never ships in the static bundle. Sample records stay out of production builds.
-
-### AWS resources (login and first API)
-
-Terraform must create at least:
-
-- **Cognito user pool** — invite-only, strong password policy, MFA required (TOTP), account recovery email, unused-account and failed-login protections.
-- **Groups** — `staff`, `admin`. Authorization is group-based and re-checked in Lambda, not only in the UI.
-- **App client** — public SPA client, no client secret, authorization-code + PKCE, callback/logout URLs limited to the staff origin.
-- **Cognito domain / Hosted UI** — branded enough for staff; no public marketing chrome required.
-- **API Gateway HTTP API** — routes such as `POST /applications` (public, WAF + rate limit + CAPTCHA), `GET/PATCH /applications` and `GET /applications/{id}` (JWT), `POST /exports/ghl` and `POST /exports/grant` (`admin` only).
-- **JWT authorizer** on staff routes, bound to the user-pool issuer.
-- **Lambda** (Node or Python) in a VPC only if it must reach Aurora via RDS Proxy; otherwise keep public-submit functions outside the VPC.
-- **Aurora Serverless v2 PostgreSQL + RDS Proxy** — applications, sessions, staff audit events. Encrypt at rest. No public DB endpoint.
-- **Secrets Manager** — DB credentials, GHL webhook token if used. Injected into Lambda via IAM, never into the browser.
-- **CloudWatch** — auth failures, 4xx/5xx, Lambda errors, WAF blocks. Alarm on repeated failed staff logins.
-- **WAF** on the API (and later CloudFront) — rate limit anonymous submit; AWS managed common-rule and known-bad-input groups.
-
-SES can send Cognito messages once the domain is verified. Until then, Cognito’s default email is acceptable only in non-production.
-
-### What the static site is allowed to contain
-
-Build-time public values only, injected from Terraform outputs: Cognito user-pool ID, app-client ID, Hosted UI domain, API base URL, and region. No pool secrets, IAM keys, GHL private keys, or database URLs.
-
-## Terraform layout
-
-All AWS login and data-plane resources are defined in Terraform. Click-ops is not an allowed change path after the state backend exists.
+## End goal and hosting decision
+
+Use **GitHub Pages only for public visual staging**. Use **AWS for production**.
+
+The production site should be the static Astro build in a private S3 bucket behind CloudFront.
+Dynamic behavior should be small, independently scalable APIs rather than a permanent web server.
+This design keeps ordinary page traffic at the edge and puts identity, submissions, calendars, and
+private records behind authenticated services.
+
+The initial AWS backend should be serverless: API Gateway, Lambda, DynamoDB, SQS, SES, Cognito, and
+S3. It needs no EC2 instances, Auto Scaling Groups, containers, or AMIs. Aurora PostgreSQL should be
+added only if reporting and transaction requirements become relational enough to justify it.
+
+The removed prototype inventory and its production replacement are in
+[MOCK_DATA_AUDIT.md](MOCK_DATA_AUDIT.md).
+
+## Environments and AWS accounts
+
+Use AWS Organizations with Control Tower. The recommended landing zone has six accounts:
+
+| Account          | Purpose                                                                                        | Must not contain                         |
+| ---------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Management/payer | Organizations, Control Tower, consolidated billing, root break-glass                           | Application workloads or CI deploy roles |
+| Log archive      | Immutable organization CloudTrail/Config and service-log archive                               | Developers or application data           |
+| Security/audit   | Delegated Security Hub, GuardDuty, IAM Access Analyzer, audit access                           | Production write access                  |
+| Shared services  | Terraform state, GitHub OIDC provider, optional Route 53 delegation and shared build artifacts | End-user PII                             |
+| Non-production   | AWS preview/staging APIs and synthetic data                                                    | Production data or production secrets    |
+| Production       | Public origin, APIs, Cognito, DynamoDB, queues, email, private submissions                     | Developer experiments                    |
+
+For a constrained first launch, shared services can be folded into non-production, but management,
+log archive, security/audit, non-production, and production must remain separate. AWS Control Tower
+defines management, log archive, and audit as its shared/core accounts and recommends workforce
+administration through IAM Identity Center rather than routine root/IAM-user access.
+
+Apply these organization guardrails:
+
+- Root users have hardware MFA and no access keys; credentials are held as break-glass only.
+- Human AWS access uses IAM Identity Center groups and temporary role credentials. Do not create IAM
+  users for developers.
+- Service control policies deny leaving the organization, disabling security/logging services,
+  unapproved Regions, public S3 access, and changes to protected log buckets.
+- Delegate GuardDuty, Security Hub, Config aggregation, and IAM Access Analyzer to security/audit.
+- Enable organization CloudTrail and Config in all accounts; central copies go to log archive.
+- Define `us-east-1` as the initial workload Region. CloudFront is global and its ACM viewer
+  certificate must be in `us-east-1`.
+
+AWS reference: [Control Tower shared accounts](https://docs.aws.amazon.com/controltower/latest/userguide/special-accounts.html)
+and [IAM security best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).
+
+## Target request paths
+
+```text
+Public visitor
+  -> Route 53
+  -> CloudFront + WAF
+     -> private S3 origin (HTML, CSS, JS, images)
+     -> /api/* origin -> API Gateway HTTP API -> Lambda
+                                            -> DynamoDB
+                                            -> SQS -> worker Lambda -> SES / approved CRM
+                                            -> private S3 uploads
+
+Staff browser
+  -> Cognito managed login (authorization code + PKCE, MFA/passkey)
+  -> staff application at CloudFront
+  -> API Gateway JWT authorizer + scoped routes
+  -> Lambda authorization + DynamoDB/S3
+  -> append-only application audit records
+```
+
+The S3 website bucket is not public. CloudFront uses Origin Access Control (OAC), which AWS
+recommends over the legacy OAI model. See
+[Restrict access to an S3 origin](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html).
+
+## Feature-to-infrastructure map
+
+| Feature              | Public behavior                           | Production services and source of truth                                                 |
+| -------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------- |
+| Marketing pages      | Static and globally cached                | Git content + Astro build, S3, CloudFront                                               |
+| News                 | Only approved published posts             | Git-based editorial PRs initially; optional content table and staff editor later        |
+| Resource directory   | Search approved public entries            | DynamoDB content table or validated content files; each record has source/review dates  |
+| Events/calendar      | Public future events, iCalendar feed      | DynamoDB events table, API Gateway/Lambda, CloudFront API cache, staff editor           |
+| Event signup         | Confirmed registration and capacity       | DynamoDB registrations table, conditional writes, SQS, SES confirmation                 |
+| Newsletter           | Double opt-in and unsubscribe             | Subscription API, DynamoDB consent ledger, SES Contact List or approved CRM             |
+| Contact/volunteer    | Durable request ID and routed case        | API Gateway, validation Lambda, SQS/DLQ, SES or approved CRM                            |
+| Retreat applications | Secure intake and staff review            | Application API, field encryption, DynamoDB, private S3, Cognito staff portal           |
+| Staff login          | Individual identity and audited access    | Cognito managed login, invite-only users, MFA/passkeys, scoped access tokens            |
+| Public/member login  | Add only when a user-owned feature exists | Separate Cognito app client/groups and profile API; not required for anonymous signup   |
+| Calendar reminders   | Scheduled, retryable delivery             | EventBridge Scheduler, SQS DLQ, Lambda, SES                                             |
+| Donations/payments   | Redirect to hosted provider               | OneCause or another PCI-compliant provider; never collect card data here                |
+| ID.me                | Optional real verification only           | Contracted vendor OAuth/OIDC callback handled server-side; no simulated browser control |
+
+No feature may maintain two silent systems of record. If GoHighLevel owns a workflow, AWS stores only
+delivery/audit metadata required to retry safely. If AWS owns it, GHL receives an explicitly approved
+marketing-safe subset through an asynchronous integration.
+
+## Identity and user management
+
+There are three different identity populations; do not combine them:
+
+1. AWS operators use IAM Identity Center permission sets in AWS Organizations.
+2. Alabama Veteran staff use an Amazon Cognito user pool for the website staff application.
+3. Public visitors are anonymous initially. Newsletter/event confirmation uses signed, expiring
+   email links and does not force account creation.
+
+Cognito configuration:
+
+- Invite-only staff; public self-registration disabled on the staff app client.
+- Groups/scopes: `content-editor`, `event-manager`, `application-reviewer`, `admin`, and
+  `audit-readonly`.
+- Managed Login with authorization-code flow and PKCE; public SPA client has no client secret.
+- Require phishing-resistant passkeys where the selected Cognito feature plan supports them;
+  otherwise require TOTP MFA. Do not use SMS as the only administrator factor.
+- Exact callback/logout URLs per environment; no wildcard production callbacks.
+- Short access-token lifetime, refresh-token rotation/revocation, protected recovery flow.
+- API Gateway validates issuer, audience, expiry, and route scopes. Lambda repeats object-level and
+  role checks; UI hiding is not authorization.
+- Cognito stores identity attributes only. User/application business records live in DynamoDB.
+
+AWS documents that managed login handles sign-in, MFA, password reset, and passkeys, and that API
+Gateway HTTP API JWT authorizers validate token claims and scopes:
+[Cognito managed login](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-managed-login.html),
+[Cognito authentication flows](https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-authentication-flow-methods.html),
+and [API Gateway JWT authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html).
+
+## DynamoDB data model
+
+Use on-demand capacity initially. Separate tables make retention, backups, IAM, and breach impact
+clearer than one large single-table design. Every table enables encryption, point-in-time recovery,
+deletion protection in production, Contributor Insights where useful, and alarms for throttling and
+system errors.
+
+| Table                    | Keys/indexes                                                  | Stored records                                                       | Retention/notes                                                                      |
+| ------------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `av-content-{env}`       | `pk`, `sk`; sparse `publish-index` on status/date             | Events, news metadata, resource records and revisions                | Public fields only; source, owner, approval, reviewed-at required                    |
+| `av-registrations-{env}` | `PK=EVENT#id`, `SK=REG#uuid`; GSI by email hash/time          | Event registrations, status, consent version                         | Conditional capacity counter; encrypt contact fields in application code             |
+| `av-subscriptions-{env}` | `PK=EMAIL#sha256`; GSI by status/updated time                 | Consent timestamp, source, policy version, confirm/unsubscribe state | Email is envelope-encrypted; hash supports idempotency without plaintext key         |
+| `av-applications-{env}`  | `PK=APP#uuid`, `SK=VERSION#n`; GSI by status/submitted time   | Retreat fields, workflow status, assignment                          | Sensitive fields envelope-encrypted; no health data until classification is approved |
+| `av-idempotency-{env}`   | Request key + expiry TTL                                      | Safe retries for anonymous POST routes and queue workers             | Short TTL; never a business system of record                                         |
+| `av-audit-{env}`         | `PK=SUBJECT#uuid`, `SK=timestamp#event-id`; GSI by actor/time | Staff reads, exports, status changes, access decisions               | Append-only API; retention set by approved policy, no sensitive field values         |
+
+Important access patterns must be written before Terraform creates indexes: list published future
+events, retrieve an event, register once, enforce capacity, list applications by status/time, load an
+application history, find an operator's audit events, confirm/unsubscribe an email, and flag stale
+resource records. Do not add a GSI without a named query and cost estimate.
+
+Event capacity uses a DynamoDB transaction or conditional update so two concurrent signups cannot
+take the last seat. API list routes use bounded page sizes and opaque pagination tokens. Public read
+responses are cached at CloudFront; private/PII responses use `Cache-Control: no-store`.
+
+Add Aurora Serverless v2 PostgreSQL and RDS Proxy only if approved reports require arbitrary joins,
+transactional multi-record workflows become dominant, or DynamoDB access patterns no longer fit.
+That later change adds a VPC, private subnets, security groups, Secrets Manager rotation, database
+migrations, and materially higher operational cost.
+
+## API contracts and workflows
+
+Every mutation validates a JSON schema, enforces a small body limit, assigns a correlation ID,
+redacts logs, applies idempotency, and returns a durable request/record ID. A browser animation is
+never evidence of success.
+
+Initial routes:
+
+```text
+GET    /v1/events?from=&to=&cursor=                  public, cached
+GET    /v1/events/{id}                              public, cached
+GET    /v1/calendar.ics                             public, cached briefly
+POST   /v1/events/{id}/registrations                public + bot control
+POST   /v1/subscriptions                            public + double opt-in
+GET    /v1/subscriptions/confirm?token=              signed expiring token
+POST   /v1/subscriptions/unsubscribe                 signed expiring token
+POST   /v1/contact                                  public + bot control
+POST   /v1/applications                             public + bot control
+POST   /v1/uploads                                  public short-lived presigned policy if approved
+GET    /v1/staff/applications                       JWT + application:read
+GET    /v1/staff/applications/{id}                  JWT + object authorization
+PATCH  /v1/staff/applications/{id}                  JWT + application:write + optimistic version
+POST   /v1/staff/events                             JWT + event:write
+PATCH  /v1/staff/events/{id}                        JWT + event:write
+POST   /v1/staff/exports                            JWT + export scope + audit event
+```
+
+### Calendar and event signup
+
+- Staff save a draft, then publish. Only `published` records with a future end time are public.
+- The iCalendar endpoint is generated from the same event records; Google/Outlook subscription links
+  point to that real feed.
+- Registration writes are conditional on published status, deadline, duplicate email hash, and
+  capacity. A transaction updates the event count and registration together.
+- SQS decouples confirmation/reminder email. Workers are idempotent and use a DLQ.
+- EventBridge Scheduler creates reminder jobs by registration/event ID, not a payload containing PII.
+- Cancellation updates the record, invalidates cached event/ICS output, and queues notifications.
+
+EventBridge Scheduler supports retry policies and SQS dead-letter queues; see
+[Managing schedules](https://docs.aws.amazon.com/scheduler/latest/UserGuide/managing-schedule.html).
+
+### Newsletter and contact signup
+
+- Store the precise consent text version, source page, timestamp, and confirmation state.
+- Send double-opt-in confirmation before marking a subscription active.
+- SES uses verified domain identity, Easy DKIM, SPF, DMARC, configuration sets, bounce/complaint
+  events, suppression handling, and one-click unsubscribe.
+- A contact request enters SQS and gets a request ID before staff delivery. DLQ alarms prevent silent
+  loss. Do not log message bodies.
+- Choose SES Contact Lists or GoHighLevel as the marketing system of record before implementation.
+  SES supports managed topic/list unsubscribe when `ListManagementOptions` is used; see
+  [SES subscription management](https://docs.aws.amazon.com/ses/latest/dg/sending-email-subscription-management.html).
+
+### Retreat intake and uploads
+
+- Complete a privacy/data-classification review before collecting disability, mental-health,
+  service, demographic, or household data. Collect only fields that have an approved purpose.
+- Public submit Lambda envelope-encrypts sensitive field groups with KMS before writing DynamoDB.
+- Attachments use short-lived presigned S3 POST policies with type/size restrictions, quarantine
+  prefix, malware scan workflow, and promotion to a clean prefix. Staff cannot download unscanned
+  files.
+- Staff reads, exports, assignments, and status changes write audit records. Export files are
+  encrypted, short-lived, access-logged, and automatically expired.
+- ID.me must not be named or enabled until a vendor agreement, redirect URLs, claims contract, and
+  server-side token handling are approved.
+- Define retention and deletion before launch. DynamoDB TTL may trigger cleanup, but a scheduled
+  reconciliation job must verify S3 attachments and secondary records are also removed.
+
+## IAM design
+
+All policies are generated by Terraform, scoped to environment-specific ARNs, and validated with IAM
+Access Analyzer. No static AWS keys are stored in GitHub.
+
+| Principal                   | Allowed                                                                  | Explicit boundary                                                                        |
+| --------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| GitHub frontend deploy role | Upload built assets to one web bucket, CloudFront invalidation           | No DynamoDB, Cognito, KMS decrypt, or wildcard account access                            |
+| GitHub Terraform plan role  | Read state/config and plan against nonprod                               | No apply, pass-role, secret values, or production trust                                  |
+| GitHub Terraform apply role | Apply only the selected environment through protected GitHub Environment | Trust restricted to repository, branch/environment claims; permissions boundary required |
+| Public API Lambda           | Schema/config read; write only its domain table/queue                    | No staff reads, exports, or broad scan                                                   |
+| Staff API Lambda            | Scoped table/index/S3 actions for route function                         | Authorization enforced per record; no public-bucket writes                               |
+| Queue worker Lambda         | Consume one queue, update its domain record, send approved SES template  | No API administration or unrelated table access                                          |
+| Scheduler execution role    | Send only to named SQS queue/Lambda target                               | No generic `lambda:InvokeFunction` or `sqs:*`                                            |
+| Cognito staff               | Invoke only API scopes carried in access token                           | Never receives AWS IAM credentials or direct DynamoDB/S3 permissions                     |
+| Security auditor            | Read security findings/logs through Identity Center                      | No workload mutation or PII export                                                       |
+
+Each Lambda gets its own role and log group. `iam:PassRole` is limited to exact service roles. KMS key
+policies distinguish encrypt-only public intake from decrypting staff processors. Secrets Manager is
+only for external service credentials such as approved CRM/ID.me secrets; DynamoDB and S3 use IAM
+roles and need no stored access keys.
+
+## Terraform design
+
+### Repository layout
 
 ```text
 infra/
-├── backend.tf          # S3 state + DynamoDB lock
-├── versions.tf         # pinned Terraform and AWS provider
-├── providers.tf        # default tags, assume-role / OIDC-friendly
-├── variables.tf
-├── outputs.tf          # values the site build and staff app consume
-├── main.tf             # module wiring only
-└── modules/
-    ├── identity/       # Cognito pool, groups, app client, domain, SES mail
-    ├── api/            # HTTP API, JWT authorizer, WAF association, routes
-    ├── compute/        # Lambda functions and IAM roles
-    ├── data/           # Aurora, RDS Proxy, Secrets Manager, upload bucket
-    └── observability/  # log groups, alarms, dashboard
+├── bootstrap/
+│   ├── state/                 # shared S3 backend + KMS + access logs
+│   └── github-oidc/           # provider and tightly-scoped plan/apply roles
+├── modules/
+│   ├── static-site/           # S3, CloudFront OAC, ACM, Route 53, WAF, headers
+│   ├── identity/              # Cognito pool, clients, groups, domain
+│   ├── api/                   # API Gateway v2, routes, JWT authorizer, access logs
+│   ├── function/              # Lambda, role, log group, alarms
+│   ├── dynamodb-table/        # table, indexes, PITR, autoscaling/alarms
+│   ├── messaging/             # SQS, DLQ, policies, age/depth alarms
+│   ├── email/                 # SES identity, DKIM, config set, contact list/topics
+│   ├── uploads/               # private/quarantine buckets, KMS, lifecycle, scanner
+│   ├── scheduling/            # EventBridge schedule groups and execution roles
+│   └── observability/         # dashboards, alarms, SNS, canaries, log retention
+└── live/
+    ├── nonprod/us-east-1/     # module wiring and non-secret tfvars
+    └── prod/us-east-1/        # separate account/provider/state key
 ```
 
-Rules:
+Bootstrap state once with an S3 bucket that has Block Public Access, SSE-KMS, versioning, access
+logging, and tightly scoped roles. Use the current S3 backend `use_lockfile = true`. Do **not** create
+a DynamoDB table only for Terraform locking: HashiCorp now marks DynamoDB-based locking deprecated.
+State data itself can contain secrets, so state access is more privileged than ordinary deployment.
+See [Terraform S3 backend](https://developer.hashicorp.com/terraform/language/backend/s3).
 
-- Pin Terraform `>= 1.9` and the AWS provider with a lock file (`infra/.terraform.lock.hcl`) committed.
-- One remote state per environment (`staging`, `production`) in a dedicated state bucket. State encryption and bucket versioning on. DynamoDB lock table required.
-- Environments are separate state keys (or separate AWS accounts), not `terraform destroy`/`workspace` improvisation on a laptop.
-- Default tags on every resource: `Project=alabama-veteran`, `Env`, `ManagedBy=terraform`.
-- Outputs include `cognito_user_pool_id`, `cognito_app_client_id`, `cognito_domain`, `api_base_url`, and `region`. The site workflow reads these after apply.
-- Modules have no hardcoded account IDs or passcodes. Staff users are invited through Cognito after apply, not declared as passwords in `.tfvars`.
-- `terraform fmt -check` and `terraform validate` are required. `tflint` is recommended once the root exists.
+Commit `.terraform.lock.hcl`, pin Terraform/provider major versions, and use separate state keys and
+accounts for non-production and production. Workspaces alone are not an environment boundary.
 
-Bootstrap (once, documented in `infra/README.md` when added): create the state bucket, lock table, OIDC provider, and GitHub IAM role. Those bootstrap resources may live in a small `infra/bootstrap/` root applied manually by an account owner. Everything else applies from CI.
+### Resource inventory
 
-## CI/CD: plan on pull request, apply on merge to `main`
+The first implementation creates these Terraform-managed resource families:
 
-GitHub Pages staging remains `.github/workflows/pages.yml`. Infrastructure is a second workflow, `.github/workflows/terraform.yml`.
+- `aws_route53_zone/record`, `aws_acm_certificate/validation`, `aws_s3_bucket` and bucket controls,
+  `aws_cloudfront_origin_access_control/distribution/cache_policy/response_headers_policy`, and
+  `aws_wafv2_web_acl`.
+- `aws_cognito_user_pool`, app clients, groups, domain, resource server/scopes, and SES integration.
+- `aws_apigatewayv2_api`, stages, integrations, routes, JWT authorizer, domain, mappings, and access
+  logs.
+- `aws_lambda_function`, per-function roles/policies, permissions, versions/aliases, log groups, and
+  reserved concurrency where downstream protection is required.
+- Six `aws_dynamodb_table` resources described above, KMS keys/aliases, PITR, deletion protection,
+  TTL only on ephemeral records, and CloudWatch alarms.
+- Domain SQS queues and DLQs with queue policies, KMS encryption, redrive policy, visibility timeout,
+  and alarms for oldest-message age/DLQ depth.
+- SES domain identity/DKIM, configuration set/event destination, templates, contact list/topics, SNS
+  handling for bounce/complaint events, and Route 53 SPF/DMARC records.
+- Private upload/quarantine/export S3 buckets, bucket policies, KMS keys, CORS restricted to the real
+  origin, lifecycle expiration, and malware scanning resources.
+- EventBridge Scheduler schedule groups, execution roles, retry policy, and DLQ integration.
+- CloudWatch dashboards/alarms, SNS incident topic, Synthetics canary, WAF/API/CloudFront logs, AWS
+  Budgets, and Cost Anomaly Detection subscriptions.
+- Account-level GuardDuty, Security Hub, Config, CloudTrail, Access Analyzer, backup policies, and
+  organization delegation are managed from the landing-zone/security roots, not the app root.
 
-### Pull request (required check)
+### AMI decision
 
-On `pull_request` targeting `main`:
+There are **no AMIs in the initial design** because no workload needs an operating system. Adding EC2
+would create patching, vulnerability, scaling, and availability obligations without helping this
+site. If a future vendor binary truly requires EC2, create an EC2 Image Builder pipeline, Inspector
+scanning, SSM-only access, an Auto Scaling Group across Availability Zones, and automated AMI
+replacement. Never maintain a hand-built “golden server.” AWS notes that custom-image owners remain
+responsible for patching; see
+[Image Builder patch management](https://docs.aws.amazon.com/imagebuilder/latest/userguide/security-patch-management.html).
 
-1. `terraform fmt -check`
-2. `terraform init -input=false`
-3. `terraform validate`
-4. `terraform plan -input=false -out=tfplan`
-5. Upload the plan and a human-readable plan comment (or artifact) on the PR
+### Network decision
 
-No apply on pull requests. Fork PRs must not receive AWS credentials.
+Initial Lambdas remain outside a customer VPC because they call managed AWS APIs and DynamoDB; this
+avoids NAT gateways and unnecessary subnet failure modes. API Gateway is the public ingress. No
+database or Lambda receives a public IP.
 
-### Merge to `main` (apply)
+If Aurora is approved later, add a two-or-more-AZ VPC with private database/application subnets,
+RDS Proxy, restricted security groups, required VPC endpoints, and explicit egress. Do not add a NAT
+gateway until a private function has a documented outbound-Internet dependency.
 
-On every push to `main` (including PR merge):
+## CI/CD and release controls
 
-1. Check out the merged commit.
-2. Authenticate to AWS with **GitHub OIDC** (`permissions: id-token: write`). No long-lived access keys in GitHub secrets.
-3. `terraform init -input=false`
-4. `terraform plan -input=false -out=tfplan` against the environment `main` deploys
-5. `terraform apply -input=false tfplan`
+GitHub Pages staging remains deployed by `.github/workflows/pages.yml`. It contains no secrets,
+private data, or functioning staff portal.
 
-Apply uses the plan file from the same job so the applied set matches what was just planned. Do not `apply -auto-approve` without a plan file.
+Add these production workflows when AWS accounts exist:
 
-`terraform apply` is idempotent. Running it on every merge to `main` is intentional: a docs-only merge is a no-op apply; an infra merge converges AWS to the new desired state; drift from click-ops is detected on the next plan.
+1. `terraform-check.yml` on pull request: format, init, validate, TFLint, Checkov/tfsec, policy tests,
+   speculative plan, and plan artifact. Fork PRs receive no AWS role.
+2. `terraform-apply.yml` after merge: OIDC to nonprod, apply the reviewed commit, smoke test. Production
+   uses a protected GitHub Environment with required customer/owner approval and applies the exact
+   commit already tested in nonprod.
+3. `production-site.yml`: build once, scan, upload hashed assets first and HTML last, set cache
+   headers, invalidate only HTML/route paths, run canary, and automatically restore the previous S3
+   version if health checks fail.
+4. Backend function packages are content-addressed and promoted; production is not rebuilt from a
+   different dependency set.
 
-### Environments and blast radius
+GitHub OIDC role trust must include repository, branch, workflow/environment, and audience claims.
+Use GitHub Environment approvals for production. Never add `AWS_ACCESS_KEY_ID` or secret access keys
+to repository secrets.
 
-| GitHub Environment | When it applies                          | Protection                                                     |
-| ------------------ | ---------------------------------------- | -------------------------------------------------------------- |
-| `aws-staging`      | Every merge to `main`                    | OIDC role limited to the staging account/stack                 |
-| `aws-production`   | Merge to `main` after required reviewers | Separate OIDC role; required reviewers; wait timer recommended |
+## Security, reliability, and load controls
 
-Until production AWS is ready, **merge to `main` applies staging only**. Production apply is the same workflow job gated by the `aws-production` environment. Do not point `main` at production apply until reviewers and a rollback runbook exist.
+- WAF managed common/known-bad-input rules plus rate-based rules for submit, login, and export routes.
+  Add bot/CAPTCHA protection to anonymous mutation routes after testing accessibility.
+- CloudFront long-cache hashed assets; short-cache/revalidate HTML; API caching only for public GETs.
+- Lambda reserved concurrency protects SES and downstream systems. SQS absorbs bursts and provides
+  backpressure. DynamoDB on-demand handles unpredictable initial traffic.
+- Strict CSP, HSTS, referrer policy, permissions policy, MIME sniff protection, and no inline secrets.
+- CloudWatch alarms: API 5xx/latency, Lambda errors/throttles/concurrency, DynamoDB throttles/system
+  errors, queue age/DLQ depth, SES bounce/complaint rates, WAF blocks, canary failure, budget anomaly.
+- Structured logs contain correlation ID, route, result, latency, and record ID only; no tokens,
+  message bodies, emails, health data, or uploaded documents.
+- DynamoDB PITR and AWS Backup restore testing; S3 versioning/lifecycle; quarterly restore exercise.
+- Suggested launch objectives: public cached pages 99.9% monthly availability; dynamic workflows
+  99.5% initially; RPO 15 minutes for application data; RTO four hours. Customer must approve these.
+- Load test public traffic through CloudFront and mutation APIs separately. Acceptance is 2x agreed
+  peak with no lost messages, oversold event capacity, or unbounded Lambda concurrency.
 
-Concurrency: one apply at a time (`concurrency: terraform-${environment}`). Do not cancel an in-progress apply.
+## Delivery order and exit criteria
 
-### Order relative to the Pages deploy
+### 0. Public staging — implemented now
 
-When the static site starts consuming Cognito/API outputs:
+- Responsive routes, GitHub Pages workflow, modular source, build/test checks.
+- Prototype records and simulated integrations removed; honest empty states shown.
+- Exit: customer approves layout and supplies authoritative content/data owners.
 
-1. Terraform apply on `main` (staging)
-2. Read outputs
-3. `npm run build` with those values (`VITE_` / `BASE_PATH` / Cognito IDs)
-4. Existing Pages deploy job
+### 1. Landing zone and production static site
 
-Until that wiring exists, Pages and Terraform jobs may run in parallel on `main`. Pages must still refuse to ship secrets.
+- Create accounts, Identity Center, security delegation, state/OIDC bootstrap.
+- Terraform S3/CloudFront/WAF/Route 53/ACM and production workflow.
+- Exit: private origin, edge protection, monitoring, rollback and budget alarms tested.
 
-### Rollback
+### 2. Content, event calendar, and subscriptions
 
-- Terraform state versioning on the backend bucket is the first undo path (`terraform apply` of the previous commit).
-- Database migrations are versioned separately and are never implied by a `terraform destroy`.
-- Destroying the user pool is a customer-approved emergency only; staff would have to be re-invited.
+- Deploy content/events API, staff event editor, ICS feed, event registration, newsletter consent,
+  contact queue, SES domain and notifications.
+- Exit: real record IDs, double opt-in/unsubscribe, DLQ recovery, capacity concurrency and audit tests
+  pass; no static fallback records are bundled.
 
-## Performance and traffic targets
+### 3. Staff identity and retreat intake
 
-Use budgets as acceptance criteria, not aspirations:
+- Cognito staff access, scoped staff app, application API, encryption, uploads/scanning, audit/export,
+  retention workflow and optional approved CRM subset.
+- Exit: privacy/security review, access review, backup/restore, deletion, incident response and load
+  test pass. Only then replace the unavailable application page.
 
-- p75 Largest Contentful Paint under 2.5 seconds on mobile field data.
-- p75 Interaction to Next Paint under 200 ms; cumulative layout shift under 0.1.
-- Initial route HTML plus critical compressed resources kept deliberately small; defer noncritical widgets.
-- At least 99% of public asset requests should be served from CloudFront during normal operation.
-- Define expected and peak authenticated API requests per second before load testing; test at least 2x the agreed peak.
-- No direct browser-to-database connectivity and no unbounded database connection creation from Lambda.
+### 4. Optional member/AV Active services
 
-## Decisions required from the customer
+- Define a real user-owned feature and mobile-product ownership before enabling public accounts.
+- Exit: store applications and APIs are real; production URLs replace status copy.
 
-Before Phase 1 begins, obtain written answers for:
+## Required customer inputs before Terraform apply
 
-- Which delivered file/page list is authoritative. The handoff names `avactivefinal_compressed.html`, but other repository artifacts include Store and an integrated application page that are absent from that named master.
-- Whether Store is in launch scope and which hosted commerce provider owns checkout.
-- Whether retreat applications and contact/volunteer submissions belong in GoHighLevel or the new AWS system. Chris’s preference is that staff keep using GHL; confirm whether GHL may hold the full application or only a marketing contact subset. See **Warrior Retreat applications and staff access**.
-- Whether the public site should expose any staff login at all, or staff should authenticate only in GHL / Cognito.
-- Whether public visitors create accounts, or accounts are only for members/staff.
-- Who can publish news/events/resources and whether approvals are required.
-- Data retention, privacy policy, accessibility owner, analytics provider, and incident contact.
-- Required launch date, traffic assumptions, availability target, and monthly AWS budget.
-- AWS account IDs for staging and production, who holds the bootstrap credentials, and who may approve `aws-production` applies.
+- AWS Organizations management owner, all account IDs/emails, billing alerts and monthly budget.
+- Domain registrar access, authoritative DNS decision, production/staging domain names.
+- GitHub organization/repository owner and production environment approvers.
+- Named data owner and retention period for each table/field; incident and deletion contacts.
+- Whether AWS, GoHighLevel, or another vendor is the system of record for newsletter, contact,
+  volunteer, and retreat applications.
+- Approved staff roles and initial invite list; whether any public/member account is actually needed.
+- Approved calendar publishing workflow, registration capacity rules, cancellation/reminder policy.
+- SES sender/from/reply-to addresses and access to add DKIM/SPF/DMARC DNS records.
+- Privacy policy, terms, consent language, accessibility owner, and legal review of sensitive retreat
+  questions.
+- Traffic assumptions, availability/RPO/RTO targets, log/audit retention, and support escalation.
+- If ID.me is required: executed vendor agreement, sandbox/production credentials, approved claims,
+  callback URLs, and privacy terms.
 
-## GitHub Pages staging operations
-
-The Pages site is public. Protect `main`, require the build workflow **and** the Terraform plan check, and use pull requests for review. GitHub repository settings must have **Pages → Source: GitHub Actions** enabled. Every push to `main` then builds and deploys the site; manual deployment is also available from the Actions tab.
-
-The same merge to `main` also runs `terraform apply` for the AWS environment attached to `main` (staging first). See **CI/CD: plan on pull request, apply on merge to `main`**.
-
-When a custom staging domain is added, configure it in GitHub Pages, add the documented DNS record, enable HTTPS, and add a `CNAME` file to the generated public assets. Do not point the production apex domain to GitHub Pages if AWS is the selected production platform.
+Until these inputs exist, Terraform implementation can be scaffolded and planned against nonprod,
+but production data collection and account invitations must remain disabled.

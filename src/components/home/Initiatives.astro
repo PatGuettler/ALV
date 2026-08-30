@@ -1,0 +1,32 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="init-section">
+  <div class="container">
+    <div class="init-header">
+      <div class="eyebrow ctr">What We Do</div>
+      <h2 class="st bl">Our Initiatives</h2>
+      <p>Two flagship initiatives — with full program details on each initiative page.</p>
+    </div>
+    <div class="init-grid">
+      <a class="init-card" href={`${base}warrior-retreat/`}
+        ><img class="ic-logo" src={`${base}assets/cc71eaccc186820e.webp`} alt="Warrior Retreat" />
+        <p class="ic-body">
+          A four-day fellowship for healing trauma through Post-Traumatic Growth. Fishing, shooting,
+          kayaking and art therapy — real healing for real warriors.
+        </p>
+        <span class="ic-link">Learn More →</span></a
+      ><a class="init-card" href={`${base}av-active/`}
+        ><img class="ic-logo" src={`${base}assets/f97c933a5da9dbef.webp`} alt="AV Active" />
+        <p class="ic-body">
+          Too many vets lose themselves searching for purpose after service. AV Active is an app in
+          development — a digital hub for communication, encouragement and productive activities
+          that keeps vets engaged in a positive way. Sponsors can track and support veterans through
+          the transition to civilian life.
+        </p>
+        <span class="ic-link">Get Involved →</span></a
+      >
+    </div>
+  </div>
+</section>

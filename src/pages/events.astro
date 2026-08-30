@@ -1,0 +1,17 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/events/Hero.astro';
+import CalendarStatus from '../components/events/CalendarStatus.astro';
+import '../styles/events.css';
+---
+
+<SiteLayout
+  pageId="events"
+  title="Events | Alabama Veteran"
+  description="Upcoming Alabama Veteran fundraisers, community programs, and events."
+>
+  <div id="page-events" class="page active">
+    <Hero />
+    <CalendarStatus />
+  </div>
+</SiteLayout>

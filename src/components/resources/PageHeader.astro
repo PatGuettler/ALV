@@ -1,0 +1,22 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<header
+  class="res-page-header"
+  style="
+      padding: 10px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a2030;
+      border-bottom: 3px solid #b21f24;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    "
+>
+  <a href={`${base}`} class="res-header-logo"
+    ><img src={`${base}assets/93198b7ec08230d7.png`} alt="Alabama Veteran" height="38" /></a
+  ><a class="res-back-btn" href={`${base}`}>← Back to Site</a>
+</header>

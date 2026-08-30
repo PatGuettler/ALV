@@ -1,0 +1,25 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/active/Hero.astro';
+import Mission from '../components/active/Mission.astro';
+import Pillars from '../components/active/Pillars.astro';
+import ApplicationStatus from '../components/active/ApplicationStatus.astro';
+import Gallery from '../components/active/Gallery.astro';
+import Sponsorship from '../components/active/Sponsorship.astro';
+import '../styles/active.css';
+---
+
+<SiteLayout
+  pageId="active"
+  title="AV Active | Alabama Veteran"
+  description="Community, activity, and wellness programming built for Alabama veterans."
+>
+  <div id="page-active" class="page active">
+    <Hero />
+    <Mission />
+    <Pillars />
+    <ApplicationStatus />
+    <Gallery />
+    <Sponsorship />
+  </div>
+</SiteLayout>

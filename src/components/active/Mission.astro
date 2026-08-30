@@ -1,0 +1,44 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="ava-mission">
+  <div class="container">
+    <div class="ava-mission-grid">
+      <div class="ava-mission-txt">
+        <div class="eyebrow">Alabama Veteran Initiative</div>
+        <h2>Built for <span class="red">Vets.</span><br />By Vets.</h2>
+        <p>
+          Too many veterans lose their sense of purpose and community after service ends. The
+          transition to civilian life can be isolating — and that isolation has real consequences
+          for mental health and well-being.
+        </p>
+        <p>
+          AV Active is a digital hub designed around the way veterans actually live. It brings
+          together peer communication, fitness tracking, wellness resources, PTG programming, and
+          real community events in one place — keeping Alabama vets engaged in a positive,
+          productive way.
+        </p>
+        <p>
+          Corporate sponsors can connect with and support veterans through the app, helping track
+          impact and fund activities that make a real difference.
+        </p>
+        <a
+          href="#"
+          class="btn-b"
+          onclick="
+              openContact('avactive@alabamaveteran.org', 'AV Active', 'AV Active Inquiry from');
+              return false;
+            "
+          >Learn More</a
+        >
+      </div>
+      <div class="ava-mission-img">
+        <img
+          src={`${base}assets/6ed7672bcae5ea4d.webp`}
+          alt="Veterans on the move at AV Active event"
+        />
+      </div>
+    </div>
+  </div>
+</section>

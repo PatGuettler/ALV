@@ -4,3 +4,5 @@ function showPanel(n, b) {
   document.getElementById('panel-' + n).classList.add('active');
   if (b) b.classList.add('active');
 }
+
+window.showPanel = showPanel;

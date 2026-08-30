@@ -1,0 +1,30 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/circle/Hero.astro';
+import MissionStrip from '../components/circle/MissionStrip.astro';
+import Programs from '../components/circle/Programs.astro';
+import PhotoStrip from '../components/circle/PhotoStrip.astro';
+import Benefits from '../components/circle/Benefits.astro';
+import MembershipTiers from '../components/circle/MembershipTiers.astro';
+import SupporterBadge from '../components/circle/SupporterBadge.astro';
+import FrequentlyAskedQuestions from '../components/circle/FrequentlyAskedQuestions.astro';
+import CallToAction from '../components/circle/CallToAction.astro';
+---
+
+<SiteLayout
+  pageId="circle"
+  title="AV Circle | Alabama Veteran"
+  description="Join the Alabama Veteran community of individual and corporate supporters."
+>
+  <div id="page-circle" class="page active">
+    <Hero />
+    <MissionStrip />
+    <Programs />
+    <PhotoStrip />
+    <Benefits />
+    <MembershipTiers />
+    <SupporterBadge />
+    <FrequentlyAskedQuestions />
+    <CallToAction />
+  </div>
+</SiteLayout>

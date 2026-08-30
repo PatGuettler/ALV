@@ -1,0 +1,15 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PublishingStatus from '../components/news/PublishingStatus.astro';
+import '../styles/news.css';
+---
+
+<SiteLayout
+  pageId="news"
+  title="AV News | Alabama Veteran"
+  description="News and updates from Alabama Veteran."
+>
+  <div id="page-news" class="page active">
+    <PublishingStatus />
+  </div>
+</SiteLayout>

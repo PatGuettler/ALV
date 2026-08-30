@@ -1,5 +1,9 @@
 # Alabama Veteran Website — Full Audit
 
+> Historical audit of a deleted monolithic concept file. It does not describe the current staging
+> build. See `MOCK_DATA_AUDIT.md` for removed prototype behavior and run the current automated checks
+> documented in `README.md`.
+
 **Date:** June 13, 2026
 **File audited:** FINAL DELIVERABLE/alabamaveteran_website_FINAL.html
 **Overall status:** Healthy. Navigation, scripts, and structure all check out. The main items to address are a set of links that still point to the old website, one group of buttons pointing to the wrong place, and a short list of security and polish recommendations for launch.
@@ -8,7 +12,8 @@
 
 ## RE-AUDIT June 14, 2026 (all 9 pages, 114 links)
 
-**Clean:** No dead links. Every internal button routes correctly (page navigation or contact popup). Calendar subscribe links (Google, Apple/iCal, Outlook, .ics) all valid. Intentional "coming soon" placeholders: Military Resume Translator, Veteran Job Board, App Store, Google Play, AV News cards. Warrior Retreat apply buttons open the application. Security still clean.
+**Historical result:** This paragraph described the retired concept. Its nonfunctional resource
+tools, store buttons, news cards, calendar feed, and retreat prototype are not in the current build.
 
 **RESOLVED June 14, 2026** — all 7 footer/About old-site links now route to the new in-site pages (Our Events → Events, Our Resources + Navigate Resources → Resources, Our Initiatives + About Us + Board of Directors → About, War on the Greens + Salute to Service Gala → Events). All 4 volunteer/ambassador links (Get Involved, Become an Ambassador, Become a Volunteer, footer Volunteer) now open the GHL form (app.alabamaveteran.org/widget/form/oA6BYtFTZ47lbNChjt2h).
 

@@ -1,0 +1,30 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<nav>
+  <a class="nav-logo" href={`${base}`}
+    ><img src={`${base}assets/93198b7ec08230d7.png`} alt="Alabama Veteran" /></a
+  >
+  <ul class="nav-links">
+    <li><a href={`${base}`} id="nb-home">Home</a></li>
+    <li><a href={`${base}av-circle/`} id="nb-circle">AV Circle</a></li>
+    <li><a href={`${base}warrior-retreat/`} id="nb-warrior">Warrior Retreat</a></li>
+    <li><a href={`${base}av-active/`} id="nb-active">AV Active</a></li>
+    <li><a href={`${base}events/`} id="nb-events">Events</a></li>
+    <li><a href={`${base}resources/`} id="nb-resources">Resources</a></li>
+    <li><a href={`${base}about/`} id="nb-about">About</a></li>
+    <li><a href={`${base}news/`} id="nb-news">AV News</a></li>
+    <li>
+      <a
+        href="https://my.onecause.com/fundraiser/organizations/069c5aa7-32be-4377-be03-b101310beee7/fundraisers/fundraiser:fd94be2b-b4ba-4e2a-b112-1ae8d3c376ee"
+        class="nav-donate"
+        target="_blank"
+        rel="noopener noreferrer">Donate</a
+      >
+    </li>
+  </ul>
+  <button class="nav-burger" aria-label="Open menu" aria-expanded="false" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>

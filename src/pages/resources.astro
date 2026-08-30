@@ -1,0 +1,26 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHeader from '../components/resources/PageHeader.astro';
+import Hero from '../components/resources/Hero.astro';
+import ResourceCenter from '../components/resources/ResourceCenter.astro';
+import CategoryNavigation from '../components/resources/CategoryNavigation.astro';
+import Directory from '../components/resources/Directory.astro';
+import '../styles/resources.css';
+---
+
+<SiteLayout
+  pageId="resources"
+  title="Veteran Resources | Alabama Veteran"
+  description="Search trusted benefits, crisis, housing, employment, and community resources for Alabama veterans."
+>
+  <div id="page-resources" class="page active">
+    <PageHeader />
+    <Hero />
+    <ResourceCenter />
+    <CategoryNavigation />
+    <Directory />
+  </div>
+  <script>
+    import '../scripts/resources.js';
+  </script>
+</SiteLayout>

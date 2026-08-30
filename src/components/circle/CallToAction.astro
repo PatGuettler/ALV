@@ -1,0 +1,29 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="cta-banner">
+  <div class="cta-bg" style={`background-image: url('${base}assets/50f5d7eee9055ae0.webp')`}></div>
+  <div class="cta-content">
+    <h2>ANSWER THE CALL.</h2>
+    <p>
+      Join the AV Circle today and stand alongside Alabama's most committed community of veteran
+      supporters. Your commitment changes lives.
+    </p>
+    <div class="cta-btns">
+      <a href="#levels" class="btn-red">Join the AV Circle</a><a
+        href="#"
+        class="btn-white"
+        onclick="
+            openContact(
+              'avcircle@alabamaveteran.org',
+              'AV Circle Sponsorship',
+              'AV Circle Sponsorship Inquiry from',
+            );
+            return false;
+          "
+        >Contact Us About Sponsorship</a
+      >
+    </div>
+  </div>
+</section>

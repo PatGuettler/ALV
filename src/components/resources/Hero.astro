@@ -1,0 +1,26 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="res-hero">
+  <div class="res-hero-bg"></div>
+  <div class="res-hero-stripe"></div>
+  <div class="res-hero-inner">
+    <div class="eyebrow">Alabama Veteran Resource Guide</div>
+    <h1>FIND THE HELP<br />YOU <span class="red">EARNED</span></h1>
+    <p>
+      Housing, healthcare, benefits, jobs, education, and crisis support — every resource Alabama
+      veterans need, in one place. Earned through service. Available now.
+    </p>
+    <div class="hero-search-wrap">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search by name, topic, or keyword..."
+        oninput="handleSearch(this.value)"
+      /><button onclick="handleSearch(document.getElementById('search-input').value)">
+        Search
+      </button>
+    </div>
+  </div>
+</section>

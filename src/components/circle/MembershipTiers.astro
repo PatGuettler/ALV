@@ -1,0 +1,313 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="tiers" id="levels">
+  <div class="tiers-inner">
+    <div class="tiers-hdr">
+      <p class="sec-label">Membership Levels</p>
+      <h2 class="sec-title">FIND YOUR CIRCLE.</h2>
+      <p class="sec-desc" style="max-width: 520px; margin: 0 auto 2rem">
+        Whether you are a business building a legacy or an individual answering the call, there is a
+        place for you in the AV Circle.
+      </p>
+      <div class="tier-toggle">
+        <button class="tbtn active" onclick="showPanel('corp', this)">
+          Corporate and Business</button
+        ><button class="tbtn" onclick="showPanel('indiv', this)">Individual Supporters</button>
+      </div>
+    </div>
+    <div class="tier-panel active" id="panel-corp">
+      <div class="tiers-grid">
+        <div class="tier-card">
+          <div class="tier-name">AV Circle Pillar</div>
+          <div class="tier-price">$250<span> – $499/month</span></div>
+          <p class="tier-sub-price">$3,000 – $5,999/year</p>
+          <p class="tier-desc">
+            The foundation everything we do is built on. Pillar members are the reason Alabama
+            veterans wake up to real support every day. Whether you commit to $250 or $499 a month,
+            your business is a cornerstone of this community — and we’ll make sure Alabama knows it.
+          </p>
+          <ul class="tier-perks">
+            <li>
+              <span class="pck">✓</span><span class="ptx">Logo on AV Circle sponsor wall</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Official Proud Supporter badge and brand package</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Social media spotlight (quarterly)</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Tax-deductible contribution letter</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Annual impact report with your name</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Recognition at all AV events</span>
+            </li>
+          </ul>
+          <a
+            href="#"
+            class="tier-btn"
+            onclick="
+                openContact(
+                  'avcircle@alabamaveteran.org',
+                  'Join the AV Circle',
+                  'AV Circle Inquiry from',
+                );
+                return false;
+              "
+            >Become a Pillar</a
+          >
+        </div>
+        <div class="tier-card feat">
+          <div class="feat-badge">Most Popular</div>
+          <div class="tier-name">Champions League</div>
+          <div class="tier-price">$500<span> – $999/month</span></div>
+          <p class="tier-sub-price">$6,000 – $11,999/year</p>
+          <p class="tier-desc">
+            Alabama veterans know who showed up. Champions are the businesses at the front of every
+            formation — your brand becomes part of the fabric of everything AV does, month after
+            month.
+          </p>
+          <ul class="tier-perks">
+            <li><span class="pck">✓</span><span class="ptx">All Pillar benefits, plus:</span></li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Featured on live sponsor leaderboard</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Prominent logo on all event materials</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Monthly social media feature post</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Named recognition at Warrior Retreats</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >CEO/owner photo opportunity at events</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Custom Champion Proud Supporter badge</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Priority access to AV event sponsorship opportunities</span
+              >
+            </li>
+          </ul>
+          <a
+            href="#"
+            class="tier-btn"
+            onclick="
+                openContact(
+                  'avcircle@alabamaveteran.org',
+                  'Join the AV Circle',
+                  'AV Circle Inquiry from',
+                );
+                return false;
+              "
+            >Join the League</a
+          >
+        </div>
+        <div class="tier-card">
+          <div class="tier-name">Titan Society</div>
+          <div class="tier-price">$1,000<span>+/month</span></div>
+          <p class="tier-sub-price">
+            $12,000+/year · Major gifts and legacy giving available — contact us directly
+          </p>
+          <p class="tier-desc">
+            For organizations making a bold, lasting commitment to Alabama veterans. Titans don’t
+            just support the mission — they help define it. When AV events open for title
+            sponsorship, Titans get the first call.
+          </p>
+          <ul class="tier-perks">
+            <li>
+              <span class="pck">✓</span><span class="ptx">All Champions League benefits, plus:</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >First right of refusal on all AV event title sponsorships</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Premier homepage hero logo placement</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Press release and media announcement</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Private annual briefing with AV leadership</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Custom employee engagement package</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Exclusive Titan Society plaque</span>
+            </li>
+            <li><span class="pck">✓</span><span class="ptx">VIP tables at annual gala</span></li>
+          </ul>
+          <a
+            href="#"
+            class="tier-btn"
+            onclick="
+                openContact(
+                  'avcircle@alabamaveteran.org',
+                  'Join the AV Circle',
+                  'AV Circle Inquiry from',
+                );
+                return false;
+              "
+            >Rise as a Titan</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="tier-panel" id="panel-indiv">
+      <div class="tiers-grid">
+        <div class="tier-card">
+          <div class="tier-name">Circle Friend</div>
+          <div class="tier-price">Any<span> amount</span></div>
+          <p class="tier-desc">
+            A one-time gift in any amount. Every dollar makes an immediate, direct impact for an
+            Alabama veteran.
+          </p>
+          <ul class="tier-perks">
+            <li>
+              <span class="pck">✓</span><span class="ptx">Instant tax-deductible receipt</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">AV Circle Friend digital certificate</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Impact update showing where your gift went</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">AV Circle community newsletter</span>
+            </li>
+          </ul>
+          <a
+            href="https://my.onecause.com/fundraiser/organizations/069c5aa7-32be-4377-be03-b101310beee7/fundraisers/fundraiser:fd94be2b-b4ba-4e2a-b112-1ae8d3c376ee"
+            class="tier-btn"
+            target="_blank"
+            rel="noopener noreferrer">Give a One-Time Gift</a
+          >
+        </div>
+        <div class="tier-card feat">
+          <div class="feat-badge">Most Popular</div>
+          <div class="tier-name">Circle Sustainer</div>
+          <div class="tier-price">$25.00<span>/month</span></div>
+          <p class="tier-desc">
+            Reliable monthly support that lets Alabama Veteran plan ahead and serve more veterans,
+            month after month. You can start for as little as $10 a month, though $25 is where most
+            members make the biggest impact.
+          </p>
+          <ul class="tier-perks">
+            <li>
+              <span class="pck">✓</span><span class="ptx">All Circle Friend benefits, plus:</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Monthly impact story to your inbox</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Sustainer digital badge for social media</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Exclusive invitations to AV events</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Sustainer-only quarterly briefing from AV leadership</span
+              >
+            </li>
+          </ul>
+          <a
+            href="https://my.onecause.com/fundraiser/organizations/069c5aa7-32be-4377-be03-b101310beee7/fundraisers/fundraiser:fd94be2b-b4ba-4e2a-b112-1ae8d3c376ee"
+            class="tier-btn"
+            target="_blank"
+            rel="noopener noreferrer">Become a Sustainer</a
+          >
+        </div>
+        <div class="tier-card">
+          <div class="tier-name">Circle Connector</div>
+          <div class="tier-price">Free<span> to join</span></div>
+          <p class="tier-desc">
+            Become a fundraiser for Alabama Veteran. Connectors rally their friends, family, and
+            network to give, turning one membership into many and carrying the mission farther than
+            a single gift ever could.
+          </p>
+          <ul class="tier-perks">
+            <li>
+              <span class="pck">✓</span><span class="ptx">All Sustainer benefits, plus:</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Personal referral link to track your reach</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx">Connector-exclusive merchandise</span>
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Named recognition at AV community events (top Connectors)</span
+              >
+            </li>
+            <li>
+              <span class="pck">✓</span><span class="ptx"
+                >Invitation to the annual Connector dinner (top Connectors)</span
+              >
+            </li>
+          </ul>
+          <a
+            href="https://my.onecause.com/fundraiser/organizations/069c5aa7-32be-4377-be03-b101310beee7/fundraisers/fundraiser:fd94be2b-b4ba-4e2a-b112-1ae8d3c376ee"
+            class="tier-btn"
+            target="_blank"
+            rel="noopener noreferrer">Become a Connector</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="major-gifts-note">
+    <p>
+      💬 Interested in a major gift, event sponsorship, or legacy giving?
+      <a
+        href="#"
+        onclick="
+            openContact(
+              'avcircle@alabamaveteran.org',
+              'Major Gifts & Legacy Giving',
+              'AV Circle Major Gift / Legacy Inquiry from',
+            );
+            return false;
+          "
+        >Contact us directly</a
+      >
+      — we’d love to have that conversation.
+    </p>
+  </div>
+</section>

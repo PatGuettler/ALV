@@ -1,0 +1,59 @@
+.integration-section {
+  background: #f4f2ed;
+  padding: clamp(64px, 10vw, 120px) 24px;
+}
+
+.integration-notice {
+  border-left: 5px solid var(--red);
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(26, 32, 48, 0.1);
+  margin: 0 auto;
+  max-width: 820px;
+  padding: clamp(28px, 5vw, 48px);
+}
+
+.integration-notice h2,
+.integration-notice h3 {
+  color: var(--blue-dp);
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+.integration-notice p {
+  color: #525866;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.integration-notice--dark {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+}
+
+.integration-notice--dark h2,
+.integration-notice--dark h3 {
+  color: #fff;
+}
+
+.integration-notice--dark p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+footer .integration-notice {
+  margin-bottom: 44px;
+}
+
+@media (max-width: 640px) {
+  .integration-section {
+    padding: 48px 16px;
+  }
+
+  .integration-notice {
+    padding: 24px;
+  }
+}

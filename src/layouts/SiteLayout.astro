@@ -1,0 +1,73 @@
+---
+import CrisisBar from '../components/site/CrisisBar.astro';
+import CrisisFloat from '../components/site/CrisisFloat.astro';
+import Navigation from '../components/site/Navigation.astro';
+import Footer from '../components/site/Footer.astro';
+import ContactModal from '../components/site/ContactModal.astro';
+
+import '../styles/foundation.css';
+import '../styles/navigation.css';
+import '../styles/forms.css';
+import '../styles/status.css';
+import '../styles/responsive.css';
+
+interface Props {
+  pageId: string;
+  title: string;
+  description: string;
+}
+
+const { pageId, title, description } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const canonicalRoutes: Record<string, string> = {
+  home: '',
+  news: 'news/',
+  warrior: 'warrior-retreat/',
+  circle: 'av-circle/',
+  about: 'about/',
+  active: 'av-active/',
+  topgolf: 'topgolf/',
+  events: 'events/',
+  resources: 'resources/',
+};
+const canonical = new URL(canonicalRoutes[pageId] ?? '', 'https://alabamaveteran.org/');
+---
+
+<!doctype html>
+<html
+  lang="en"
+  data-base-path={base}
+  data-page={pageId}
+  style={`--site-hero-image: url('${base}assets/d6f82f3f7b70368f.webp')`}
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#1A2030" />
+    <link rel="canonical" href={canonical} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Libre+Franklin:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <CrisisBar />
+    <Navigation />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+    <CrisisFloat />
+    <ContactModal />
+    <script>
+      import '../scripts/navigation.js';
+      import '../scripts/forms.js';
+      import '../scripts/panels.js';
+    </script>
+  </body>
+</html>

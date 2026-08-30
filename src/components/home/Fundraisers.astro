@@ -1,0 +1,41 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="fund-section">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 52px; position: relative; z-index: 2">
+      <div class="eyebrow ctr">Signature Fundraisers</div>
+      <h2 class="st wh">Support the Mission</h2>
+      <p style="font-size: 16px; color: rgba(255, 255, 255, 0.5); margin-top: 12px">
+        Two premier events that bring the community together and fund veteran programs across
+        Alabama.
+      </p>
+    </div>
+    <div class="fund-grid">
+      <div class="fund-card">
+        <div class="fund-num">01</div>
+        <div class="fund-eyebrow">Annual Fundraiser</div>
+        <div class="fund-title">War on<br />the Greens</div>
+        <p class="fund-body">
+          Our signature golf tournament brings veterans, sponsors, and supporters together at RTJ
+          golf courses across Alabama. Competitive, fun, and directly funding the mission.
+        </p>
+        <div class="fund-detail">Event dates are published after staff approval.</div>
+        <a href={`${base}events/`} class="btn-r">Learn More</a>
+      </div>
+      <div class="fund-card">
+        <div class="fund-num">02</div>
+        <div class="fund-eyebrow">Annual Gala</div>
+        <div class="fund-title">Salute to<br />Service</div>
+        <p class="fund-body">
+          Our premier annual gala celebrating the service and sacrifice of Alabama's veterans. An
+          evening of recognition, fellowship, and raising critical funds for programs that change
+          lives.
+        </p>
+        <div class="fund-detail">Event dates are published after staff approval.</div>
+        <a href={`${base}events/`} class="btn-r">Learn More</a>
+      </div>
+    </div>
+  </div>
+</section>

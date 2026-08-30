@@ -1,0 +1,31 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="ava-gallery">
+  <div class="container">
+    <div class="ava-gallery-header">
+      <div class="eyebrow ctr" style="color: rgba(255, 255, 255, 0.7)">The AV Active Community</div>
+      <h2 class="st wh">Where Vets Show Up</h2>
+    </div>
+    <div class="ava-gallery-grid">
+      <div class="ava-gallery-item tall">
+        <img
+          src={`${base}assets/6ed7672bcae5ea4d.webp`}
+          alt="Veteran group activity - bridge walk"
+        />
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div class="ava-gallery-item">
+          <img
+            src={`${base}assets/76f21b51a9cc15dc.webp`}
+            alt="Veterans at Topgolf community event"
+          />
+        </div>
+        <div class="ava-gallery-item">
+          <img src={`${base}assets/f23e69cd30f93ec9.webp`} alt="Veterans rowing team on the lake" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

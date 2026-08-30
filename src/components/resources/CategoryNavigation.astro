@@ -1,0 +1,46 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<div class="cat-nav-wrap">
+  <div class="cat-nav-inner">
+    <button class="cat-suggest" onclick="
+          openContact();
+          return false;
+        ">
+      + Suggest a Resource</button
+    ><button class="cat-btn active" onclick="showSection('all', this)">
+      <span class="ci">🧭</span> All Resources</button
+    ><button class="cat-btn" onclick="showSection('crisis', this)">
+      <span class="ci">🆘</span> Crisis &amp; Mental Health</button
+    ><button class="cat-btn" onclick="showSection('vetcenters', this)">
+      <span class="ci">🏥</span> VA &amp; Vet Centers</button
+    ><button class="cat-btn" onclick="showSection('housing', this)">
+      <span class="ci">🏠</span> Housing</button
+    ><button class="cat-btn" onclick="showSection('benefits', this)">
+      <span class="ci">📋</span> Benefits &amp; Claims</button
+    ><button class="cat-btn" onclick="showSection('education', this)">
+      <span class="ci">🎓</span> Education</button
+    ><button class="cat-btn" onclick="showSection('employment', this)">
+      <span class="ci">💼</span> Employment</button
+    ><button class="cat-btn" onclick="showSection('financial', this)">
+      <span class="ci">💰</span> Financial Aid</button
+    ><button class="cat-btn" onclick="showSection('legal', this)">
+      <span class="ci">⚖️</span> Legal Help</button
+    ><button class="cat-btn" onclick="showSection('family', this)">
+      <span class="ci">👨‍👩‍👧</span> Family &amp; Caregivers</button
+    ><button class="cat-btn" onclick="showSection('transition', this)">
+      <span class="ci">🎖️</span> Transition</button
+    ><button class="cat-btn" onclick="showSection('ministry', this)">
+      <span class="ci">✝️</span> Ministry &amp; Faith</button
+    ><button class="cat-btn" onclick="showSection('women', this)">
+      <span class="ci">👩‍✈️</span> Women Veterans</button
+    ><button class="cat-btn" onclick="showSection('adaptive', this)">
+      <span class="ci">🏅</span> Adaptive Sports</button
+    ><button class="cat-btn" onclick="showSection('recovery', this)">
+      <span class="ci">🫂</span> Substance Use &amp; Recovery</button
+    ><button class="cat-btn" onclick="showSection('servicedogs', this)">
+      <span class="ci">🦮</span> Service Dogs
+    </button>
+  </div>
+</div>

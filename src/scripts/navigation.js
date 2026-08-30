@@ -1,36 +1,8 @@
-const PAGE_ROUTES = Object.freeze({
-  home: '',
-  news: 'news/',
-  warrior: 'warrior-retreat/',
-  circle: 'av-circle/',
-  about: 'about/',
-  active: 'av-active/',
-  topgolf: 'topgolf/',
-  events: 'events/',
-  resources: 'resources/',
-});
-
-function getBasePath() {
-  return document.documentElement.dataset.basePath || '/';
-}
-
 function closeMenu() {
   const navigation = document.querySelector('body > nav');
   const menuButton = navigation?.querySelector('.nav-burger');
   navigation?.classList.remove('menu-open');
   menuButton?.setAttribute('aria-expanded', 'false');
-}
-
-function showPage(pageId) {
-  if (!(pageId in PAGE_ROUTES)) return;
-
-  if (document.documentElement.dataset.page === pageId) {
-    closeMenu();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
-  }
-
-  window.location.assign(`${getBasePath()}${PAGE_ROUTES[pageId]}`);
 }
 
 function toggleMenu() {
@@ -65,13 +37,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-window.addEventListener('scroll', () => {
-  const ticker = document.getElementById('ticker');
-  if (ticker && window.matchMedia('(min-width: 901px)').matches) {
-    ticker.style.opacity = window.scrollY > 80 ? '0' : '1';
-  }
-});
-
-window.showPage = showPage;
 window.toggleMenu = toggleMenu;
 window.toggleFaq = toggleFaq;

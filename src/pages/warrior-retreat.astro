@@ -1,0 +1,18 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/warrior/Hero.astro';
+import Programs from '../components/warrior/Programs.astro';
+import CallToAction from '../components/warrior/CallToAction.astro';
+---
+
+<SiteLayout
+  pageId="warrior"
+  title="Warrior Retreat | Alabama Veteran"
+  description="Retreat programs and peer support for Alabama veterans and their families."
+>
+  <div id="page-warrior" class="page active">
+    <Hero />
+    <Programs />
+    <CallToAction />
+  </div>
+</SiteLayout>

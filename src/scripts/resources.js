@@ -1464,3 +1464,7 @@ function checkNoResults() {
   document.getElementById('no-results').classList.toggle('visible', v === 0);
 }
 populateGrids();
+
+window.showSection = showSection;
+window.filterType = filterType;
+window.handleSearch = handleSearch;

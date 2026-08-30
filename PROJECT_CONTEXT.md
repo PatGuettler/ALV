@@ -1,6 +1,9 @@
 # Alabama Veteran Website Redesign — Project Context
 
 > Imported from Claude.ai project on 2026-06-06
+>
+> Historical customer context only. It is not a deployment specification. `README.md`,
+> `MOCK_DATA_AUDIT.md`, and `PRODUCTION_PLAN.md` supersede its implementation notes.
 
 ## Project Overview
 
@@ -27,8 +30,8 @@ Rebuilding the Alabama Veteran website (alabamaveteran.org) — a nonprofit serv
 | Jesse Elders | Secretary |
 | Dylan Angeline | Parliamentarian |
 | James "Mike" Oakley | Board Member |
-| Matt Schlaugenhauf | Placeholder |
-| Danny Noles | Placeholder |
+| Matt Schlaugenhauf | Not published; profile approval required |
+| Danny Noles | Board Member; customer content approval required |
 
 ---
 

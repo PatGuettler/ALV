@@ -1,27 +1,35 @@
 # Alabama Veteran website
 
-This repository contains the approved Alabama Veteran website concept and a maintainable, responsive, multi-page static implementation. Shared components, page content, styles, scripts, and images live in separate source modules and produce independently addressable routes.
+This repository contains the approved Alabama Veteran website concept as a responsive,
+component-based Astro site. Astro file-based routes import small page sections and a shared site
+layout; there is no hand-maintained all-in-one HTML source.
 
 ## Local development
 
-Requirements: Node.js 20.19 or newer.
+Requirements: Node.js 22.12 or newer.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Vite prints the local preview URL. The standalone Warrior Retreat application is available at `/warrior-retreat-application.html`.
+Astro prints the local preview URL. `/warrior-retreat-application/` intentionally displays an
+unavailable state until its secure production workflow is deployed.
 
 ## Project structure
 
 ```text
 src/
-├── components/   Shared navigation, crisis controls, footer, and modal
-├── pages/        One HTML content module per public route
-├── styles/       Foundation, feature, page, and responsive stylesheets
-├── scripts/      Navigation, forms, events, resources, and page behavior
-└── assets/       Content-hashed, independently cacheable images
+├── components/
+│   ├── site/       Shared navigation, crisis controls, footer, and contact modal
+│   ├── home/       Named homepage sections
+│   └── */          Named sections owned by each feature page
+├── layouts/        Shared full-document and minimal page shells
+├── pages/          Thin Astro file-based routes; no page markup monoliths
+├── styles/         Foundation, feature, page, and responsive stylesheets
+└── scripts/        Small client modules for menu, contact, panels, and resource search
+public/
+└── assets/         Public content-hashed images copied unchanged by Astro
 ```
 
 Public routes include `/`, `/about/`, `/av-active/`, `/av-circle/`, `/events/`, `/news/`, `/resources/`, `/topgolf/`, and `/warrior-retreat/`.
@@ -30,6 +38,7 @@ Public routes include `/`, `/about/`, `/av-active/`, `/av-circle/`, `/events/`, 
 
 ```bash
 npm test
+npm run check
 npm run build
 CHECK_BUILD=1 npm run test:site
 npm run test:browser
@@ -42,18 +51,25 @@ The browser smoke test uses an installed Chrome or Chromium. Set `CHROME_PATH` i
 
 ## Source-of-truth files
 
-- `avactivefinal_compressed.html` is the approved website baseline identified by the customer handoff.
-- `warrior-retreat-application.html` is the standalone retreat application baseline.
-- `src/` is the maintainable website source used for builds.
-- `scripts/prepare-site.mjs` composes shared components and pages into the optimized input consumed by Vite.
-- `scripts/extract-legacy.mjs` is a controlled migration utility. Run `npm run extract:legacy` only when intentionally importing a revised approved baseline, then review the resulting source changes.
+- `src/pages/` owns routing and page metadata. Route files should remain small composition roots.
+- `src/layouts/SiteLayout.astro` owns the document shell and shared site chrome.
+- `src/components/<feature>/` owns one semantic section per component.
+- `src/pages/warrior-retreat-application.astro` is the safe staging route. The discarded concept
+  included fictional applicants and browser-only authentication and must not be restored.
+- `astro.config.mjs` owns the GitHub Pages base path and static directory output.
 
-The manifest in `src/legacy-manifest.json` ties the modular source to the approved baseline. The build fails if that baseline changes without an explicit extraction and review.
+The duplicate monolithic concept files and archive package were removed after migration because they
+contained prototype records and simulated behavior. Git history retains the original customer
+handoff if a visual comparison is ever required.
 
 ## GitHub Pages staging
 
-The workflow in `.github/workflows/pages.yml` validates, builds, and deploys `main` to GitHub Pages. In the GitHub repository, open **Settings → Pages** and set **Source** to **GitHub Actions** once. Then run the workflow manually or push to `main`.
+The workflow in `.github/workflows/pages.yml` type-checks, validates, builds, browser-tests, and
+deploys `main` to GitHub Pages. In the GitHub repository, open **Settings → Pages** and set **Source**
+to **GitHub Actions** once. Then run the workflow manually or push to `main`.
 
 No secrets or private customer data may be added to this static site. GitHub Pages is a public staging environment.
 
-For the recommended production architecture and migration phases, see [PRODUCTION_PLAN.md](./PRODUCTION_PLAN.md).
+For the AWS architecture, Terraform inventory, IAM boundaries, data model, and migration phases, see
+[PRODUCTION_PLAN.md](./PRODUCTION_PLAN.md). The precise list of removed prototype data and each
+production replacement is in [MOCK_DATA_AUDIT.md](./MOCK_DATA_AUDIT.md).

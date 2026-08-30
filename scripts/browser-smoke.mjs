@@ -1,7 +1,7 @@
 import { access } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { chromium } from 'playwright-core';
-import { preview } from 'vite';
 
 const projectRoot = resolve(import.meta.dirname, '..');
 const chromeCandidates = [
@@ -39,20 +39,35 @@ const routes = new Map([
   ['resources', 'resources/'],
 ]);
 
-const server = await preview({
-  configFile: resolve(projectRoot, 'vite.config.js'),
-  preview: { host: '127.0.0.1', port: 4173, strictPort: false },
-});
+const server = spawn(
+  process.execPath,
+  [
+    resolve(projectRoot, 'node_modules/astro/bin/astro.mjs'),
+    'preview',
+    '--host',
+    '127.0.0.1',
+    '--port',
+    '4173',
+  ],
+  { cwd: projectRoot, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] },
+);
+let serverOutput = '';
+server.stdout.on('data', (chunk) => (serverOutput += chunk));
+server.stderr.on('data', (chunk) => (serverOutput += chunk));
 
-const previewUrl = server.resolvedUrls?.local?.[0];
-if (!previewUrl) {
-  await server.close();
-  throw new Error('Vite did not provide a local preview URL.');
+const trimmedBase = (process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
+const siteUrl = `http://127.0.0.1:4173/${trimmedBase ? `${trimmedBase}/` : ''}`;
+
+for (let attempt = 0; attempt < 50; attempt++) {
+  try {
+    const response = await fetch(siteUrl);
+    if (response.ok) break;
+  } catch {
+    // Preview is still starting.
+  }
+  if (attempt === 49) throw new Error(`Astro preview failed to start.\n${serverOutput}`);
+  await new Promise((resolveWait) => setTimeout(resolveWait, 100));
 }
-
-// GitHub Pages `base_path` is `/AVL` without a trailing slash. Treat the preview
-// origin as a directory so `news/` resolves to `/AVL/news/`, not `/news/`.
-const siteUrl = previewUrl.endsWith('/') ? previewUrl : `${previewUrl}/`;
 
 const browser = await chromium.launch({ executablePath, headless: true });
 
@@ -131,10 +146,12 @@ try {
     await assertNoHorizontalOverflow(mobile, `home ${width}px`);
   }
 
-  await desktop.goto(new URL('warrior-retreat-application.html', siteUrl).href, {
+  await desktop.goto(new URL('warrior-retreat-application/', siteUrl).href, {
     waitUntil: 'networkidle',
   });
-  await desktop.locator('input[name="applicant_type"]').first().waitFor({ state: 'attached' });
+  await desktop
+    .getByRole('heading', { name: 'Application service not connected' })
+    .waitFor({ state: 'visible' });
 
   await mobileContext.close();
   await desktop.close();
@@ -143,5 +160,5 @@ try {
   );
 } finally {
   await browser.close();
-  await server.close();
+  server.kill('SIGTERM');
 }

@@ -1,0 +1,17 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/topgolf/Hero.astro';
+import ProgramDetails from '../components/topgolf/ProgramDetails.astro';
+import '../styles/topgolf.css';
+---
+
+<SiteLayout
+  pageId="topgolf"
+  title="Topgolf for Veterans | Alabama Veteran"
+  description="Free Topgolf programming for Alabama veterans."
+>
+  <div id="page-topgolf" class="page active">
+    <Hero />
+    <ProgramDetails />
+  </div>
+</SiteLayout>

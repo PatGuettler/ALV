@@ -1,0 +1,29 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import MissionStrip from '../components/home/MissionStrip.astro';
+import Initiatives from '../components/home/Initiatives.astro';
+import Fundraisers from '../components/home/Fundraisers.astro';
+import CirclePreview from '../components/home/CirclePreview.astro';
+import Sponsors from '../components/home/Sponsors.astro';
+import Transparency from '../components/home/Transparency.astro';
+import CommunityCallToAction from '../components/home/CommunityCallToAction.astro';
+import '../styles/home.css';
+---
+
+<SiteLayout
+  pageId="home"
+  title="Alabama Veteran — We've Got Your Six"
+  description="Serving Alabama veterans through community, resources, retreats, and direct support."
+>
+  <div id="page-home" class="page active">
+    <Hero />
+    <MissionStrip />
+    <Initiatives />
+    <Fundraisers />
+    <CirclePreview />
+    <Sponsors />
+    <Transparency />
+    <CommunityCallToAction />
+  </div>
+</SiteLayout>

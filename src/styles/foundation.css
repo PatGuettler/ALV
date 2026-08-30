@@ -1129,7 +1129,7 @@ h2.st.bl {
 .wr-hero-bg {
   position: absolute;
   inset: 0;
-  background: url('../assets/d6f82f3f7b70368f.webp') center 0% / cover no-repeat;
+  background: var(--site-hero-image) center 0% / cover no-repeat;
   opacity: 0.45;
 }
 .wr-hero-overlay {

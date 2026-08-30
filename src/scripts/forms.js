@@ -1,12 +1,3 @@
-function avSignup(fm) {
-  fm.style.display = 'none';
-  var w = fm.parentNode;
-  var ok = w.querySelector('.su-ok');
-  if (ok) ok.style.display = 'block';
-  var nt = w.querySelector('.su-note');
-  if (nt) nt.style.display = 'none';
-  return false;
-}
 var _cTo = 'info@alabamaveteran.org',
   _cSubj = 'Website Contact from';
 function openContact(email, title, subj) {
@@ -35,3 +26,7 @@ function sendContact(f) {
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') closeContact();
 });
+
+window.openContact = openContact;
+window.closeContact = closeContact;
+window.sendContact = sendContact;

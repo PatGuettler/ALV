@@ -1,66 +1,107 @@
-import { createHash } from 'node:crypto';
-import { access, readFile, stat } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { extname, resolve } from 'node:path';
 
 const projectRoot = resolve(import.meta.dirname, '..');
 const sourceRoot = resolve(projectRoot, 'src');
-const masterPath = resolve(projectRoot, 'avactivefinal_compressed.html');
-const retreatPath = resolve(projectRoot, 'warrior-retreat-application.html');
-const master = await readFile(masterPath, 'utf8');
-const retreat = await readFile(retreatPath, 'utf8');
-const manifest = JSON.parse(await readFile(resolve(sourceRoot, 'legacy-manifest.json'), 'utf8'));
-
 const failures = [];
-const pages = new Map([
-  ['home', ''],
-  ['news', 'news'],
-  ['warrior', 'warrior-retreat'],
-  ['circle', 'av-circle'],
-  ['active', 'av-active'],
-  ['topgolf', 'topgolf'],
-  ['events', 'events'],
-  ['resources', 'resources'],
-  ['about', 'about'],
+
+const routes = new Map([
+  ['home', { source: 'index.astro', output: 'index.html' }],
+  ['news', { source: 'news.astro', output: 'news/index.html' }],
+  ['warrior', { source: 'warrior-retreat.astro', output: 'warrior-retreat/index.html' }],
+  ['circle', { source: 'av-circle.astro', output: 'av-circle/index.html' }],
+  ['active', { source: 'av-active.astro', output: 'av-active/index.html' }],
+  ['topgolf', { source: 'topgolf.astro', output: 'topgolf/index.html' }],
+  ['events', { source: 'events.astro', output: 'events/index.html' }],
+  ['resources', { source: 'resources.astro', output: 'resources/index.html' }],
+  ['about', { source: 'about.astro', output: 'about/index.html' }],
 ]);
 
-const masterDigest = createHash('sha256').update(master).digest('hex');
-if (manifest.sourceSha256 !== masterDigest) {
-  failures.push('The modular source is out of sync with the approved baseline.');
+const sectionCounts = new Map([
+  ['home', 8],
+  ['news', 1],
+  ['warrior', 3],
+  ['circle', 9],
+  ['about', 4],
+  ['active', 6],
+  ['topgolf', 2],
+  ['events', 2],
+  ['resources', 5],
+]);
+
+const forbiddenPrototypeMarkers = [
+  'sampleApps',
+  'ADMIN_PASSCODE',
+  'AV_EVENTS',
+  'AV_FUNDRAISERS',
+  'Thanks — you’re on the list',
+  'return avSignup',
+  'Beta Testing Now',
+  'Coming Soon',
+  'Sarah M., Birmingham',
+  'Robert L., Huntsville',
+  'David P., Tuscaloosa',
+  '2026-10-19',
+];
+
+async function filesUnder(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.map((entry) => {
+      const path = resolve(directory, entry.name);
+      return entry.isDirectory() ? filesUnder(path) : [path];
+    }),
+  );
+  return nested.flat();
 }
 
-for (const pageId of pages.keys()) {
-  const source = await readFile(resolve(sourceRoot, 'pages', `${pageId}.html`), 'utf8');
-  if (!source.includes(`id="page-${pageId}"`)) failures.push(`Missing modular page: ${pageId}`);
-  if (source.includes('<style') || source.includes('<script')) {
-    failures.push(`${pageId} contains inline style or script elements.`);
+const sourceFiles = await filesUnder(sourceRoot);
+const astroFiles = sourceFiles.filter((path) => extname(path) === '.astro');
+const htmlFiles = sourceFiles.filter((path) => extname(path) === '.html');
+
+if (htmlFiles.length > 0) failures.push(`Legacy HTML source files remain: ${htmlFiles.join(', ')}`);
+
+for (const [pageId, route] of routes) {
+  const source = await readFile(resolve(sourceRoot, 'pages', route.source), 'utf8');
+  if (!source.includes('<SiteLayout')) failures.push(`${pageId} does not use SiteLayout.`);
+  if (!source.includes(`id="page-${pageId}"`)) failures.push(`${pageId} is missing its page root.`);
+
+  const componentDirectory = resolve(sourceRoot, 'components', pageId);
+  const components = (await readdir(componentDirectory)).filter((name) => name.endsWith('.astro'));
+  if (components.length !== sectionCounts.get(pageId)) {
+    failures.push(
+      `${pageId} should have ${sectionCounts.get(pageId)} section components; found ${components.length}.`,
+    );
   }
-  if (source.includes('data:image/')) failures.push(`${pageId} contains an embedded image.`);
 }
 
-for (const component of [
-  'crisis-bar',
-  'ticker',
-  'navigation',
-  'crisis-float',
-  'footer',
-  'contact-modal',
-]) {
-  await access(resolve(sourceRoot, 'components', `${component}.html`));
+for (const path of astroFiles) {
+  const source = await readFile(path, 'utf8');
+  if (source.includes('data:image/')) failures.push(`${path} contains an embedded image.`);
+  for (const marker of forbiddenPrototypeMarkers) {
+    if (source.includes(marker)) failures.push(`${path} contains removed marker: ${marker}`);
+  }
 }
 
-for (const script of ['ticker', 'navigation', 'forms', 'panels', 'events', 'resources']) {
+for (const script of ['navigation', 'forms', 'panels', 'resources']) {
   const javascript = await readFile(resolve(sourceRoot, 'scripts', `${script}.js`), 'utf8');
   try {
     new Function(javascript);
   } catch (error) {
     failures.push(`${script}.js has invalid syntax: ${error.message}`);
   }
+  for (const marker of forbiddenPrototypeMarkers) {
+    if (javascript.includes(marker))
+      failures.push(`${script}.js contains removed marker: ${marker}`);
+  }
 }
 
-for (const requiredText of ['<!DOCTYPE html>', 'name="applicant_type"', 'Warrior Retreat']) {
-  if (!retreat.includes(requiredText)) {
-    failures.push(`Retreat application is missing required marker: ${requiredText}`);
-  }
+const retreatPage = await readFile(
+  resolve(sourceRoot, 'components', 'retreat', 'ServiceUnavailable.astro'),
+  'utf8',
+);
+if (!retreatPage.includes('Application service not connected')) {
+  failures.push('The retreat service status component is missing.');
 }
 
 if (failures.length > 0) {
@@ -69,24 +110,30 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `Validated ${pages.size} modular pages, shared components, scripts, and the retreat application.`,
+  `Validated ${routes.size} Astro routes, ${astroFiles.length} components/layouts, and client modules.`,
 );
 
 if (process.env.CHECK_BUILD === '1') {
-  for (const [pageId, route] of pages) {
-    const output = route
-      ? resolve(projectRoot, 'dist', route, 'index.html')
-      : resolve(projectRoot, 'dist', 'index.html');
-    const html = await readFile(output, 'utf8');
+  for (const [pageId, route] of routes) {
+    const html = await readFile(resolve(projectRoot, 'dist', route.output), 'utf8');
     if (!html.includes(`id="page-${pageId}"`)) failures.push(`Built route is incorrect: ${pageId}`);
-    if (html.includes('data:image/'))
-      failures.push(`Built route contains embedded images: ${pageId}`);
+    if (html.includes('data:image/')) failures.push(`Built route embeds images: ${pageId}`);
+    for (const marker of forbiddenPrototypeMarkers) {
+      if (html.includes(marker)) failures.push(`Built route ${pageId} contains: ${marker}`);
+    }
+  }
+
+  const builtRetreat = await readFile(
+    resolve(projectRoot, 'dist', 'warrior-retreat-application', 'index.html'),
+    'utf8',
+  );
+  if (!builtRetreat.includes('Application service not connected')) {
+    failures.push('Built retreat status route is incorrect.');
   }
 
   const builtIndex = resolve(projectRoot, 'dist', 'index.html');
   const builtSize = (await stat(builtIndex)).size;
-  if (builtSize > 100 * 1024)
-    failures.push('The homepage HTML exceeds its 100 KiB performance budget.');
+  if (builtSize > 100 * 1024) failures.push('The homepage HTML exceeds its 100 KiB budget.');
 
   if (failures.length > 0) {
     console.error(failures.join('\n'));
@@ -94,6 +141,6 @@ if (process.env.CHECK_BUILD === '1') {
   }
 
   console.log(
-    `Validated ${pages.size} built routes; homepage HTML is ${(builtSize / 1024).toFixed(0)} KiB.`,
+    `Validated ${routes.size + 1} built routes; homepage HTML is ${(builtSize / 1024).toFixed(0)} KiB.`,
   );
 }
