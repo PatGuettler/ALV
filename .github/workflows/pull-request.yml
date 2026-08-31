@@ -1,0 +1,75 @@
+name: Validate production pull request
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-validation:
+    name: Production validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_PATH: /
+      SITE_ENV: production
+      SITE_URL: https://alabamaveteran.org
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.22.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Validate source
+        run: |
+          npm run format:check
+          npm run check
+          npm test
+
+      - name: Build production artifact
+        run: npm run build
+
+      - name: Validate production artifact
+        env:
+          CHECK_BUILD: '1'
+        run: |
+          npm run test:site
+          node scripts/seo-audit.mjs
+
+      - name: Run responsive browser regression suite
+        run: node scripts/browser-smoke.mjs
+
+      - name: Run automated accessibility scans
+        run: node scripts/accessibility-scan.mjs
+
+      - name: Enforce Lighthouse performance budget
+        run: node scripts/performance-budget.mjs
+
+      - name: Upload quality reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: production-quality-reports
+          path: |
+            artifacts/accessibility/axe-report.json
+            artifacts/performance/lighthouse-budget-report.json
+
+      - name: Summarize validation failure
+        if: ${{ failure() }}
+        run: |
+          echo '## Production validation failed' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Review the first failed gate above. Formatting, diagnostics, source validation, the static artifact, SEO, responsive behavior, accessibility, and performance are all required before merge.' >> "$GITHUB_STEP_SUMMARY"
