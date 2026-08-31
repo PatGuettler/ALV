@@ -348,13 +348,20 @@ nav [aria-current='page'] {
     padding: 20px;
   }
 
-  .mstrip p {
+  .mstrip-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
     font-size: 22px;
     line-height: 1.45;
   }
 
-  .mstrip p span {
-    margin-inline: 7px;
+  .mstrip-list li {
+    justify-content: center;
+  }
+
+  .mstrip-list li + li::before {
+    display: none;
   }
 
   .init-section,

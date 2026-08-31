@@ -406,14 +406,24 @@ h2.st.bl {
   padding: 26px 0;
   text-align: center;
 }
-.mstrip p {
+.mstrip-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  list-style: none;
   font-family: 'League Gothic', sans-serif;
   font-size: 26px;
   color: var(--white);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
-.mstrip p span {
+.mstrip-list li {
+  display: inline-flex;
+  align-items: center;
+}
+.mstrip-list li + li::before {
+  content: '·';
   opacity: 0.5;
   margin: 0 16px;
 }
