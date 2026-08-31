@@ -33,7 +33,6 @@ about 29 KiB, the largest stylesheet about 13 KiB, and the largest script about 
 - Total transfer at or below 1.5 MiB. Largest image 400 KiB, font 150 KiB, stylesheet 200 KiB, and
   script 150 KiB.
 
-Issue #243 tracks the remaining work to make the 2.5-second LCP target stable after the customer
-confirms that the current externally hosted hero can be copied into the governed production asset
-set. Any future budget failure must be represented by a focused AVL issue before a threshold is
-changed.
+Issue #244 tracks customer approval to copy the current externally hosted hero into the governed
+production asset set and remove the legacy WordPress dependency. Any future budget failure must be
+represented by a focused AVL issue before a threshold is changed.
