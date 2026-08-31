@@ -95,6 +95,266 @@ async function assertNoHorizontalOverflow(page, label) {
   }
 }
 
+function assertLayout(condition, message, details) {
+  if (!condition) {
+    throw new Error(`${message}: ${JSON.stringify(details)}`);
+  }
+}
+
+async function assertEventsHero(page, label) {
+  const layout = await page.evaluate(() => {
+    const hero = document.querySelector('.evp-hero');
+    const subtitle = document.querySelector('.evp-hero-sub');
+    const heroRect = hero.getBoundingClientRect();
+    const subtitleRect = subtitle.getBoundingClientRect();
+
+    const parseColor = (value) => {
+      const channels = value.match(/[\d.]+/g)?.map(Number) ?? [];
+      return {
+        red: channels[0] ?? 0,
+        green: channels[1] ?? 0,
+        blue: channels[2] ?? 0,
+        alpha: channels[3] ?? 1,
+      };
+    };
+    const foreground = parseColor(getComputedStyle(subtitle).color);
+    const background = parseColor(getComputedStyle(hero).backgroundColor);
+    const composite = ['red', 'green', 'blue'].map(
+      (channel) =>
+        foreground[channel] * foreground.alpha + background[channel] * (1 - foreground.alpha),
+    );
+    const luminance = (channels) => {
+      const [red, green, blue] = channels.map((channel) => {
+        const normalized = channel / 255;
+        return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    };
+    const foregroundLuminance = luminance(composite);
+    const backgroundLuminance = luminance([background.red, background.green, background.blue]);
+
+    return {
+      contrast:
+        (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) /
+        (Math.min(foregroundLuminance, backgroundLuminance) + 0.05),
+      hero: {
+        left: heroRect.left,
+        right: heroRect.right,
+        top: heroRect.top,
+        bottom: heroRect.bottom,
+      },
+      subtitle: {
+        left: subtitleRect.left,
+        right: subtitleRect.right,
+        top: subtitleRect.top,
+        bottom: subtitleRect.bottom,
+        width: subtitleRect.width,
+        height: subtitleRect.height,
+      },
+    };
+  });
+
+  const insideHero =
+    layout.subtitle.width > 0 &&
+    layout.subtitle.height > 0 &&
+    layout.subtitle.left >= layout.hero.left - 1 &&
+    layout.subtitle.right <= layout.hero.right + 1 &&
+    layout.subtitle.top >= layout.hero.top - 1 &&
+    layout.subtitle.bottom <= layout.hero.bottom + 1;
+  assertLayout(insideHero, `${label} events subtitle is clipped`, layout);
+  assertLayout(layout.contrast >= 4.5, `${label} events subtitle contrast is too low`, layout);
+}
+
+async function assertAvrcStrip(page, label) {
+  const layout = await page.evaluate(() => {
+    const strip = document.querySelector('.avrc-strip').getBoundingClientRect();
+    const details = document.querySelector('.avrc-details').getBoundingClientRect();
+    const action = document.querySelector('.avrc-inner a').getBoundingClientRect();
+    const items = [...document.querySelectorAll('.avrc-details span')].map((item) => {
+      const rect = item.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+    });
+    const overlap =
+      details.left < action.right &&
+      details.right > action.left &&
+      details.top < action.bottom &&
+      details.bottom > action.top;
+
+    return {
+      strip: { left: strip.left, right: strip.right, top: strip.top, bottom: strip.bottom },
+      details: {
+        left: details.left,
+        right: details.right,
+        top: details.top,
+        bottom: details.bottom,
+      },
+      action: {
+        left: action.left,
+        right: action.right,
+        top: action.top,
+        bottom: action.bottom,
+        width: action.width,
+        height: action.height,
+      },
+      items,
+      overlap,
+    };
+  });
+
+  const elements = [layout.details, layout.action, ...layout.items];
+  const allInside = elements.every(
+    (rect) =>
+      rect.right > rect.left &&
+      rect.bottom > rect.top &&
+      rect.left >= layout.strip.left - 1 &&
+      rect.right <= layout.strip.right + 1 &&
+      rect.top >= layout.strip.top - 1 &&
+      rect.bottom <= layout.strip.bottom + 1,
+  );
+  assertLayout(allInside, `${label} AVRC content is clipped`, layout);
+  assertLayout(!layout.overlap, `${label} AVRC details overlap the call to action`, layout);
+}
+
+async function assertMissionStrip(page, label) {
+  const layout = await page.evaluate(() => {
+    const strip = document.querySelector('.mstrip').getBoundingClientRect();
+    const items = [...document.querySelectorAll('.mstrip-list li')].map((item) => {
+      const rect = item.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+    });
+    const overlaps = items.some((item, index) =>
+      items
+        .slice(index + 1)
+        .some(
+          (other) =>
+            item.left < other.right &&
+            item.right > other.left &&
+            item.top < other.bottom &&
+            item.bottom > other.top,
+        ),
+    );
+    return {
+      strip: { left: strip.left, right: strip.right, top: strip.top, bottom: strip.bottom },
+      items,
+      overlaps,
+    };
+  });
+
+  const allInside =
+    layout.items.length === 4 &&
+    layout.items.every(
+      (rect) =>
+        rect.right > rect.left &&
+        rect.bottom > rect.top &&
+        rect.left >= layout.strip.left - 1 &&
+        rect.right <= layout.strip.right + 1 &&
+        rect.top >= layout.strip.top - 1 &&
+        rect.bottom <= layout.strip.bottom + 1,
+    );
+  assertLayout(allInside, `${label} mission-strip content is clipped`, layout);
+  assertLayout(!layout.overlaps, `${label} mission-strip items overlap`, layout);
+}
+
+async function assertCrisisControl(page, label, width) {
+  const layout = await page.evaluate(() => {
+    const footer = document.querySelector('body > footer').getBoundingClientRect();
+    const action = document.querySelector('.nl-float').getBoundingClientRect();
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      viewportHeight: document.documentElement.clientHeight,
+      position: getComputedStyle(document.querySelector('.nl-float')).position,
+      footer: { top: footer.top, bottom: footer.bottom },
+      action: {
+        left: action.left,
+        right: action.right,
+        top: action.top,
+        bottom: action.bottom,
+        width: action.width,
+        height: action.height,
+      },
+    };
+  });
+
+  if (width <= 900) {
+    const followsFooter =
+      layout.position === 'static' &&
+      layout.action.top >= layout.footer.bottom - 1 &&
+      Math.abs(layout.action.width - layout.viewportWidth) <= 1;
+    assertLayout(followsFooter, `${label} crisis control covers mobile content`, layout);
+    return;
+  }
+
+  const insideViewport =
+    layout.position === 'fixed' &&
+    layout.action.left >= 0 &&
+    layout.action.right <= layout.viewportWidth &&
+    layout.action.top >= 0 &&
+    layout.action.bottom <= layout.viewportHeight;
+  assertLayout(insideViewport, `${label} crisis control is outside the desktop viewport`, layout);
+}
+
+async function assertRetreatStatus(page, label) {
+  await page.goto(new URL('warrior-retreat-application/', siteUrl).href, {
+    waitUntil: 'networkidle',
+  });
+  await page
+    .getByRole('heading', { name: 'Application service not connected' })
+    .waitFor({ state: 'visible' });
+  await assertNoHorizontalOverflow(page, `${label} retreat status`);
+
+  const layout = await page.evaluate(() => {
+    const card = document.querySelector('.retreat-status').getBoundingClientRect();
+    const link = document.querySelector('.return-link a').getBoundingClientRect();
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      card: {
+        left: card.left,
+        right: card.right,
+        top: card.top,
+        bottom: card.bottom,
+        width: card.width,
+        height: card.height,
+      },
+      link: {
+        left: link.left,
+        right: link.right,
+        top: link.top,
+        bottom: link.bottom,
+        width: link.width,
+        height: link.height,
+      },
+    };
+  });
+  const usable =
+    layout.card.width > 0 &&
+    layout.card.left >= 0 &&
+    layout.card.right <= layout.viewportWidth &&
+    layout.link.width > 0 &&
+    layout.link.height >= 44 &&
+    layout.link.left >= layout.card.left &&
+    layout.link.right <= layout.card.right &&
+    layout.link.top >= layout.card.top &&
+    layout.link.bottom <= layout.card.bottom;
+  assertLayout(usable, `${label} retreat status panel or return link is clipped`, layout);
+}
+
+async function assertCustomerReportedLayouts(page, label, width, browserErrors) {
+  await loadRoute(page, 'events', 'events/', browserErrors);
+  await assertNoHorizontalOverflow(page, `${label} events`);
+  await assertEventsHero(page, label);
+
+  await loadRoute(page, 'resources', 'resources/', browserErrors);
+  await assertNoHorizontalOverflow(page, `${label} resources`);
+  await assertAvrcStrip(page, label);
+
+  await loadRoute(page, 'home', '', browserErrors);
+  await assertNoHorizontalOverflow(page, `${label} home`);
+  await assertMissionStrip(page, label);
+  await assertCrisisControl(page, label, width);
+
+  await assertRetreatStatus(page, label);
+}
+
 try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
   const desktopErrors = [];
@@ -104,6 +364,8 @@ try {
     await loadRoute(desktop, pageId, route, desktopErrors);
     await assertNoHorizontalOverflow(desktop, `${pageId} desktop`);
   }
+
+  await assertCustomerReportedLayouts(desktop, 'desktop', 1440, desktopErrors);
 
   await loadRoute(desktop, 'home', '', desktopErrors);
   await desktop.locator('#nb-about').click();
@@ -150,23 +412,15 @@ try {
   const crisisHref = await mobile.locator('a[href="tel:988"]').first().getAttribute('href');
   if (crisisHref !== 'tel:988') throw new Error('The 988 crisis link is missing.');
 
-  for (const width of [320, 768]) {
+  for (const width of [320, 375, 412, 768]) {
     await mobile.setViewportSize({ width, height: 915 });
-    await loadRoute(mobile, 'home', '', mobileErrors);
-    await assertNoHorizontalOverflow(mobile, `home ${width}px`);
+    await assertCustomerReportedLayouts(mobile, `${width}px`, width, mobileErrors);
   }
-
-  await desktop.goto(new URL('warrior-retreat-application/', siteUrl).href, {
-    waitUntil: 'networkidle',
-  });
-  await desktop
-    .getByRole('heading', { name: 'Application service not connected' })
-    .waitFor({ state: 'visible' });
 
   await mobileContext.close();
   await desktop.close();
   console.log(
-    `Browser smoke test passed for ${routes.size} responsive routes and the retreat status route.`,
+    `Browser smoke test passed for ${routes.size} routes and five customer-reported layouts at five responsive widths.`,
   );
 } finally {
   await browser.close();
