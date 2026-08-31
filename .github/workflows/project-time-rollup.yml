@@ -22,18 +22,30 @@ jobs:
   rollup:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
     steps:
+      - name: Report missing Projects credential
+        if: ${{ env.PROJECTS_TOKEN == '' }}
+        run: |
+          echo '::warning::Automatic estimate rollups are waiting for the PROJECTS_TOKEN repository secret.'
+          echo '## Estimate rollup not configured' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Add the dedicated `PROJECTS_TOKEN` Actions secret, then run this workflow once in dry-run mode. See AVL issue #242.' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Check out repository
+        if: ${{ env.PROJECTS_TOKEN != '' }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Node.js
+        if: ${{ env.PROJECTS_TOKEN != '' }}
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
 
       - name: Calculate parent estimates
+        if: ${{ env.PROJECTS_TOKEN != '' }}
         env:
-          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          GH_TOKEN: ${{ env.PROJECTS_TOKEN }}
           PROJECT_OWNER: PatGuettler
           PROJECT_NUMBER: '3'
           PROJECT_FIELD_NAME: Time (hours)
