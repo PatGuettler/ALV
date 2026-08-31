@@ -74,11 +74,21 @@ jobs:
             terraform -chdir="$root" validate
           done
 
+      - name: Validate and test reusable modules
+        run: |
+          for module in infra/modules/*; do
+            terraform -chdir="$module" init -backend=false -input=false
+            terraform -chdir="$module" validate
+          done
+          terraform -chdir=infra/modules/static-site test
+
       - name: Install pinned Checkov
         run: pip install --disable-pip-version-check checkov==3.3.16
 
       - name: Run Terraform security checks
-        run: checkov --directory infra --framework terraform --compact --quiet
+        run: >-
+          checkov --directory infra --framework terraform --compact --quiet
+          --skip-path 'infra/modules/.*/tests'
 
       - name: Summarize validation failure
         if: ${{ failure() }}
