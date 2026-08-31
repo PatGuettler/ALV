@@ -33,7 +33,7 @@
   line-height: 0.95;
 }
 .ava-hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .ava-hero-sub {
   font-size: 17px;

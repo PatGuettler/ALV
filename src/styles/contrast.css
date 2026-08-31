@@ -1,0 +1,155 @@
+/* WCAG 2.2 AA text contrast. Brand red (#b21f24) is 2.4:1 on navy; --mg was 2.96:1 on white. */
+:root {
+  --red-on-dark: #ff8a8e;
+  --muted-on-dark: rgba(255, 255, 255, 0.78);
+  --mg: #5c5854;
+}
+
+.hero-title .red,
+.hs-num,
+.nav-nine,
+.fund-section .eyebrow,
+.fund-eyebrow,
+.wr-hero .eyebrow,
+.wr-hero-content h1 .red,
+.ava-app-left .eyebrow,
+.ava-app-left h2 .red,
+.wr-cta h2 .red,
+.circ-hero h1 .red,
+.ab-hero .eyebrow,
+.ab-hero h1 .red,
+.ab-board .eyebrow,
+.ab-board-header h2 .red,
+.ab-board-header h2 span,
+.prog-card.dark .pc-eyebrow,
+.prog-full.dark .pc-eyebrow,
+footer .foot-col-head,
+#page-circle .hero h1 .red,
+#page-circle .bstep-num,
+#page-about .ab-member-role,
+#page-news .nc-eyebrow,
+#page-news .nc-inner h1 .red,
+#page-topgolf .tg-day,
+#page-topgolf .tg-step-num,
+.tgp-hero h1 .red,
+.tgp-hero .eyebrow,
+.tgp-body .eyebrow,
+.ava-hero h1 .red,
+.evp-hero h1 .red,
+.evp-hero .eyebrow,
+.evp-fund-header h2 .red,
+.res-hero .eyebrow,
+.res-hero-inner h1 .red,
+#page-resources .eyebrow,
+.major-gifts-note a {
+  color: var(--red-on-dark);
+}
+
+#page-topgolf .tg-step-num {
+  opacity: 1;
+}
+
+.hero-ey-txt,
+.hero-sub,
+.hs-lbl,
+.fund-section p,
+.fund-body,
+.fund-detail,
+.transp-text p,
+.prog-card.dark .pc-body,
+.prog-full.dark .pc-body,
+.prog-full.dark .duties-list li,
+.prog-full.dark .nine-box p,
+.ab-hero p,
+#page-about .ab-board-header p,
+#page-about .ab-member-title,
+#page-about .ab-member-bio,
+.foot-blurb,
+.foot-addr,
+.foot-bottom,
+.foot-links a,
+.foot-links a:visited,
+#page-circle .m-label,
+#page-circle .prog-tag,
+#page-circle .prog-desc,
+#page-circle .prog-stat span,
+#page-circle .bstep p,
+#page-topgolf .tg-note,
+#page-topgolf .tg-step-body,
+#page-topgolf .tg-cta-row p,
+.tgp-back,
+.ava-hero-sub,
+.ava-sponsor-card p,
+.circle-preview .eyebrow,
+.ava-gallery .eyebrow {
+  color: var(--muted-on-dark);
+}
+
+.prog-full.dark .pc-title {
+  color: var(--white);
+}
+
+#page-circle .tbtn {
+  color: var(--mg);
+}
+
+#page-circle .tbtn.active {
+  color: var(--white);
+}
+
+#page-circle .tier-price span,
+#page-circle .tier-sub-price {
+  color: var(--mg);
+}
+
+.cp-body {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.ab-join-title,
+.ab-join-copy,
+.ab-join-cta {
+  color: var(--muted-on-dark);
+}
+
+.ab-join-cta {
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.badge-sec .sec-label {
+  color: #ffb8ba;
+}
+
+.badge-sec .sec-desc {
+  color: var(--muted-on-dark);
+}
+
+.ava-hero .btn-ow-redline {
+  color: var(--red-on-dark);
+  border-color: rgba(255, 138, 142, 0.65);
+}
+
+footer .foot-links a.foot-accent {
+  color: var(--red-on-dark);
+}
+
+#page-resources .rc-phone,
+#page-resources .rc-addr,
+#page-resources .filter-label,
+#page-resources .sec-head-text p {
+  color: var(--mg);
+}
+
+#page-resources .res-card:hover .rc-desc,
+#page-resources .res-card:hover .rc-phone,
+#page-resources .res-card:hover .rc-addr {
+  color: var(--muted-on-dark);
+}
+
+#page-resources .res-card:hover .rc-link {
+  color: var(--red-on-dark);
+}
+
+.wog-hsv-yr {
+  color: var(--mg);
+}

@@ -100,7 +100,7 @@
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #9a9590;
+  color: var(--mg);
 }
 .avnews-body h3 {
   font-family: 'League Gothic', sans-serif;

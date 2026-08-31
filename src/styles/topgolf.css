@@ -39,7 +39,7 @@
   margin-bottom: 18px;
 }
 .tgp-hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .tgp-hero-sub {
   font-size: 17px;

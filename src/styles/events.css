@@ -34,7 +34,7 @@
   margin-bottom: 14px;
 }
 .evp-hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .evp-hero-sub {
   font-size: 17px;

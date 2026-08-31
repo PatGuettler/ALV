@@ -134,7 +134,7 @@
   border: none;
   font-size: 30px;
   line-height: 1;
-  color: #9a9590;
+  color: var(--mg);
   cursor: pointer;
 }
 .cm-close:hover {
@@ -208,7 +208,7 @@
 .cm-addr {
   margin-top: 18px;
   font-size: 11.5px;
-  color: #9a9590;
+  color: var(--mg);
   line-height: 1.5;
   text-align: center;
 }
