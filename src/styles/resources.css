@@ -276,13 +276,17 @@
   padding: 28px 0;
 }
 #page-resources .avrc-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+}
+#page-resources .avrc-details {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
   flex-wrap: wrap;
-}
-#page-resources .avrc-inner p {
+  column-gap: 14px;
+  row-gap: 8px;
   font-family: 'League Gothic', sans-serif;
   font-size: 22px;
   color: var(--white);
@@ -290,9 +294,14 @@
   text-transform: uppercase;
   line-height: 1.2;
 }
-#page-resources .avrc-inner p span {
+#page-resources .avrc-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+#page-resources .avrc-details span + span::before {
+  content: '|';
   opacity: 0.55;
-  margin: 0 10px;
 }
 #page-resources .avrc-inner a {
   background: var(--white);
@@ -882,7 +891,21 @@
     width: 100%;
   }
   #page-resources .avrc-inner {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #page-resources .avrc-details {
+    display: grid;
+    gap: 10px;
+  }
+  #page-resources .avrc-details span {
+    align-items: baseline;
+  }
+  #page-resources .avrc-details span + span::before {
+    flex: 0 0 auto;
+  }
+  #page-resources .avrc-inner a {
+    width: 100%;
+    text-align: center;
   }
   #page-resources .foot-grid {
     grid-template-columns: 1fr 1fr;
