@@ -172,8 +172,10 @@
 #page-resources .res-hero-bg {
   position: absolute;
   inset: 0;
-  background: url('https://alabamaveteran.org/wp-content/uploads/2025/01/your-next-mission-1.webp')
-    center 30% / cover no-repeat;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
   opacity: 0.12;
 }
 #page-resources .res-hero-stripe {

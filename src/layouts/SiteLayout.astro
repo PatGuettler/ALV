@@ -35,6 +35,10 @@ const canonical = new URL(canonicalRoutes[pageId] ?? '', 'https://alabamaveteran
 const isProduction = import.meta.env.SITE_ENV === 'production';
 const socialImage = new URL('/assets/d6f82f3f7b70368f.webp', canonical.origin);
 const favicon = `${base}assets/93198b7ec08230d7.png`;
+const sharedHeroImage =
+  pageId === 'home' || pageId === 'resources'
+    ? 'https://alabamaveteran.org/wp-content/uploads/2025/01/your-next-mission-1.webp'
+    : undefined;
 const structuredData = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -78,6 +82,11 @@ const structuredData = {
     <meta name="theme-color" content="#1A2030" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/png" href={favicon} />
+    {
+      sharedHeroImage && (
+        <link rel="preload" as="image" href={sharedHeroImage} fetchpriority="high" />
+      )
+    }
     <meta property="og:site_name" content="Alabama Veteran" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
@@ -92,7 +101,7 @@ const structuredData = {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Libre+Franklin:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Libre+Franklin:wght@400;500;600;700;800;900&display=optional"
       rel="stylesheet"
     />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
