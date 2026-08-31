@@ -11,12 +11,14 @@
     "format": "prettier --write \"src/**/*.{astro,css,js,json}\" \"scripts/**/*.mjs\" \"*.{js,json,mjs}\" README.md DEVELOPER_HANDOFF.md PRODUCTION_PLAN.md MOCK_DATA_AUDIT.md \".github/**/*.{yml,yaml}\"",
     "format:check": "prettier --check \"src/**/*.{astro,css,js,json}\" \"scripts/**/*.mjs\" \"*.{js,json,mjs}\" README.md DEVELOPER_HANDOFF.md PRODUCTION_PLAN.md MOCK_DATA_AUDIT.md \".github/**/*.{yml,yaml}\"",
     "preview": "astro preview --host 0.0.0.0",
-    "test": "npm run test:site",
+    "test": "npm run test:site && npm run test:rollup",
     "test:browser": "npm run build && node scripts/browser-smoke.mjs",
+    "test:rollup": "node --test scripts/tests/*.test.mjs",
     "test:site": "node scripts/validate-site.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@axe-core/playwright": "4.13.0",
     "astro": "7.2.9",
     "playwright-core": "1.62.1",
     "prettier": "3.9.6",

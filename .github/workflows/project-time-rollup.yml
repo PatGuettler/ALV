@@ -1,0 +1,42 @@
+name: Roll up project time estimates
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Report changes without updating parent estimates
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-time-rollup
+  cancel-in-progress: false
+
+jobs:
+  rollup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Calculate parent estimates
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          PROJECT_OWNER: PatGuettler
+          PROJECT_NUMBER: '3'
+          PROJECT_FIELD_NAME: Time (hours)
+          TARGET_REPOSITORY: PatGuettler/AVL
+          ROLLUP_DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: node scripts/project-time-rollup.mjs

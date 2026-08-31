@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { chromium } from 'playwright-core';
 
 const projectRoot = resolve(import.meta.dirname, '..');
+const astroCli = resolve(projectRoot, 'node_modules/astro/bin/astro.mjs');
 const chromeCandidates = [
   process.env.CHROME_PATH,
   '/usr/bin/google-chrome',
@@ -41,14 +42,7 @@ const routes = new Map([
 
 const server = spawn(
   process.execPath,
-  [
-    resolve(projectRoot, 'node_modules/astro/bin/astro.mjs'),
-    'preview',
-    '--host',
-    '127.0.0.1',
-    '--port',
-    '4173',
-  ],
+  [astroCli, 'preview', '--host', '127.0.0.1', '--port', '4173'],
   { cwd: projectRoot, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] },
 );
 let serverOutput = '';
@@ -70,6 +64,19 @@ for (let attempt = 0; attempt < 50; attempt++) {
 }
 
 const browser = await chromium.launch({ executablePath, headless: true });
+
+async function stopPreviewServer() {
+  server.kill('SIGTERM');
+  await new Promise((resolveStop) => {
+    const stop = spawn(process.execPath, [astroCli, 'preview', 'stop'], {
+      cwd: projectRoot,
+      env: process.env,
+      stdio: 'ignore',
+    });
+    stop.on('error', resolveStop);
+    stop.on('close', resolveStop);
+  });
+}
 
 async function loadRoute(page, pageId, route, browserErrors) {
   browserErrors.length = 0;
@@ -424,5 +431,5 @@ try {
   );
 } finally {
   await browser.close();
-  server.kill('SIGTERM');
+  await stopPreviewServer();
 }
