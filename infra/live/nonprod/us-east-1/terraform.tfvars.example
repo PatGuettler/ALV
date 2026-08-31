@@ -1,0 +1,4 @@
+aws_account_id      = "111111111111"
+owner               = "platform-team"
+cost_center         = "customer-approved-value"
+data_classification = "internal"

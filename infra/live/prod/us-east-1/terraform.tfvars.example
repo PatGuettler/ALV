@@ -1,0 +1,4 @@
+aws_account_id      = "222222222222"
+owner               = "platform-team"
+cost_center         = "customer-approved-value"
+data_classification = "restricted"
