@@ -97,6 +97,16 @@ nav [aria-current='page'] {
     width: 100%;
   }
 
+  .nl-float {
+    position: static;
+    inset: auto;
+    width: 100%;
+    padding: 16px 24px calc(16px + env(safe-area-inset-bottom));
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+  }
+
   body > nav {
     position: sticky;
     inset: auto;
@@ -466,9 +476,7 @@ nav [aria-current='page'] {
   }
 
   .nl-float {
-    right: 16px;
-    bottom: max(16px, env(safe-area-inset-bottom));
-    padding: 12px 16px;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
     font-size: 17px;
   }
 
