@@ -1,0 +1,13 @@
+{
+  "lighthousePerformanceScore": 0.9,
+  "largestContentfulPaintTargetMs": 2500,
+  "largestContentfulPaintCiMs": 3000,
+  "cumulativeLayoutShift": 0.1,
+  "interactionToNextPaintMs": 200,
+  "totalBlockingTimeMs": 200,
+  "totalTransferBytes": 1572864,
+  "largestImageBytes": 409600,
+  "largestFontBytes": 153600,
+  "largestStylesheetBytes": 204800,
+  "largestScriptBytes": 153600
+}

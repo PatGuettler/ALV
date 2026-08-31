@@ -21,6 +21,8 @@
     "@astrojs/sitemap": "3.7.3",
     "@axe-core/playwright": "4.13.0",
     "astro": "7.2.9",
+    "chrome-launcher": "1.2.1",
+    "lighthouse": "13.4.1",
     "playwright-core": "1.62.1",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "0.14.1",
