@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",
+    "@astrojs/sitemap": "3.7.3",
     "@axe-core/playwright": "4.13.0",
     "astro": "7.2.9",
     "playwright-core": "1.62.1",

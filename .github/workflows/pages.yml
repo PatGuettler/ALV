@@ -41,12 +41,19 @@ jobs:
       - name: Build staging site
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_ENV: staging
         run: npm run build
 
       - name: Validate build
         env:
           CHECK_BUILD: '1'
         run: npm run test:site
+
+      - name: Audit staging SEO output
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_ENV: staging
+        run: node scripts/seo-audit.mjs
 
       - name: Run browser smoke test
         env:

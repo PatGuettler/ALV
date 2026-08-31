@@ -32,6 +32,35 @@ const canonicalRoutes: Record<string, string> = {
   resources: 'resources/',
 };
 const canonical = new URL(canonicalRoutes[pageId] ?? '', 'https://alabamaveteran.org/');
+const isProduction = import.meta.env.SITE_ENV === 'production';
+const socialImage = new URL('/assets/d6f82f3f7b70368f.webp', canonical.origin);
+const favicon = `${base}assets/93198b7ec08230d7.png`;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://alabamaveteran.org/#organization',
+      name: 'Alabama Veteran',
+      url: 'https://alabamaveteran.org/',
+      logo: 'https://alabamaveteran.org/assets/93198b7ec08230d7.png',
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical.href}#webpage`,
+      name: title,
+      description,
+      url: canonical.href,
+      isPartOf: {
+        '@type': 'WebSite',
+        '@id': 'https://alabamaveteran.org/#website',
+        name: 'Alabama Veteran',
+        url: 'https://alabamaveteran.org/',
+        publisher: { '@id': 'https://alabamaveteran.org/#organization' },
+      },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -45,14 +74,28 @@ const canonical = new URL(canonicalRoutes[pageId] ?? '', 'https://alabamaveteran
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={description} />
+    {!isProduction && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#1A2030" />
     <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href={favicon} />
+    <meta property="og:site_name" content="Alabama Veteran" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta property="og:image:alt" content="Alabama Veteran community programs" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Libre+Franklin:wght@400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
   </head>
   <body>
