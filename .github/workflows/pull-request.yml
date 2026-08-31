@@ -43,6 +43,11 @@ jobs:
       - name: Build production artifact
         run: npm run build
 
+      - name: Package production asset metadata
+        env:
+          FORBIDDEN_BASE_PATH: /AVL/
+        run: node scripts/package-production.mjs
+
       - name: Validate production artifact
         env:
           CHECK_BUILD: '1'
@@ -67,6 +72,7 @@ jobs:
           path: |
             artifacts/accessibility/axe-report.json
             artifacts/performance/lighthouse-budget-report.json
+            artifacts/production/asset-manifest.json
 
       - name: Summarize validation failure
         if: ${{ failure() }}
