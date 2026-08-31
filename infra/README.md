@@ -45,3 +45,20 @@ terraform -chdir=infra/live/prod/us-east-1 validate
 
 Use `-backend-config=/secure/path/nonprod.s3.tfbackend` only after the remote state bootstrap is
 complete. Do not commit populated `.tfvars` or `.tfbackend` files.
+
+## Controlled tool and provider upgrades
+
+Terraform is pinned in `.terraform-version` and in every root/module constraint. Provider selections
+and registry checksums are committed in each environment lock file. Upgrade them only in a focused
+pull request:
+
+1. Review Terraform, AWS provider, TFLint, AWS TFLint rules, and Checkov release/security notes.
+2. Update the pinned versions together with the workflow versions that run them.
+3. Run `terraform init -backend=false -upgrade` in each environment root and commit the resulting
+   lock-file changes; never hand-edit provider hashes.
+4. Run formatting, validation, TFLint, repository policy tests, and Checkov locally and in CI.
+5. Review a nonproduction speculative plan before applying. Promote the same reviewed commit to
+   production only through the protected apply workflow after account access exists.
+
+Major upgrades and provider changes that alter state schemas require an explicit rollback note and
+state backup confirmation before apply.
