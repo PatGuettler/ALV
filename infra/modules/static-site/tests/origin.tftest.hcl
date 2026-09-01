@@ -1,9 +1,21 @@
 mock_provider "aws" {}
 
+override_resource {
+  target = aws_s3_bucket.origin
+  values = {
+    id                           = "alv-test-web-origin"
+    arn                          = "arn:aws:s3:::alv-test-web-origin"
+    bucket_regional_domain_name  = "alv-test-web-origin.s3.us-east-1.amazonaws.com"
+  }
+}
+
 variables {
-  bucket_name            = "alv-test-web-origin"
-  access_log_bucket_name = "alv-test-central-logs"
-  deployment_role_arns   = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
+  bucket_name                    = "alv-test-web-origin"
+  access_log_bucket_name         = "alv-test-central-logs"
+  deployment_role_arns           = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
+  aws_account_id                 = "111111111111"
+  cloudfront_distribution_arn    = "arn:aws:cloudfront::111111111111:distribution/E1234567890ABC"
+  origin_access_control_name     = "alv-test-origin"
   tags = {
     Project     = "alabama-veteran"
     Environment = "test"
@@ -60,6 +72,33 @@ run "secure_origin_defaults" {
     condition     = one(aws_s3_bucket_lifecycle_configuration.origin.rule).status == "Enabled"
     error_message = "The rollback lifecycle rule must be enabled."
   }
+
+  assert {
+    condition     = aws_cloudfront_origin_access_control.origin.signing_behavior == "always"
+    error_message = "CloudFront must sign every S3 origin request."
+  }
+
+  assert {
+    condition     = aws_cloudfront_origin_access_control.origin.signing_protocol == "sigv4"
+    error_message = "CloudFront must use SigV4 for the S3 origin."
+  }
+
+  assert {
+    condition = (
+      local.cloudfront_origin_policy.source_arn ==
+      "arn:aws:cloudfront::111111111111:distribution/E1234567890ABC"
+    )
+    error_message = "The bucket policy must scope CloudFront access to the approved distribution."
+  }
+
+  assert {
+    condition = (
+      local.cloudfront_origin_policy.principal == "cloudfront.amazonaws.com" &&
+      local.cloudfront_origin_policy.action == "s3:GetObject" &&
+      local.cloudfront_origin_policy.source_account == "111111111111"
+    )
+    error_message = "CloudFront access must use the service principal and read-only account scope."
+  }
 }
 
 run "reject_self_logging" {
@@ -70,4 +109,14 @@ run "reject_self_logging" {
   }
 
   expect_failures = [var.access_log_bucket_name]
+}
+
+run "reject_cross_account_distribution" {
+  command = plan
+
+  variables {
+    cloudfront_distribution_arn = "arn:aws:cloudfront::222222222222:distribution/E1234567890ABC"
+  }
+
+  expect_failures = [check.distribution_belongs_to_account]
 }

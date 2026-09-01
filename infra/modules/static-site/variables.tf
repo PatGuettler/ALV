@@ -50,6 +50,42 @@ variable "deployment_role_arns" {
   }
 }
 
+variable "aws_account_id" {
+  description = "Twelve-digit account that owns the origin and approved CloudFront distribution."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must contain exactly 12 digits."
+  }
+}
+
+variable "cloudfront_distribution_arn" {
+  description = "Exact CloudFront distribution ARN allowed to read origin objects."
+  type        = string
+
+  validation {
+    condition = can(regex(
+      "^arn:aws:cloudfront::[0-9]{12}:distribution/[A-Z0-9]+$",
+      var.cloudfront_distribution_arn,
+    ))
+    error_message = "cloudfront_distribution_arn must be an exact CloudFront distribution ARN."
+  }
+}
+
+variable "origin_access_control_name" {
+  description = "Environment-specific CloudFront Origin Access Control name."
+  type        = string
+
+  validation {
+    condition = (
+      length(trimspace(var.origin_access_control_name)) >= 3 &&
+      length(var.origin_access_control_name) <= 64
+    )
+    error_message = "origin_access_control_name must contain 3-64 characters."
+  }
+}
+
 variable "noncurrent_version_retention_days" {
   description = "Days to retain replaced/deleted object versions for rollback."
   type        = number

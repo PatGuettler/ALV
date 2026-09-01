@@ -79,68 +79,92 @@ resource "aws_s3_bucket_lifecycle_configuration" "origin" {
   }
 }
 
-data "aws_iam_policy_document" "origin" {
-  statement {
-    sid    = "DenyInsecureTransport"
-    effect = "Deny"
-    actions = [
-      "s3:*",
-    ]
-    resources = [
-      aws_s3_bucket.origin.arn,
-      "${aws_s3_bucket.origin.arn}/*",
-    ]
+resource "aws_cloudfront_origin_access_control" "origin" {
+  name                              = var.origin_access_control_name
+  description                       = "Signed CloudFront access to ${var.bucket_name}"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
 
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    condition {
-      test     = "Bool"
-      variable = "aws:SecureTransport"
-      values   = ["false"]
-    }
+check "distribution_belongs_to_account" {
+  assert {
+    condition = startswith(
+      var.cloudfront_distribution_arn,
+      "arn:aws:cloudfront::${var.aws_account_id}:distribution/",
+    )
+    error_message = "cloudfront_distribution_arn must belong to aws_account_id."
   }
+}
 
-  statement {
-    sid    = "AllowDeploymentBucketRead"
-    effect = "Allow"
-    actions = [
-      "s3:GetBucketLocation",
-      "s3:ListBucket",
-    ]
-    resources = [aws_s3_bucket.origin.arn]
-
-    principals {
-      type        = "AWS"
-      identifiers = var.deployment_role_arns
-    }
-  }
-
-  statement {
-    sid    = "AllowDeploymentObjectChanges"
-    effect = "Allow"
-    actions = [
-      "s3:AbortMultipartUpload",
-      "s3:DeleteObject",
-      "s3:GetObject",
-      "s3:PutObject",
-    ]
-    resources = ["${aws_s3_bucket.origin.arn}/*"]
-
-    principals {
-      type        = "AWS"
-      identifiers = var.deployment_role_arns
-    }
+locals {
+  cloudfront_origin_policy = {
+    action         = "s3:GetObject"
+    principal      = "cloudfront.amazonaws.com"
+    source_account = var.aws_account_id
+    source_arn     = var.cloudfront_distribution_arn
   }
 }
 
 resource "aws_s3_bucket_policy" "origin" {
   bucket = aws_s3_bucket.origin.id
-  policy = data.aws_iam_policy_document.origin.json
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "DenyInsecureTransport"
+        Effect    = "Deny"
+        Action    = "s3:*"
+        Resource  = [aws_s3_bucket.origin.arn, "${aws_s3_bucket.origin.arn}/*"]
+        Principal = "*"
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      },
+      {
+        Sid      = "AllowDeploymentBucketRead"
+        Effect   = "Allow"
+        Action   = ["s3:GetBucketLocation", "s3:ListBucket"]
+        Resource = aws_s3_bucket.origin.arn
+        Principal = {
+          AWS = var.deployment_role_arns
+        }
+      },
+      {
+        Sid    = "AllowDeploymentObjectChanges"
+        Effect = "Allow"
+        Action = [
+          "s3:AbortMultipartUpload",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:PutObject",
+        ]
+        Resource = "${aws_s3_bucket.origin.arn}/*"
+        Principal = {
+          AWS = var.deployment_role_arns
+        }
+      },
+      {
+        Sid      = "AllowCloudFrontReadFromApprovedDistribution"
+        Effect   = "Allow"
+        Action   = local.cloudfront_origin_policy.action
+        Resource = "${aws_s3_bucket.origin.arn}/*"
+        Principal = {
+          Service = local.cloudfront_origin_policy.principal
+        }
+        Condition = {
+          ArnEquals = {
+            "AWS:SourceArn" = local.cloudfront_origin_policy.source_arn
+          }
+          StringEquals = {
+            "AWS:SourceAccount" = local.cloudfront_origin_policy.source_account
+          }
+        }
+      },
+    ]
+  })
 
   depends_on = [aws_s3_bucket_public_access_block.origin]
 }
-
-# CloudFront OAC access is added to this single bucket policy by #81.
