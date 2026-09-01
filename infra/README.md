@@ -1,23 +1,33 @@
 # Terraform infrastructure
 
-This directory is the implementation root for Alabama Veteran AWS resources. GitHub Pages remains
-public visual staging; these roots are for isolated AWS nonproduction and production accounts.
+keyTrain owns the AWS Organization. Alabama Veteran (ALV) is one product under the websites OU,
+alongside other keyTrain products. GitHub Pages remains public visual staging for this ALV site.
+
+## Roots
+
+| Root                     | Runs in                         | Creates                                                        |
+| ------------------------ | ------------------------------- | -------------------------------------------------------------- |
+| `live/org/us-east-1`     | Existing keyTrain payer account | Organization, tenant accounts, ALV Identity Center assignments |
+| `live/nonprod/us-east-1` | ALV nonprod `177258422136` only | ALV website/API resources                                      |
+| `live/prod/us-east-1`    | ALV prod `286801153738` only    | ALV website/API resources                                      |
+
+Clickops in the keyTrain payer stays unmanaged. Org Terraform does not import it. ALV workload roots
+use `allowed_account_ids` set to the ALV member account IDs from org outputs, never the payer.
 
 ## Boundaries
 
-- `live/nonprod/us-east-1` and `live/prod/us-east-1` use separate AWS accounts, state keys, and input
-  files. Terraform workspaces are not an environment boundary.
+- Terraform workspaces are not an environment boundary.
 - Every provider is restricted with `allowed_account_ids` so an incorrect credential fails before
   resource changes.
 - Remote state configuration is supplied at initialization time from an uncommitted backend file.
-  Backend buckets and apply roles are created only by the dedicated bootstrap backlog items.
-- No AWS resource is present in this scaffold. Resource modules are implemented and reviewed by
-  their focused backlog issues after account, domain, retention, and ownership inputs are approved.
+- Do not import clickops resources into these roots.
 
 ## Naming and tags
 
-Resource names use the lowercase prefix `avl-<environment>`. Modules must accept that prefix rather
-than inventing independent names. Every supported resource inherits these provider default tags:
+Organization resources use the prefix `keytrain-`. ALV workload resources use `alv-<environment>`.
+Modules must accept that prefix rather than inventing independent names.
+
+Every supported ALV workload resource inherits these provider default tags:
 
 - `Project=alabama-veteran`
 - `Environment=nonprod|prod`
@@ -26,9 +36,8 @@ than inventing independent names. Every supported resource inherits these provid
 - `CostCenter=<approved cost center>`
 - `DataClassification=public|internal|confidential|restricted`
 
-Additional module tags may add context but may not replace the required keys. Never put secrets,
-email addresses used as credentials, or private customer data in variables, tfvars, outputs, state
-keys, or tags.
+Org resources additionally tag `Company=keytrain`. Never put secrets, email addresses used as
+credentials, or private customer data in variables, tfvars, outputs, state keys, or tags.
 
 ## Local validation
 
@@ -36,6 +45,9 @@ Copy the example tfvars/backend files outside the repository, replace placeholde
 the intended account with IAM Identity Center, and then run:
 
 ```bash
+terraform -chdir=infra/live/org/us-east-1 init -backend=false
+terraform -chdir=infra/live/org/us-east-1 validate
+
 terraform -chdir=infra/live/nonprod/us-east-1 init -backend=false
 terraform -chdir=infra/live/nonprod/us-east-1 validate
 
@@ -43,8 +55,10 @@ terraform -chdir=infra/live/prod/us-east-1 init -backend=false
 terraform -chdir=infra/live/prod/us-east-1 validate
 ```
 
-Use `-backend-config=/secure/path/nonprod.s3.tfbackend` only after the remote state bootstrap is
+Use `-backend-config=/secure/path/*.s3.tfbackend` only after the remote state bootstrap is
 complete. Do not commit populated `.tfvars` or `.tfbackend` files.
+
+Operator steps for the organization root are in [live/org/README.md](live/org/README.md).
 
 ## Controlled tool and provider upgrades
 
@@ -57,8 +71,8 @@ pull request:
 3. Run `terraform init -backend=false -upgrade` in each environment root and commit the resulting
    lock-file changes; never hand-edit provider hashes.
 4. Run formatting, validation, TFLint, repository policy tests, and Checkov locally and in CI.
-5. Review a nonproduction speculative plan before applying. Promote the same reviewed commit to
-   production only through the protected apply workflow after account access exists.
+5. Review a speculative plan for the intended account before applying. ALV production apply stays
+   behind a protected GitHub Environment after account access exists.
 
 Major upgrades and provider changes that alter state schemas require an explicit rollback note and
 state backup confirmation before apply.

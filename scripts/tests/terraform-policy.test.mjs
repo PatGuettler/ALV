@@ -24,12 +24,17 @@ function compliantRoot(environment) {
 }
 
 test('accepts isolated environment roots with native S3 locking', () => {
-  const failures = checkTerraformPolicy([...compliantRoot('nonprod'), ...compliantRoot('prod')]);
+  const failures = checkTerraformPolicy([
+    ...compliantRoot('org'),
+    ...compliantRoot('nonprod'),
+    ...compliantRoot('prod'),
+  ]);
   assert.deepEqual(failures, []);
 });
 
 test('rejects a deliberate public bucket and wildcard IAM policy violation', () => {
   const files = [
+    ...compliantRoot('org'),
     ...compliantRoot('nonprod'),
     ...compliantRoot('prod'),
     {
@@ -51,7 +56,7 @@ test('rejects a deliberate public bucket and wildcard IAM policy violation', () 
 });
 
 test('rejects missing account guards and deprecated state locking', () => {
-  const files = [...compliantRoot('nonprod'), ...compliantRoot('prod')];
+  const files = [...compliantRoot('org'), ...compliantRoot('nonprod'), ...compliantRoot('prod')];
   files.find(({ path }) => path.includes('/prod/') && path.endsWith('providers.tf')).source =
     'terraform { backend "local" {} } provider "aws" {}';
   files.find(({ path }) => path.includes('/prod/') && path.endsWith('.example')).source =

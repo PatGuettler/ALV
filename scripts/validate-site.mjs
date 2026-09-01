@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
+import { retreatLive } from '../src/config/retreat.js';
 
 const projectRoot = resolve(import.meta.dirname, '..');
 const sourceRoot = resolve(projectRoot, 'src');
@@ -83,7 +84,14 @@ for (const path of astroFiles) {
   }
 }
 
-for (const script of ['navigation', 'forms', 'panels', 'resources']) {
+for (const script of [
+  'navigation',
+  'forms',
+  'panels',
+  'resources',
+  'retreat-application',
+  'retreat-staff',
+]) {
   const javascript = await readFile(resolve(sourceRoot, 'scripts', `${script}.js`), 'utf8');
   try {
     new Function(javascript);
@@ -127,8 +135,20 @@ if (process.env.CHECK_BUILD === '1') {
     resolve(projectRoot, 'dist', 'warrior-retreat-application', 'index.html'),
     'utf8',
   );
-  if (!builtRetreat.includes('Application service not connected')) {
-    failures.push('Built retreat status route is incorrect.');
+  const retreatHeading = retreatLive
+    ? 'Apply for a Warrior Retreat'
+    : 'Application service not connected';
+  if (!builtRetreat.includes(retreatHeading)) {
+    failures.push('Built retreat application route is incorrect.');
+  }
+
+  const builtStaff = await readFile(
+    resolve(projectRoot, 'dist', 'warrior-retreat-staff', 'index.html'),
+    'utf8',
+  );
+  const staffHeading = retreatLive ? 'Warrior Retreat review' : 'Application service not connected';
+  if (!builtStaff.includes(staffHeading)) {
+    failures.push('Built retreat staff route is incorrect.');
   }
 
   const builtIndex = resolve(projectRoot, 'dist', 'index.html');

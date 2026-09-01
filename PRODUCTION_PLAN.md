@@ -1,5 +1,135 @@
 # Alabama Veteran production plan
 
+## Current AWS status (2026-08-31) — pick up here
+
+This section is the operator/AI handoff for work already applied. Do not create a second AWS
+Organization or a second payer. Do not import Halo clickops into Terraform. Do not treat IAM Identity
+Center as Alabama Veteran staff login (that is Cognito later, issue 38 / 154).
+
+### Decisions that are locked
+
+- Company payer is the **existing KeyTrain** AWS account. Halo clickops already lives there; that is
+  expected. ALV is a **member-account tenant**, not a new bill.
+- Product code is **ALV**, not AVL. Resource prefix for ALV workloads is `alv-<environment>`.
+- KeyTrain engineers use **IAM Identity Center**. Alabama Veteran staff (Chris) do **not**.
+- First org apply created **ALV nonprod and prod only**. Halo, learning, pest-control, log-archive,
+  audit, and shared-services **accounts** are not created yet. Empty OUs for those products exist.
+- **Build Warrior Retreat and the AWS site in ALV prod (`286801153738`) first.** The customer-facing
+  site is still GitHub Pages only; AWS prod is the integration environment until DNS cutover.
+  Start using ALV nonprod as an AWS staging env only after prod is in a good state. Do not require
+  nonprod-first for retreat/Cognito/API work.
+
+### Live identifiers
+
+| Thing                           | Value                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| KeyTrain payer / org management | `607292335442` (console name KeyTrain)                                                                  |
+| Organization                    | `o-g8wnpu966s` (already existed; **imported** into Terraform, not created)                              |
+| Organization root               | `r-508d`                                                                                                |
+| IAM Identity Center instance    | `ssoins-72231312dc803ed4` (organization instance, primary Region `us-east-1`)                           |
+| Identity store                  | `d-90667ccc2c`                                                                                          |
+| Access portal (IPv4)            | `https://d-90667ccc2c.awsapps.com/start`                                                                |
+| Identity source                 | Identity Center directory                                                                               |
+| Org Terraform state bucket      | `keytrain-org-tfstate` in `us-east-1` (private, versioned, SSE-S3, ACLs disabled)                       |
+| State key                       | `organization/us-east-1/terraform.tfstate`                                                              |
+| ALV nonprod account             | `177258422136` (`keytrain-alv-nonprod`, tags Product=alv Environment=nonprod)                           |
+| ALV prod account                | `286801153738` (`keytrain-alv-prod`, tags Product=alv Environment=prod)                                 |
+| ALV OU                          | `websites` (`ou-508d-2dtrfvo4`)                                                                         |
+| Identity Center group           | `alv-operators`                                                                                         |
+| Permission set                  | `ALVAdministrator` (AdministratorAccess, 4h, assigned **only** to the two ALV accounts)                 |
+| Operator user                   | `patguettler@gmail.com` (Identity Center user **Pat Guettler**)                                         |
+| New account root emails         | `patguettler+alv-nonprod@gmail.com` and `patguettler+alv-prod@gmail.com` (same Gmail inbox)             |
+| Org monthly budget              | `keytrain-org-monthly` $100, mail `patguettler@gmail.com`                                               |
+| Local CLI profile `alv`         | IAM user **PatG** in the **payer** (`607292335442`), not an ALV account. Use for `infra/live/org` only. |
+
+Cost Explorer: charge Alabama Veteran by **linked account** `177258422136` / `286801153738`. Activate
+cost allocation tags `Product`, `Environment`, and `Company` after those accounts have spend (AWS
+rejected activation on 2026-08-31 because the keys were not in billing data yet).
+
+### Terraform that is live
+
+Root: `infra/live/org/us-east-1`. Applied 2026-08-31: 15 added, 1 changed, 0 destroyed. The existing
+organization was updated in place (service access principals + SCP policy type enabled). Clickops in
+the payer was not imported.
+
+Gitignored local files (do not commit):
+
+- `infra/live/org/us-east-1/terraform.tfvars`
+- `infra/live/org/us-east-1/org.s3.tfbackend`
+
+```bash
+export AWS_PROFILE=alv
+export AWS_DEFAULT_REGION=us-east-1
+terraform -chdir=infra/live/org/us-east-1 init -backend-config=infra/live/org/us-east-1/org.s3.tfbackend
+terraform -chdir=infra/live/org/us-east-1 plan
+```
+
+Do not `destroy` this root. Do not remove ALV accounts from `var.accounts`.
+
+`infra/live/prod` Warrior Retreat intake is applied in ALV prod `286801153738`. `infra/live/nonprod`
+is still unwired. Do not apply ALV website roots to the KeyTrain payer `607292335442`.
+
+### Warrior Retreat (applied 2026-08-31)
+
+Invite-only Cognito staff login, DynamoDB applications table, HTTP API, and Lambda are live in ALV
+prod. GitHub Pages remains the public site; after this code is on `main`, apply at
+`/warrior-retreat-application/` and staff sign-in at `/warrior-retreat-staff/`. Locally:
+`http://127.0.0.1:4321/warrior-retreat-staff/`.
+
+This is **not** the Identity Center portal. Check email (including spam) for the Cognito invite to
+`patguettler@gmail.com`, then set a password on the hosted UI. Do not paste one-time passwords into
+chat.
+
+| Thing                | Value                                                                    |
+| -------------------- | ------------------------------------------------------------------------ |
+| API                  | `https://p364msgsc2.execute-api.us-east-1.amazonaws.com`                 |
+| Cognito hosted UI    | `https://alv-prod-retreat-286801153738.auth.us-east-1.amazoncognito.com` |
+| SPA client ID        | `37tsmb3p4du202e1vmstblsrui` (public)                                    |
+| User pool            | `us-east-1_6t3Xrh6Oc`                                                    |
+| Prod Terraform state | `keytrain-org-tfstate` key `alv/prod/us-east-1/terraform.tfstate`        |
+
+```bash
+export AWS_PROFILE=alv
+export AWS_DEFAULT_REGION=us-east-1
+terraform -chdir=infra/live/prod/us-east-1 init -backend-config=infra/live/prod/us-east-1/prod.s3.tfbackend
+terraform -chdir=infra/live/prod/us-east-1 plan
+```
+
+### How humans log in
+
+1. KeyTrain house (Halo clickops): IAM user `PatG` in account `607292335442` (existing console URL).
+2. ALV rooms: Identity Center portal → tiles `keytrain-alv-nonprod` / `keytrain-alv-prod` → role
+   `ALVAdministrator`. Confirmed working for prod (`286801153738`) on 2026-08-31.
+3. MFA: Identity Center Settings → Authentication → if no MFA device, **require registration at
+   sign-in**. First login used an admin one-time password; forgot-password failed until that MFA
+   policy was set. Do not paste one-time passwords into chat.
+4. Workload Region for ALV resources: `us-east-1` (the Identity Center portal may open `us-east-2`).
+5. Warrior Retreat staff: Cognito hosted UI from `/warrior-retreat-staff/` with the invited email.
+   Not the AWS access portal.
+
+### Explicitly not done
+
+- Log-archive, audit, shared-services, Halo, keytrainlearning, pest-control **accounts**
+- GitHub OIDC plan/apply roles; org Terraform still uses long-lived PatG access keys locally
+- State bucket access logging and deny-unauth policies beyond default owner
+- Organization CloudTrail/Config/GuardDuty/Security Hub **as working delegated services** (principals
+  were enabled on the org; trails/hubs were not built)
+- SCPs, AWS Backup, Control Tower
+- ALV static site on S3/CloudFront (GitHub Pages is still the public origin)
+- Issue 37 privacy/retention review before treating submissions as production veteran records
+- Cost allocation tags in Billing
+
+### Next engineering slice
+
+Warrior Retreat intake is live in ALV prod. GitHub Pages still needs this branch on `main` before
+the public apply/staff URLs work on github.io. Local `npm run dev` can sign in now.
+
+1. Merge/deploy so Pages serves the live form and staff login.
+2. Issue 248: private S3 web origin in ALV **prod**.
+3. Issue 37 before treating public submissions as production veteran records.
+4. Later: wire `infra/live/nonprod` to `177258422136` as AWS staging. Issue 79 / 26 remainder: GitHub
+   OIDC.
+
 ## End goal and hosting decision
 
 Use **GitHub Pages only for public visual staging**. Use **AWS for production**.
@@ -18,21 +148,22 @@ The removed prototype inventory and its production replacement are in
 
 ## Environments and AWS accounts
 
-Use AWS Organizations with Control Tower. The recommended landing zone has six accounts:
+The AWS Organization belongs to **keyTrain**, not to a single customer site. The existing keyTrain
+AWS account is the payer. Alabama Veteran (ALV) is a member-account tenant under the websites OU,
+next to Halo, keytrainlearning, and other hosted sites. Clickops already in the payer stays
+unmanaged; ALV website Terraform never runs in that account.
 
-| Account          | Purpose                                                                                        | Must not contain                         |
-| ---------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Management/payer | Organizations, Control Tower, consolidated billing, root break-glass                           | Application workloads or CI deploy roles |
-| Log archive      | Immutable organization CloudTrail/Config and service-log archive                               | Developers or application data           |
-| Security/audit   | Delegated Security Hub, GuardDuty, IAM Access Analyzer, audit access                           | Production write access                  |
-| Shared services  | Terraform state, GitHub OIDC provider, optional Route 53 delegation and shared build artifacts | End-user PII                             |
-| Non-production   | AWS preview/staging APIs and synthetic data                                                    | Production data or production secrets    |
-| Production       | Public origin, APIs, Cognito, DynamoDB, queues, email, private submissions                     | Developer experiments                    |
+| Account                                         | Purpose                                                                | Must not contain                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------- |
+| keyTrain management/payer                       | Organization, consolidated billing, Identity Center, existing clickops | ALV/Halo application data, CI deploy into clickops |
+| Log archive                                     | Immutable organization CloudTrail/Config and service-log archive       | Developers or application data                     |
+| Security/audit                                  | Delegated Security Hub, GuardDuty, IAM Access Analyzer                 | Production write access                            |
+| Shared services                                 | Product Terraform state (after org state), GitHub OIDC                 | End-user PII                                       |
+| Halo / keytrainlearning nonprod and prod        | Those products' own infrastructure                                     | ALV or other-product data                          |
+| Website product accounts (ALV, pest control, …) | That site's origin, APIs, and data                                     | Other products' workloads                          |
 
-For a constrained first launch, shared services can be folded into non-production, but management,
-log archive, security/audit, non-production, and production must remain separate. AWS Control Tower
-defines management, log archive, and audit as its shared/core accounts and recommends workforce
-administration through IAM Identity Center rather than routine root/IAM-user access.
+ALV non-production and production must remain separate from each other and from Halo and
+keytrainlearning. Control Tower is optional later and must not be enabled in the clickops account.
 
 Apply these organization guardrails:
 
@@ -265,8 +396,9 @@ infra/
 │   ├── scheduling/            # EventBridge schedule groups and execution roles
 │   └── observability/         # dashboards, alarms, SNS, canaries, log retention
 └── live/
-    ├── nonprod/us-east-1/     # module wiring and non-secret tfvars
-    └── prod/us-east-1/        # separate account/provider/state key
+    ├── org/us-east-1/         # keyTrain organization, OUs, member accounts
+    ├── nonprod/us-east-1/     # ALV nonprod module wiring
+    └── prod/us-east-1/        # ALV prod module wiring
 ```
 
 Bootstrap state once with an S3 bucket that has Block Public Access, SSE-KMS, versioning, access
@@ -374,8 +506,12 @@ to repository secrets.
 
 ### 1. Landing zone and production static site
 
-- Create accounts, Identity Center, security delegation, state/OIDC bootstrap.
-- Terraform S3/CloudFront/WAF/Route 53/ACM and production workflow.
+**1a. ALV tenant under KeyTrain — done 2026-08-31.** Existing payer, imported org, Identity Center
+portal, ALV member accounts, org Terraform state. See [Current AWS status](#current-aws-status-2026-08-31--pick-up-here).
+
+**1b. Still open.** Log-archive/audit/shared accounts, OIDC, SCPs, logging. Put S3/CloudFront/WAF
+and retreat APIs in **ALV prod** first; use ALV nonprod only after that is good.
+
 - Exit: private origin, edge protection, monitoring, rollback and budget alarms tested.
 
 ### 2. Content, event calendar, and subscriptions
@@ -387,10 +523,11 @@ to repository secrets.
 
 ### 3. Staff identity and retreat intake
 
-- Cognito staff access, scoped staff app, application API, encryption, uploads/scanning, audit/export,
-  retention workflow and optional approved CRM subset.
+**MVP applied 2026-08-31** in ALV prod: invite-only Cognito, DynamoDB, HTTP API, public form, staff
+review UI. Remaining: encryption/KMS, uploads, audit/export, retention, issue 37 privacy review.
+
 - Exit: privacy/security review, access review, backup/restore, deletion, incident response and load
-  test pass. Only then replace the unavailable application page.
+  test pass.
 
 ### 4. Optional member/AV Active services
 
@@ -399,7 +536,8 @@ to repository secrets.
 
 ## Required customer inputs before Terraform apply
 
-- AWS Organizations management owner, all account IDs/emails, billing alerts and monthly budget.
+- keyTrain management account ID, unique emails for each member account, Identity Center operator
+  list, billing alerts and monthly budget.
 - Domain registrar access, authoritative DNS decision, production/staging domain names.
 - GitHub organization/repository owner and production environment approvers.
 - Named data owner and retention period for each table/field; incident and deletion contacts.

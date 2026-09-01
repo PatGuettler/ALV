@@ -1,0 +1,44 @@
+---
+interface Props {
+  apiUrl: string;
+  cognitoDomain: string;
+  clientId: string;
+}
+
+const { apiUrl, cognitoDomain, clientId } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<main class="retreat-status">
+  <div class="eyebrow">Alabama Veteran · Staff</div>
+  <h1>Warrior Retreat review</h1>
+  <p id="retreat-staff-copy">
+    Sign in with the Cognito account you were invited to. This is not the AWS access portal.
+  </p>
+  <div class="retreat-staff-actions">
+    <button id="retreat-staff-signin" type="button">Sign in</button>
+    <button id="retreat-staff-signout" type="button" hidden>Sign out</button>
+  </div>
+  <p id="retreat-staff-status" class="retreat-form-status" role="status"></p>
+  <div id="retreat-staff-list" hidden>
+    <label class="retreat-filter">
+      Status
+      <select id="retreat-staff-status-filter">
+        <option value="submitted">Submitted</option>
+        <option value="approved">Approved</option>
+        <option value="declined">Declined</option>
+      </select>
+    </label>
+    <ul id="retreat-staff-items" class="retreat-staff-items"></ul>
+  </div>
+  <p class="return-link">
+    <a href={`${base}warrior-retreat/`}>Return to Warrior Retreat</a>
+  </p>
+</main>
+
+<script is:inline define:vars={{ apiUrl, cognitoDomain, clientId, base }}>
+  window.__RETREAT_STAFF__ = { apiUrl, cognitoDomain, clientId, base };
+</script>
+<script>
+  import '../../scripts/retreat-staff.js';
+</script>

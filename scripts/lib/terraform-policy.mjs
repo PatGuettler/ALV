@@ -38,7 +38,7 @@ export function checkTerraformPolicy(files) {
     }
   }
 
-  for (const environment of ['nonprod', 'prod']) {
+  for (const environment of ['org', 'nonprod', 'prod']) {
     const root = `infra/live/${environment}/us-east-1/`;
     const provider = hasFile(files, `${root}providers.tf`);
     const backend = hasFile(files, `${root}backend.s3.tfbackend.example`);

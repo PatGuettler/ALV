@@ -2,6 +2,7 @@ import { access } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { chromium } from 'playwright-core';
+import { retreatLive } from '../src/config/retreat.js';
 
 const projectRoot = resolve(import.meta.dirname, '..');
 const astroCli = resolve(projectRoot, 'node_modules/astro/bin/astro.mjs');
@@ -304,9 +305,8 @@ async function assertRetreatStatus(page, label) {
   await page.goto(new URL('warrior-retreat-application/', siteUrl).href, {
     waitUntil: 'networkidle',
   });
-  await page
-    .getByRole('heading', { name: 'Application service not connected' })
-    .waitFor({ state: 'visible' });
+  const heading = retreatLive ? 'Apply for a Warrior Retreat' : 'Application service not connected';
+  await page.getByRole('heading', { name: heading }).waitFor({ state: 'visible' });
   await assertNoHorizontalOverflow(page, `${label} retreat status`);
 
   const layout = await page.evaluate(() => {

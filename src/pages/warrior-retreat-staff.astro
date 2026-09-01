@@ -1,0 +1,25 @@
+---
+import { retreatLive, retreatPublic } from '../config/retreat';
+import ServiceUnavailable from '../components/retreat/ServiceUnavailable.astro';
+import StaffReview from '../components/retreat/StaffReview.astro';
+import MinimalLayout from '../layouts/MinimalLayout.astro';
+import '../styles/retreat-status.css';
+---
+
+<MinimalLayout
+  title="Warrior Retreat Staff | Alabama Veteran"
+  description="Staff sign-in for Warrior Retreat applications."
+  noindex
+>
+  {
+    retreatLive ? (
+      <StaffReview
+        apiUrl={retreatPublic.apiUrl}
+        cognitoDomain={retreatPublic.cognitoDomain}
+        clientId={retreatPublic.clientId}
+      />
+    ) : (
+      <ServiceUnavailable />
+    )
+  }
+</MinimalLayout>

@@ -1,0 +1,59 @@
+---
+import { retreatPublic } from '../../config/retreat';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<main class="retreat-status">
+  <div class="eyebrow">Alabama Veteran · Warrior Retreat</div>
+  <h1>Apply for a Warrior Retreat</h1>
+  <p>
+    Share a short note about your household. A staff member will follow up. Do not include medical
+    details or social security numbers.
+  </p>
+  <form id="retreat-application-form" class="retreat-form" novalidate>
+    <label>
+      Full name
+      <input name="fullName" type="text" autocomplete="name" maxlength="120" required />
+    </label>
+    <label>
+      Email
+      <input name="email" type="email" autocomplete="email" maxlength="254" required />
+    </label>
+    <label>
+      Phone
+      <input name="phone" type="tel" autocomplete="tel" maxlength="40" />
+    </label>
+    <label>
+      Program
+      <select name="program" required>
+        <option value="">Select a program</option>
+        <option value="warrior-retreat">Warrior Retreat</option>
+        <option value="marriage-retreat">Marriage Retreat</option>
+        <option value="peer-to-peer">Peer-to-Peer Programs</option>
+        <option value="ambassador">AV Ambassador Program</option>
+      </select>
+    </label>
+    <label>
+      How can we help?
+      <textarea name="message" rows="5" maxlength="1000"></textarea>
+    </label>
+    <label class="retreat-consent">
+      <input name="consent" type="checkbox" required />
+      I agree to be contacted about this application and understand this is not a medical or emergency
+      service.
+    </label>
+    <p id="retreat-application-status" class="retreat-form-status" role="status"></p>
+    <button type="submit">Submit application</button>
+  </form>
+  <p class="return-link">
+    <a href={`${base}warrior-retreat/`}>Return to Warrior Retreat</a>
+  </p>
+</main>
+
+<script is:inline define:vars={{ apiUrl: retreatPublic.apiUrl }}>
+  window.__RETREAT_API_URL__ = apiUrl;
+</script>
+<script>
+  import '../../scripts/retreat-application.js';
+</script>

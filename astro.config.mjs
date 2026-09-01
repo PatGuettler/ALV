@@ -11,7 +11,9 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     sitemap({
-      filter: (page) => !page.endsWith('/warrior-retreat-application/'),
+      filter: (page) =>
+        !page.endsWith('/warrior-retreat-application/') &&
+        !page.endsWith('/warrior-retreat-staff/'),
     }),
   ],
   build: {

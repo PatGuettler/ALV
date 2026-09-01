@@ -8,12 +8,15 @@ structure.
 
 - GitHub Pages is public visual staging. `.github/workflows/pages.yml` builds, validates, tests in a
   real browser, and deploys every merge to `main`.
-- AWS is the selected production platform. [PRODUCTION_PLAN.md](PRODUCTION_PLAN.md) defines accounts,
-  Terraform, IAM, identity, APIs, DynamoDB, calendars, signups, security, and delivery phases.
+- AWS production identity for **this product** is the ALV member accounts under the KeyTrain org.
+  Live IDs, login URLs, and Terraform commands are in
+  [PRODUCTION_PLAN.md — Current AWS status](PRODUCTION_PLAN.md#current-aws-status-2026-08-31--pick-up-here).
+  Org Terraform: `infra/live/org`. Do not apply ALV website roots to the KeyTrain payer.
 - [MOCK_DATA_AUDIT.md](MOCK_DATA_AUDIT.md) records every removed prototype behavior and its required
   production replacement.
-- `/warrior-retreat-application/` intentionally collects nothing until the secure application and
-  staff-review infrastructure exists.
+- `/warrior-retreat-application/` posts to the ALV prod API when `src/config/retreat.js` is populated.
+  `/warrior-retreat-staff/` is invite-only Cognito login for operators. GitHub Pages still must not
+  ship secrets, mock applicants, or passcodes.
 
 ## Required checks
 

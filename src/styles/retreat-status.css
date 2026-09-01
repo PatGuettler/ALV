@@ -82,6 +82,95 @@ a {
   min-height: 44px;
 }
 
+.retreat-form,
+.retreat-filter {
+  display: grid;
+  gap: 16px;
+}
+
+.retreat-form label,
+.retreat-filter {
+  color: var(--blue);
+  display: grid;
+  font-size: 0.875rem;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.retreat-form input,
+.retreat-form select,
+.retreat-form textarea,
+.retreat-filter select {
+  border: 1px solid #c5c9d3;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.retreat-consent {
+  align-items: flex-start;
+  display: flex !important;
+  font-weight: 600;
+  gap: 12px;
+  grid-template-columns: none;
+}
+
+.retreat-consent input {
+  min-height: 24px;
+  margin-top: 4px;
+  width: 20px;
+}
+
+.retreat-form button,
+.retreat-staff-actions button {
+  background: var(--red);
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  min-height: 44px;
+  padding: 0 20px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.retreat-form-status {
+  color: var(--blue);
+  font-weight: 700;
+  min-height: 1.5em;
+}
+
+.retreat-staff-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+
+.retreat-staff-items {
+  display: grid;
+  gap: 16px;
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.retreat-staff-card {
+  background: #fff;
+  border-left: 5px solid var(--red);
+  padding: 20px;
+}
+
+.retreat-staff-card p {
+  margin: 8px 0 0;
+}
+
 @media (max-width: 480px) {
   body {
     align-items: flex-start;

@@ -69,7 +69,7 @@ jobs:
 
       - name: Initialize and validate environment roots
         run: |
-          for root in infra/live/nonprod/us-east-1 infra/live/prod/us-east-1; do
+          for root in infra/live/org/us-east-1 infra/live/nonprod/us-east-1 infra/live/prod/us-east-1; do
             terraform -chdir="$root" init -backend=false -input=false -lockfile=readonly
             terraform -chdir="$root" validate
           done

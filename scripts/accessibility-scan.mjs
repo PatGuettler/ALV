@@ -22,6 +22,7 @@ const routes = [
   'news/',
   'warrior-retreat/',
   'warrior-retreat-application/',
+  'warrior-retreat-staff/',
   'av-circle/',
   'about/',
   'av-active/',

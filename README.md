@@ -13,8 +13,8 @@ npm install
 npm run dev
 ```
 
-Astro prints the local preview URL. `/warrior-retreat-application/` intentionally displays an
-unavailable state until its secure production workflow is deployed.
+Astro prints the local preview URL. `/warrior-retreat-application/` is the public apply form.
+Staff sign in at `/warrior-retreat-staff/` with the Cognito invite (not the AWS access portal).
 
 ## Project structure
 
@@ -54,7 +54,7 @@ The browser smoke test uses an installed Chrome or Chromium. Set `CHROME_PATH` i
 - `src/pages/` owns routing and page metadata. Route files should remain small composition roots.
 - `src/layouts/SiteLayout.astro` owns the document shell and shared site chrome.
 - `src/components/<feature>/` owns one semantic section per component.
-- `src/pages/warrior-retreat-application.astro` is the safe staging route. The discarded concept
+- `src/pages/warrior-retreat-application.astro` is the public apply form. The discarded concept
   included fictional applicants and browser-only authentication and must not be restored.
 - `astro.config.mjs` owns the GitHub Pages base path and static directory output.
 

@@ -1,7 +1,7 @@
 locals {
   project_name    = "alabama-veteran"
   environment     = "nonprod"
-  resource_prefix = "avl-${local.environment}"
+  resource_prefix = "alv-${local.environment}"
   required_tags = {
     Project            = local.project_name
     Environment        = local.environment

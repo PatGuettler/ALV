@@ -39,6 +39,55 @@ variable "cost_center" {
   }
 }
 
+variable "assume_role_arn" {
+  description = "Optional OrganizationAccountAccessRole in the ALV account. Empty means credentials already belong to aws_account_id."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.assume_role_arn == "" || can(regex("^arn:aws:iam::[0-9]{12}:role/.+", var.assume_role_arn))
+    error_message = "assume_role_arn must be empty or an IAM role ARN."
+  }
+}
+
+variable "retreat_callback_urls" {
+  description = "Cognito hosted UI callback URLs for the staff SPA."
+  type        = list(string)
+  default = [
+    "http://127.0.0.1:4321/warrior-retreat-staff/",
+    "http://localhost:4321/warrior-retreat-staff/",
+    "https://patguettler.github.io/ALV/warrior-retreat-staff/",
+    "https://patguettler.github.io/AVL/warrior-retreat-staff/",
+  ]
+}
+
+variable "retreat_logout_urls" {
+  description = "Cognito logout redirect URLs."
+  type        = list(string)
+  default = [
+    "http://127.0.0.1:4321/warrior-retreat-staff/",
+    "http://localhost:4321/warrior-retreat-staff/",
+    "https://patguettler.github.io/ALV/warrior-retreat-staff/",
+    "https://patguettler.github.io/AVL/warrior-retreat-staff/",
+  ]
+}
+
+variable "retreat_allowed_origins" {
+  description = "CORS origins allowed to call the retreat API."
+  type        = list(string)
+  default = [
+    "http://127.0.0.1:4321",
+    "http://localhost:4321",
+    "https://patguettler.github.io",
+  ]
+}
+
+variable "staff_invite_email" {
+  description = "Invite-only Cognito username/email for the first staff operator."
+  type        = string
+  default     = "patguettler@gmail.com"
+}
+
 variable "data_classification" {
   description = "Highest data classification permitted in this environment root."
   type        = string

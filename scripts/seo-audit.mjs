@@ -146,6 +146,14 @@ for (const route of routes) {
 if (sitemap.includes('warrior-retreat-application')) {
   failures.push('Sitemap includes the noindex retreat application route.');
 }
+if (sitemap.includes('warrior-retreat-staff')) {
+  failures.push('Sitemap includes the noindex retreat staff route.');
+}
+
+const staffHtml = await readFile(resolve(distRoot, 'warrior-retreat-staff', 'index.html'), 'utf8');
+if (!metaContent(staffHtml, 'name', 'robots')?.includes('noindex')) {
+  failures.push('The retreat staff route must remain noindex.');
+}
 
 if (failures.length > 0) {
   console.error(failures.join('\n'));

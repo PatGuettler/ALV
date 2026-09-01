@@ -1,4 +1,6 @@
-aws_account_id      = "222222222222"
+aws_account_id      = "286801153738"
+assume_role_arn     = "arn:aws:iam::286801153738:role/OrganizationAccountAccessRole"
 owner               = "platform-team"
 cost_center         = "customer-approved-value"
 data_classification = "restricted"
+staff_invite_email  = "operator@example.com"

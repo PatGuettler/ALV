@@ -1,4 +1,6 @@
 ---
+import { retreatLive } from '../config/retreat';
+import ApplicationForm from '../components/retreat/ApplicationForm.astro';
 import ServiceUnavailable from '../components/retreat/ServiceUnavailable.astro';
 import MinimalLayout from '../layouts/MinimalLayout.astro';
 import '../styles/retreat-status.css';
@@ -6,8 +8,8 @@ import '../styles/retreat-status.css';
 
 <MinimalLayout
   title="Warrior Retreat Application | Alabama Veteran"
-  description="Warrior Retreat application service status."
+  description="Apply for an Alabama Veteran Warrior Retreat."
   noindex
 >
-  <ServiceUnavailable />
+  {retreatLive ? <ApplicationForm /> : <ServiceUnavailable />}
 </MinimalLayout>

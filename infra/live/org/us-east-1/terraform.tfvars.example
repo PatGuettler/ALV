@@ -1,0 +1,77 @@
+management_account_id = "111111111111"
+
+owner                     = "keytrain-platform"
+cost_center               = "keytrain"
+budget_notification_email = "billing@example.com"
+monthly_budget_usd        = "100"
+
+# People who should see ALV as a separate tile in the Identity Center portal.
+# Alabama Veteran staff do not belong here.
+alv_operators = {
+  pat = {
+    email       = "you@example.com"
+    given_name  = "Pat"
+    family_name = "Guettler"
+  }
+}
+
+# Each email must be unique and not already registered with AWS.
+# Keep only ALV keys for the first apply if other product emails are not ready.
+accounts = {
+  alv-nonprod = {
+    name        = "keytrain-alv-nonprod"
+    email       = "you+alv-nonprod@example.com"
+    ou          = "websites"
+    product     = "alv"
+    environment = "nonprod"
+  }
+  alv-prod = {
+    name        = "keytrain-alv-prod"
+    email       = "you+alv-prod@example.com"
+    ou          = "websites"
+    product     = "alv"
+    environment = "prod"
+  }
+  halo-nonprod = {
+    name        = "keytrain-halo-nonprod"
+    email       = "you+halo-nonprod@example.com"
+    ou          = "halo"
+    product     = "halo"
+    environment = "nonprod"
+  }
+  halo-prod = {
+    name        = "keytrain-halo-prod"
+    email       = "you+halo-prod@example.com"
+    ou          = "halo"
+    product     = "halo"
+    environment = "prod"
+  }
+  keytrainlearning-nonprod = {
+    name        = "keytrain-learning-nonprod"
+    email       = "you+ktl-nonprod@example.com"
+    ou          = "keytrainlearning"
+    product     = "keytrainlearning"
+    environment = "nonprod"
+  }
+  keytrainlearning-prod = {
+    name        = "keytrain-learning-prod"
+    email       = "you+ktl-prod@example.com"
+    ou          = "keytrainlearning"
+    product     = "keytrainlearning"
+    environment = "prod"
+  }
+  pestcontrol-nonprod = {
+    name        = "keytrain-pestcontrol-nonprod"
+    email       = "you+pest-nonprod@example.com"
+    ou          = "websites"
+    product     = "pestcontrol"
+    environment = "nonprod"
+  }
+  pestcontrol-prod = {
+    name        = "keytrain-pestcontrol-prod"
+    email       = "you+pest-prod@example.com"
+    ou          = "websites"
+    product     = "pestcontrol"
+    environment = "prod"
+  }
+}
