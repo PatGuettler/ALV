@@ -69,6 +69,10 @@ body {
   max-width: 680px;
 }
 
+.retreat-application-header .eyebrow {
+  color: #ff7f82;
+}
+
 .application-back {
   color: #fff;
   margin-bottom: 30px;
@@ -95,7 +99,7 @@ body {
 
 .application-progress li {
   align-items: center;
-  color: #747987;
+  color: #656a75;
   display: flex;
   font-size: 0.7rem;
   font-weight: 800;
