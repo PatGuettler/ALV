@@ -359,6 +359,17 @@ async function assertRetreatStatus(page, label) {
     layout.link.top >= layout.card.top &&
     layout.link.bottom <= layout.card.bottom;
   assertLayout(usable, `${label} retreat status panel or return link is clipped`, layout);
+
+  if (retreatLive) {
+    await page.goto(new URL('warrior-retreat-staff/', siteUrl).href, { waitUntil: 'networkidle' });
+    await page
+      .getByRole('heading', { name: 'Warrior Retreat review' })
+      .waitFor({ state: 'visible' });
+    await page
+      .getByRole('button', { name: 'Continue to secure sign in' })
+      .waitFor({ state: 'visible' });
+    await assertNoHorizontalOverflow(page, `${label} retreat staff login`);
+  }
 }
 
 async function assertCustomerReportedLayouts(page, label, width, browserErrors) {

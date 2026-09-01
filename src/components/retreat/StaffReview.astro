@@ -9,17 +9,28 @@ const { apiUrl, cognitoDomain, clientId } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
-<main class="retreat-status">
-  <div class="eyebrow">Alabama Veteran · Staff</div>
-  <h1>Warrior Retreat review</h1>
-  <p id="retreat-staff-copy">
-    Sign in with the Cognito account you were invited to. This is not the AWS access portal.
-  </p>
-  <div class="retreat-staff-actions">
-    <button id="retreat-staff-signin" type="button">Sign in</button>
+<main class="retreat-status retreat-staff-page">
+  <header class="retreat-staff-login-header">
+    <div class="retreat-staff-mark" aria-hidden="true"><span>ALV</span><span>Staff</span></div>
+    <div>
+      <div class="eyebrow">Alabama Veteran · Secure staff portal</div>
+      <h1>Warrior Retreat review</h1>
+      <p id="retreat-staff-copy">
+        Review retreat applications and record staff decisions. Sign in with the Cognito account
+        issued to you by the ALV administrator; this is not the AWS access portal.
+      </p>
+    </div>
+  </header>
+  <div class="retreat-staff-security">
+    <span>Invite-only access</span><span>Encrypted applicant records</span><span
+      >Audited decisions</span
+    >
+  </div>
+  <div class="retreat-staff-actions retreat-staff-login-actions">
+    <button id="retreat-staff-signin" type="button">Continue to secure sign in</button>
     <button id="retreat-staff-signout" type="button" hidden>Sign out</button>
   </div>
-  <p id="retreat-staff-status" class="retreat-form-status" role="status"></p>
+  <p id="retreat-staff-status" class="retreat-form-status" role="status" aria-live="polite"></p>
   <div id="retreat-staff-list" hidden>
     <div class="retreat-staff-filters">
       <label class="retreat-filter">
