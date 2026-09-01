@@ -57,7 +57,6 @@ variable "retreat_callback_urls" {
     "http://127.0.0.1:4321/warrior-retreat-staff/",
     "http://localhost:4321/warrior-retreat-staff/",
     "https://patguettler.github.io/ALV/warrior-retreat-staff/",
-    "https://patguettler.github.io/AVL/warrior-retreat-staff/",
   ]
 }
 
@@ -68,7 +67,6 @@ variable "retreat_logout_urls" {
     "http://127.0.0.1:4321/warrior-retreat-staff/",
     "http://localhost:4321/warrior-retreat-staff/",
     "https://patguettler.github.io/ALV/warrior-retreat-staff/",
-    "https://patguettler.github.io/AVL/warrior-retreat-staff/",
   ]
 }
 

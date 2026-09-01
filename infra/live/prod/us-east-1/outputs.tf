@@ -28,3 +28,13 @@ output "retreat_staff_user_pool_id" {
   description = "Cognito user pool for invite-only Alabama Veteran staff."
   value       = aws_cognito_user_pool.staff.id
 }
+
+output "retreat_data_kms_key_arn" {
+  description = "Customer-managed KMS key protecting retreat application and audit tables."
+  value       = aws_kms_key.retreat.arn
+}
+
+output "retreat_application_audit_table_name" {
+  description = "Append-only staff application decision audit table."
+  value       = aws_dynamodb_table.application_audit.name
+}

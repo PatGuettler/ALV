@@ -3,9 +3,10 @@ import {
   PutItemCommand,
   GetItemCommand,
   QueryCommand,
-  UpdateItemCommand,
+  TransactWriteItemsCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { randomUUID } from 'node:crypto';
 import {
   applicationIdFrom,
   buildApplicationItem,
@@ -24,6 +25,7 @@ import {
 
 const ddb = new DynamoDBClient({});
 const tableName = process.env.TABLE_NAME;
+const auditTableName = process.env.AUDIT_TABLE_NAME;
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
 
 export async function handler(event) {
@@ -150,29 +152,57 @@ async function patchApplication(event, origin) {
   if (!parsed.ok) return json(400, { error: parsed.error }, origin, allowedOrigins);
 
   const actor = event.requestContext?.authorizer?.jwt?.claims?.email || 'staff';
+  const reviewedAt = new Date().toISOString();
   try {
-    const result = await ddb.send(
-      new UpdateItemCommand({
-        TableName: tableName,
-        Key: marshall({ pk: `APP#${id}`, sk: 'VERSION#1' }),
-        ConditionExpression: 'attribute_exists(pk) AND version = :expectedVersion',
-        UpdateExpression:
-          'SET #status = :status, note = :note, reviewedAt = :reviewedAt, reviewedBy = :reviewedBy, version = version + :one',
-        ExpressionAttributeNames: { '#status': 'status' },
-        ExpressionAttributeValues: marshall({
-          ':status': parsed.status,
-          ':note': parsed.note,
-          ':reviewedAt': new Date().toISOString(),
-          ':reviewedBy': String(actor).slice(0, 254),
-          ':expectedVersion': parsed.expectedVersion,
-          ':one': 1,
-        }),
-        ReturnValues: 'ALL_NEW',
+    await ddb.send(
+      new TransactWriteItemsCommand({
+        TransactItems: [
+          {
+            Update: {
+              TableName: tableName,
+              Key: marshall({ pk: `APP#${id}`, sk: 'VERSION#1' }),
+              ConditionExpression: 'attribute_exists(pk) AND version = :expectedVersion',
+              UpdateExpression:
+                'SET #status = :status, note = :note, reviewedAt = :reviewedAt, reviewedBy = :reviewedBy, version = version + :one',
+              ExpressionAttributeNames: { '#status': 'status' },
+              ExpressionAttributeValues: marshall({
+                ':status': parsed.status,
+                ':note': parsed.note,
+                ':reviewedAt': reviewedAt,
+                ':reviewedBy': String(actor).slice(0, 254),
+                ':expectedVersion': parsed.expectedVersion,
+                ':one': 1,
+              }),
+            },
+          },
+          {
+            Put: {
+              TableName: auditTableName,
+              Item: marshall({
+                pk: `APP#${id}`,
+                sk: `EVENT#${reviewedAt}#${randomUUID()}`,
+                applicationId: id,
+                eventType: 'STATUS_CHANGED',
+                status: parsed.status,
+                actor: String(actor).slice(0, 254),
+                occurredAt: reviewedAt,
+                applicationVersion: parsed.expectedVersion + 1,
+              }),
+              ConditionExpression: 'attribute_not_exists(pk)',
+            },
+          },
+        ],
       }),
     );
-    return json(200, publicStaffRecord(unmarshall(result.Attributes)), origin, allowedOrigins);
+    const result = await ddb.send(
+      new GetItemCommand({
+        TableName: tableName,
+        Key: marshall({ pk: `APP#${id}`, sk: 'VERSION#1' }),
+      }),
+    );
+    return json(200, publicStaffRecord(unmarshall(result.Item)), origin, allowedOrigins);
   } catch (error) {
-    if (error?.name === 'ConditionalCheckFailedException') {
+    if (error?.name === 'TransactionCanceledException') {
       const current = await ddb.send(
         new GetItemCommand({
           TableName: tableName,

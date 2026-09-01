@@ -37,10 +37,12 @@ data "aws_iam_policy_document" "retreat_api" {
       "dynamodb:GetItem",
       "dynamodb:UpdateItem",
       "dynamodb:Query",
+      "dynamodb:TransactWriteItems",
     ]
     resources = [
       aws_dynamodb_table.applications.arn,
       "${aws_dynamodb_table.applications.arn}/index/status-submitted-index",
+      aws_dynamodb_table.application_audit.arn,
     ]
   }
 }
@@ -81,8 +83,9 @@ resource "aws_lambda_function" "retreat_api" {
 
   environment {
     variables = {
-      TABLE_NAME      = aws_dynamodb_table.applications.name
-      ALLOWED_ORIGINS = join(",", var.retreat_allowed_origins)
+      TABLE_NAME       = aws_dynamodb_table.applications.name
+      AUDIT_TABLE_NAME = aws_dynamodb_table.application_audit.name
+      ALLOWED_ORIGINS  = join(",", var.retreat_allowed_origins)
     }
   }
 
