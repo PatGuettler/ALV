@@ -72,7 +72,7 @@ No secrets or private customer data may be added to this static site. GitHub Pag
 
 ## Project estimate rollups
 
-The `Time (hours)` field in the AVL GitHub Project is maintained by
+The `Time (hours)` field in the ALV GitHub Project is maintained by
 `.github/workflows/project-time-rollup.yml`. Estimates are entered only on issues without
 sub-issues. Every issue with children is a calculated value, and the workflow rolls nested
 hierarchies up from the lowest level every 15 minutes. It can also be run manually with a dry-run
@@ -80,12 +80,12 @@ option. Estimates are ordinary working hours; the original person-day estimates 
 eight hours per person-day.
 
 The workflow requires a repository Actions secret named `PROJECTS_TOKEN`. Use a dedicated
-fine-grained personal access token owned by a project administrator, with read access to AVL issues
+fine-grained personal access token owned by a project administrator, with read access to ALV issues
 and read/write access to the user's Projects. Do not reuse a broad developer or AWS credential. If
 GitHub's fine-grained token UI does not offer write access to the user-owned project, use a classic
 token limited to the `project` scope and set an expiration/rotation reminder.
 
-Configure the secret under **AVL → Settings → Secrets and variables → Actions**, then run
+Configure the secret under **ALV → Settings → Secrets and variables → Actions**, then run
 **Roll up project time estimates** once with `dry_run` enabled and once normally. Missing leaf
 estimates, missing project children, and hierarchy cycles fail safely without partially calculating
 new totals.
@@ -93,9 +93,9 @@ new totals.
 For a local dry run with an authenticated GitHub CLI token:
 
 ```bash
-AVL_PROJECT_TOKEN=$(gh auth token)
-GH_TOKEN="$AVL_PROJECT_TOKEN" node scripts/project-time-rollup.mjs --dry-run
-unset AVL_PROJECT_TOKEN
+ALV_PROJECT_TOKEN=$(gh auth token)
+GH_TOKEN="$ALV_PROJECT_TOKEN" node scripts/project-time-rollup.mjs --dry-run
+unset ALV_PROJECT_TOKEN
 ```
 
 For the AWS architecture, Terraform inventory, IAM boundaries, data model, and migration phases, see

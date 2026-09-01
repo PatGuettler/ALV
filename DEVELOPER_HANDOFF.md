@@ -22,9 +22,9 @@ npm ci
 npm run format:check
 npm run check
 npm test
-BASE_PATH=/AVL npm run build
+BASE_PATH=/ALV npm run build
 CHECK_BUILD=1 npm run test:site
-BASE_PATH=/AVL node scripts/browser-smoke.mjs
+BASE_PATH=/ALV node scripts/browser-smoke.mjs
 ```
 
 Do not add secrets, private submissions, staff credentials, test people, simulated success states,

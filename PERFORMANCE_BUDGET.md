@@ -35,4 +35,4 @@ about 29 KiB, the largest stylesheet about 13 KiB, and the largest script about 
 
 Issue #244 tracks customer approval to copy the current externally hosted hero into the governed
 production asset set and remove the legacy WordPress dependency. Any future budget failure must be
-represented by a focused AVL issue before a threshold is changed.
+represented by a focused ALV issue before a threshold is changed.

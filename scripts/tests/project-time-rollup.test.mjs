@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { calculateTimeRollups } from '../lib/project-time-rollup.mjs';
 
-const repository = 'PatGuettler/AVL';
+const repository = 'PatGuettler/ALV';
 
 function item(number, currentValue, subIssueNumbers = [], itemRepository = repository) {
   return {
@@ -72,7 +72,7 @@ test('ignores project items from another repository', () => {
 test('rejects a project with no target repository issues', () => {
   assert.throws(
     () => calculateTimeRollups([item(2, 200, [], 'PatGuettler/unicorn-arcade')], repository),
-    /No PatGuettler\/AVL issues were found in the project/,
+    /No PatGuettler\/ALV issues were found in the project/,
   );
 });
 
@@ -86,7 +86,7 @@ test('rejects a leaf without an estimate', () => {
 test('rejects a child that is missing from the target project', () => {
   assert.throws(
     () => calculateTimeRollups([item(1, 10, [2])], repository),
-    /is not a PatGuettler\/AVL item in the project/,
+    /is not a PatGuettler\/ALV item in the project/,
   );
 });
 

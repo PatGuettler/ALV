@@ -30,7 +30,7 @@ jobs:
         run: |
           echo '::warning::Automatic estimate rollups are waiting for the PROJECTS_TOKEN repository secret.'
           echo '## Estimate rollup not configured' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Add the dedicated `PROJECTS_TOKEN` Actions secret, then run this workflow once in dry-run mode. See AVL issue #242.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Add the dedicated `PROJECTS_TOKEN` Actions secret, then run this workflow once in dry-run mode. See ALV issue #242.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check out repository
         if: ${{ env.PROJECTS_TOKEN != '' }}
@@ -49,6 +49,6 @@ jobs:
           PROJECT_OWNER: PatGuettler
           PROJECT_NUMBER: '3'
           PROJECT_FIELD_NAME: Time (hours)
-          TARGET_REPOSITORY: PatGuettler/AVL
+          TARGET_REPOSITORY: PatGuettler/ALV
           ROLLUP_DRY_RUN: ${{ inputs.dry_run || 'false' }}
         run: node scripts/project-time-rollup.mjs

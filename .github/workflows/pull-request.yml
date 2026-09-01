@@ -46,7 +46,7 @@ jobs:
 
       - name: Package production asset metadata
         env:
-          FORBIDDEN_BASE_PATH: /AVL/
+          FORBIDDEN_BASE_PATH: /ALV/
         run: node scripts/package-production.mjs
 
       - name: Validate production artifact

@@ -6,7 +6,7 @@ const GRAPHQL_URL = 'https://api.github.com/graphql';
 const FIELD_NAME = process.env.PROJECT_FIELD_NAME || 'Time (hours)';
 const OWNER = process.env.PROJECT_OWNER || 'PatGuettler';
 const PROJECT_NUMBER = Number.parseInt(process.env.PROJECT_NUMBER || '3', 10);
-const TARGET_REPOSITORY = process.env.TARGET_REPOSITORY || 'PatGuettler/AVL';
+const TARGET_REPOSITORY = process.env.TARGET_REPOSITORY || 'PatGuettler/ALV';
 const DRY_RUN = process.argv.includes('--dry-run') || process.env.ROLLUP_DRY_RUN === 'true';
 const TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
 
@@ -107,7 +107,7 @@ async function graphql(query, variables) {
       Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${TOKEN}`,
       'Content-Type': 'application/json',
-      'User-Agent': 'AVL-project-time-rollup',
+      'User-Agent': 'ALV-project-time-rollup',
       'X-GitHub-Api-Version': '2022-11-28',
     },
     body: JSON.stringify({ query, variables }),
