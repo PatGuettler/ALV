@@ -3,19 +3,19 @@ mock_provider "aws" {}
 override_resource {
   target = aws_s3_bucket.origin
   values = {
-    id                           = "alv-test-web-origin"
-    arn                          = "arn:aws:s3:::alv-test-web-origin"
-    bucket_regional_domain_name  = "alv-test-web-origin.s3.us-east-1.amazonaws.com"
+    id                          = "alv-test-web-origin"
+    arn                         = "arn:aws:s3:::alv-test-web-origin"
+    bucket_regional_domain_name = "alv-test-web-origin.s3.us-east-1.amazonaws.com"
   }
 }
 
 variables {
-  bucket_name                    = "alv-test-web-origin"
-  access_log_bucket_name         = "alv-test-central-logs"
-  deployment_role_arns           = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
-  aws_account_id                 = "111111111111"
-  cloudfront_distribution_arn    = "arn:aws:cloudfront::111111111111:distribution/E1234567890ABC"
-  origin_access_control_name     = "alv-test-origin"
+  bucket_name                 = "alv-test-web-origin"
+  access_log_bucket_name      = "alv-test-central-logs"
+  deployment_role_arns        = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
+  aws_account_id              = "111111111111"
+  cloudfront_distribution_arn = "arn:aws:cloudfront::111111111111:distribution/E1234567890ABC"
+  origin_access_control_name  = "alv-test-origin"
   tags = {
     Project     = "alabama-veteran"
     Environment = "test"
