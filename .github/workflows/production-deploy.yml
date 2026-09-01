@@ -1,0 +1,188 @@
+name: Deploy production website
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: Confirm an approved production deployment
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build immutable release artifact
+    if: ${{ inputs.confirm_production }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_PATH: /
+      SITE_ENV: production
+      SITE_URL: https://alabamaveteran.org
+    steps:
+      - name: Require the main branch
+        run: |
+          if [ "$GITHUB_REF" != 'refs/heads/main' ]; then
+            echo 'Production releases must run from main.' >&2
+            exit 1
+          fi
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.22.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Validate and build production site
+        run: |
+          npm run format:check
+          npm run check
+          npm test
+          npm run build
+
+      - name: Package and verify production artifact
+        env:
+          FORBIDDEN_BASE_PATH: /ALV/
+          CHECK_BUILD: '1'
+        run: |
+          node scripts/package-production.mjs
+          npm run test:site
+          node scripts/seo-audit.mjs
+          node scripts/browser-smoke.mjs
+          node scripts/accessibility-scan.mjs
+          node scripts/performance-budget.mjs
+
+      - name: Upload reviewed release artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: production-release-${{ github.sha }}
+          path: |
+            dist
+            artifacts/production/asset-manifest.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  deploy:
+    name: Approve and upload production release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: us-east-1
+      AWS_PRODUCTION_ACCOUNT_ID: ${{ vars.AWS_PRODUCTION_ACCOUNT_ID }}
+      AWS_PRODUCTION_BUCKET: ${{ vars.AWS_PRODUCTION_BUCKET }}
+      AWS_PRODUCTION_DEPLOY_ROLE_ARN: ${{ vars.AWS_PRODUCTION_DEPLOY_ROLE_ARN }}
+    steps:
+      - name: Validate protected environment configuration
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in AWS_PRODUCTION_ACCOUNT_ID AWS_PRODUCTION_BUCKET AWS_PRODUCTION_DEPLOY_ROLE_ARN; do
+            if [ -z "${!name}" ]; then
+              echo "Missing required production environment variable: $name" >&2
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+          if [[ ! "$AWS_PRODUCTION_ACCOUNT_ID" =~ ^[0-9]{12}$ ]]; then
+            echo 'AWS_PRODUCTION_ACCOUNT_ID must contain exactly 12 digits.' >&2
+            exit 1
+          fi
+
+      - name: Download reviewed release artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: production-release-${{ github.sha }}
+          path: release
+
+      - name: Assume production deployment role through OIDC
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_PRODUCTION_DEPLOY_ROLE_ARN }}
+          role-session-name: alv-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Verify the target AWS account
+        run: |
+          actual_account=$(aws sts get-caller-identity --query Account --output text)
+          if [ "$actual_account" != "$AWS_PRODUCTION_ACCOUNT_ID" ]; then
+            echo 'OIDC role resolved to the wrong AWS account.' >&2
+            exit 1
+          fi
+
+      - name: Upload release in safe manifest order
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest='release/artifacts/production/asset-manifest.json'
+          uploaded=0
+
+          for phase in 1 2 3; do
+            while IFS= read -r encoded; do
+              entry=$(printf '%s' "$encoded" | base64 --decode)
+              key=$(jq -r '.key' <<< "$entry")
+              content_type=$(jq -r '.contentType' <<< "$entry")
+              cache_control=$(jq -r '.cacheControl' <<< "$entry")
+              expected_sha=$(jq -r '.sha256' <<< "$entry")
+              source="release/dist/$key"
+
+              if [ ! -f "$source" ]; then
+                echo "Manifest object is missing from the release artifact: $key" >&2
+                exit 1
+              fi
+
+              actual_sha=$(sha256sum "$source" | cut -d ' ' -f 1)
+              if [ "$actual_sha" != "$expected_sha" ]; then
+                echo "Release checksum mismatch: $key" >&2
+                exit 1
+              fi
+
+              aws s3 cp "$source" "s3://$AWS_PRODUCTION_BUCKET/$key" \
+                --content-type "$content_type" \
+                --cache-control "$cache_control" \
+                --only-show-errors \
+                --no-progress
+              uploaded=$((uploaded + 1))
+            done < <(jq -r --argjson phase "$phase" '.files[] | select(.uploadPhase == $phase) | @base64' "$manifest")
+          done
+
+          expected=$(jq -r '.totals.files' "$manifest")
+          if [ "$uploaded" -ne "$expected" ]; then
+            echo "Uploaded $uploaded objects but the manifest requires $expected." >&2
+            exit 1
+          fi
+          aws s3api head-object --bucket "$AWS_PRODUCTION_BUCKET" --key index.html >/dev/null
+          echo "Uploaded $uploaded verified objects in immutable, mutable, then HTML order."
+
+      - name: Record deployment evidence
+        run: |
+          {
+            echo '## Production deployment complete'
+            echo "- Repository: $GITHUB_REPOSITORY"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Target bucket: $AWS_PRODUCTION_BUCKET"
+            echo "- AWS account: $AWS_PRODUCTION_ACCOUNT_ID"
+          } >> "$GITHUB_STEP_SUMMARY"
