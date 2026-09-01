@@ -6,7 +6,6 @@ import {
   UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import { randomUUID } from 'node:crypto';
 import {
   applicationIdFrom,
   buildApplicationItem,
@@ -20,6 +19,7 @@ import {
   parseStaffPatch,
   publicStaffRecord,
   readBody,
+  staffSummaryRecord,
 } from './logic.mjs';
 
 const ddb = new DynamoDBClient({});
@@ -52,24 +52,49 @@ async function createApplication(event, origin) {
   let payload;
   try {
     payload = readBody(event);
-  } catch {
-    return json(400, { error: 'invalid_json' }, origin, allowedOrigins);
+  } catch (error) {
+    return json(
+      error instanceof RangeError ? 413 : 400,
+      { error: error instanceof RangeError ? 'body_too_large' : 'invalid_json' },
+      origin,
+      allowedOrigins,
+    );
   }
 
   const parsed = parseApplication(payload);
   if (!parsed.ok) return json(400, { error: parsed.error }, origin, allowedOrigins);
 
-  const id = randomUUID();
+  const id = parsed.id;
   const submittedAt = new Date().toISOString();
   const item = buildApplicationItem({ id, submittedAt, fields: parsed.fields });
 
-  await ddb.send(
-    new PutItemCommand({
-      TableName: tableName,
-      Item: marshall(item),
-      ConditionExpression: 'attribute_not_exists(pk)',
-    }),
-  );
+  try {
+    await ddb.send(
+      new PutItemCommand({
+        TableName: tableName,
+        Item: marshall(item, { removeUndefinedValues: true }),
+        ConditionExpression: 'attribute_not_exists(pk)',
+      }),
+    );
+  } catch (error) {
+    if (error?.name !== 'ConditionalCheckFailedException') throw error;
+    const existing = await ddb.send(
+      new GetItemCommand({
+        TableName: tableName,
+        Key: marshall({ pk: `APP#${id}`, sk: 'VERSION#1' }),
+        ProjectionExpression: 'id, #status',
+        ExpressionAttributeNames: { '#status': 'status' },
+      }),
+    );
+    if (!existing.Item) throw error;
+    const record = unmarshall(existing.Item);
+    return json(
+      200,
+      { id: record.id, status: record.status, duplicate: true },
+      origin,
+      allowedOrigins,
+    );
+  }
 
   return json(201, { id, status: 'submitted' }, origin, allowedOrigins);
 }
@@ -102,7 +127,7 @@ async function listApplications(event, origin) {
   );
   return json(
     200,
-    { items: (result.Items || []).map((item) => publicStaffRecord(unmarshall(item))) },
+    { items: (result.Items || []).map((item) => staffSummaryRecord(unmarshall(item))) },
     origin,
     allowedOrigins,
   );
@@ -113,8 +138,13 @@ async function patchApplication(event, origin) {
   let payload;
   try {
     payload = readBody(event);
-  } catch {
-    return json(400, { error: 'invalid_json' }, origin, allowedOrigins);
+  } catch (error) {
+    return json(
+      error instanceof RangeError ? 413 : 400,
+      { error: error instanceof RangeError ? 'body_too_large' : 'invalid_json' },
+      origin,
+      allowedOrigins,
+    );
   }
   const parsed = parseStaffPatch(payload);
   if (!parsed.ok) return json(400, { error: parsed.error }, origin, allowedOrigins);
@@ -125,15 +155,17 @@ async function patchApplication(event, origin) {
       new UpdateItemCommand({
         TableName: tableName,
         Key: marshall({ pk: `APP#${id}`, sk: 'VERSION#1' }),
-        ConditionExpression: 'attribute_exists(pk)',
+        ConditionExpression: 'attribute_exists(pk) AND version = :expectedVersion',
         UpdateExpression:
-          'SET #status = :status, note = :note, reviewedAt = :reviewedAt, reviewedBy = :reviewedBy',
+          'SET #status = :status, note = :note, reviewedAt = :reviewedAt, reviewedBy = :reviewedBy, version = version + :one',
         ExpressionAttributeNames: { '#status': 'status' },
         ExpressionAttributeValues: marshall({
           ':status': parsed.status,
           ':note': parsed.note,
           ':reviewedAt': new Date().toISOString(),
           ':reviewedBy': String(actor).slice(0, 254),
+          ':expectedVersion': parsed.expectedVersion,
+          ':one': 1,
         }),
         ReturnValues: 'ALL_NEW',
       }),
@@ -141,7 +173,16 @@ async function patchApplication(event, origin) {
     return json(200, publicStaffRecord(unmarshall(result.Attributes)), origin, allowedOrigins);
   } catch (error) {
     if (error?.name === 'ConditionalCheckFailedException') {
-      return json(404, { error: 'not_found' }, origin, allowedOrigins);
+      const current = await ddb.send(
+        new GetItemCommand({
+          TableName: tableName,
+          Key: marshall({ pk: `APP#${id}`, sk: 'VERSION#1' }),
+          ProjectionExpression: 'id, version',
+        }),
+      );
+      return current.Item
+        ? json(409, { error: 'version_conflict' }, origin, allowedOrigins)
+        : json(404, { error: 'not_found' }, origin, allowedOrigins);
     }
     throw error;
   }

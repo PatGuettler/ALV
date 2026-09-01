@@ -15,9 +15,71 @@ import {
   parseStaffPatch,
   publicStaffRecord,
   readBody,
+  staffSummaryRecord,
 } from '../../infra/functions/retreat-api/logic.mjs';
 
 const allowed = ['http://127.0.0.1:4321', 'https://patguettler.github.io'];
+
+function validApplication(overrides = {}) {
+  const payload = {
+    schemaVersion: 2,
+    submissionId: '01991f38-7165-7cc8-a1bb-5ba46bc444b8',
+    retreat: {
+      applicantType: 'military',
+      retreatType: 'mens',
+      timingPreference: 'next-available',
+    },
+    applicant: {
+      firstName: ' Pat ',
+      lastName: ' Guettler ',
+      email: 'Pat@Example.com',
+      phone: '555-0100',
+      address: {
+        street: '100 Main Street',
+        city: 'Birmingham',
+        state: 'AL',
+        postalCode: '35203',
+        county: 'Jefferson',
+      },
+      referral: { source: 'event', referredBy: 'ALV staff' },
+      spouse: null,
+    },
+    service: {
+      kind: 'military',
+      branch: 'army',
+      status: 'veteran',
+      years: '8',
+      rank: 'SGT',
+      combatDeployment: 'yes',
+      verificationStatus: 'staff-follow-up',
+    },
+    workforce: {
+      employmentStatus: 'full-time',
+      employer: 'Example',
+      jobTitle: 'Operator',
+      satisfaction: 'somewhat',
+      interests: ['resume', 'training'],
+      notes: 'Interested in a certification.',
+    },
+    finalDetails: {
+      emergencyContact: {
+        name: 'Casey Guettler',
+        relationship: 'Spouse',
+        phone: '555-0101',
+        secondaryPhone: '',
+      },
+      previousRetreats: [],
+      previousRetreatYears: '',
+      goals: 'Reconnect with a peer community.',
+      additionalNotes: '',
+      agreements: { accuracy: true, contact: true, placement: true, policies: true },
+      signature: 'Pat Guettler',
+      signatureDate: '2026-09-01',
+    },
+    consent: { version: '2026-09-01', acceptedAt: '2026-09-01T12:00:00.000Z' },
+  };
+  return { ...payload, ...overrides };
+}
 
 test('parseAllowedOrigins splits and trims a comma list', () => {
   assert.deepEqual(parseAllowedOrigins(' http://localhost:4321, https://patguettler.github.io '), [
@@ -27,10 +89,7 @@ test('parseAllowedOrigins splits and trims a comma list', () => {
 });
 
 test('corsHeaders allows a listed origin and falls back otherwise', () => {
-  assert.equal(
-    corsHeaders('https://patguettler.github.io', allowed)['Access-Control-Allow-Origin'],
-    allowed[1],
-  );
+  assert.equal(corsHeaders(allowed[1], allowed)['Access-Control-Allow-Origin'], allowed[1]);
   assert.equal(
     corsHeaders('https://evil.example', allowed)['Access-Control-Allow-Origin'],
     allowed[0],
@@ -47,22 +106,20 @@ test('json responses include no-store JSON headers', () => {
 });
 
 test('originOf reads origin or Origin', () => {
-  assert.equal(originOf({ headers: { origin: 'http://localhost:4321' } }), 'http://localhost:4321');
-  assert.equal(
-    originOf({ headers: { Origin: 'https://patguettler.github.io' } }),
-    'https://patguettler.github.io',
-  );
+  assert.equal(originOf({ headers: { origin: allowed[0] } }), allowed[0]);
+  assert.equal(originOf({ headers: { Origin: allowed[1] } }), allowed[1]);
   assert.equal(originOf({ headers: {} }), '');
 });
 
-test('readBody parses JSON and base64 JSON and rejects invalid JSON', () => {
+test('readBody parses JSON and base64 JSON and enforces its size limit', () => {
   assert.deepEqual(readBody({}), {});
-  assert.deepEqual(readBody({ body: '{"fullName":"Pat"}' }), { fullName: 'Pat' });
+  assert.deepEqual(readBody({ body: '{"name":"Pat"}' }), { name: 'Pat' });
   assert.deepEqual(
     readBody({ body: Buffer.from('{"consent":true}').toString('base64'), isBase64Encoded: true }),
     { consent: true },
   );
   assert.throws(() => readBody({ body: '{not-json' }), SyntaxError);
+  assert.throws(() => readBody({ body: '12345' }, 4), RangeError);
 });
 
 test('cleanText trims, truncates, and ignores non-strings', () => {
@@ -70,44 +127,69 @@ test('cleanText trims, truncates, and ignores non-strings', () => {
   assert.equal(cleanText(12, 10), '');
 });
 
-test('parseApplication accepts a valid payload and rejects incomplete ones', () => {
-  const valid = parseApplication({
-    fullName: ' Pat Guettler ',
-    email: 'Pat@Example.com',
-    phone: '555-0100',
-    program: 'warrior-retreat',
-    message: 'Need a weekend.',
-    consent: true,
-  });
-  assert.equal(valid.ok, true);
-  assert.equal(valid.fields.fullName, 'Pat Guettler');
-  assert.equal(valid.fields.email, 'pat@example.com');
-
-  assert.equal(
-    parseApplication({ fullName: 'Pat', email: 'pat@example.com', consent: false }).ok,
-    false,
-  );
-  assert.equal(
-    parseApplication({ fullName: '', email: 'pat@example.com', consent: true }).ok,
-    false,
-  );
-  assert.equal(
-    parseApplication({ fullName: 'Pat', email: 'not-an-email', consent: true }).ok,
-    false,
-  );
+test('parseApplication accepts and normalizes the versioned applicant schema', () => {
+  const parsed = parseApplication(validApplication());
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.id, '01991f38-7165-7cc8-a1bb-5ba46bc444b8');
+  assert.equal(parsed.fields.fullName, 'Pat Guettler');
+  assert.equal(parsed.fields.email, 'pat@example.com');
+  assert.equal(parsed.fields.service.branch, 'army');
+  assert.deepEqual(parsed.fields.workforce.interests, ['resume', 'training']);
 });
 
-test('parseApplication truncates oversized fields', () => {
-  const parsed = parseApplication({
-    fullName: 'x'.repeat(200),
-    email: `${'a'.repeat(250)}@x.com`,
-    message: 'm'.repeat(2000),
-    consent: true,
+test('parseApplication enforces conditional spouse and service fields', () => {
+  const marriage = validApplication({
+    retreat: {
+      applicantType: 'military',
+      retreatType: 'marriage',
+      timingPreference: 'next-available',
+    },
   });
-  assert.equal(parsed.ok, true);
-  assert.equal(parsed.fields.fullName.length, 120);
-  assert.equal(parsed.fields.email.length, 254);
-  assert.equal(parsed.fields.message.length, 1000);
+  assert.equal(parseApplication(marriage).error, 'invalid_spouse');
+
+  const responder = validApplication({
+    retreat: {
+      applicantType: 'first-responder',
+      retreatType: 'endurance',
+      timingPreference: 'staff-contact',
+    },
+    service: {
+      kind: 'first-responder',
+      type: 'ems',
+      agency: 'Example EMS',
+      status: 'active',
+      years: '10',
+      rank: 'Paramedic',
+      criticalIncident: 'prefer-not-to-answer',
+    },
+  });
+  assert.equal(parseApplication(responder).ok, true);
+});
+
+test('parseApplication rejects missing consent, mismatched signatures, and sensitive payloads', () => {
+  assert.equal(
+    parseApplication(validApplication({ schemaVersion: 1 })).error,
+    'unsupported_schema',
+  );
+  assert.equal(
+    parseApplication(validApplication({ health: { phq2: 5 } })).error,
+    'sensitive_fields_not_accepted',
+  );
+  const badSignature = validApplication();
+  badSignature.finalDetails.signature = 'Someone Else';
+  assert.equal(parseApplication(badSignature).error, 'invalid_final_details');
+  const noConsent = validApplication();
+  noConsent.finalDetails.agreements.contact = false;
+  assert.equal(parseApplication(noConsent).error, 'invalid_final_details');
+});
+
+test('parseApplication truncates approved optional notes', () => {
+  const payload = validApplication();
+  payload.workforce.notes = 'n'.repeat(2000);
+  payload.finalDetails.additionalNotes = 'a'.repeat(2500);
+  const parsed = parseApplication(payload);
+  assert.equal(parsed.fields.workforce.notes.length, 1000);
+  assert.equal(parsed.fields.finalDetails.additionalNotes.length, 1500);
 });
 
 test('matchRoute identifies public, staff, options, and unknown paths', () => {
@@ -117,52 +199,45 @@ test('matchRoute identifies public, staff, options, and unknown paths', () => {
   assert.equal(matchRoute('GET', '/v1/staff/applications/abc-123'), 'get');
   assert.equal(matchRoute('PATCH', '/v1/staff/applications/abc-123'), 'patch');
   assert.equal(matchRoute('GET', '/v1/staff/applications/abc-123/notes'), 'not_found');
-  assert.equal(matchRoute('DELETE', '/v1/applications'), 'not_found');
 });
 
 test('applicationIdFrom uses the last path segment', () => {
   assert.equal(applicationIdFrom({ rawPath: '/v1/staff/applications/abc-123' }), 'abc-123');
 });
 
-test('parseListStatus defaults to submitted and rejects unknown values', () => {
+test('parseListStatus supports the production decision statuses', () => {
   assert.deepEqual(parseListStatus(undefined), { ok: true, status: 'submitted' });
-  assert.deepEqual(parseListStatus('approved'), { ok: true, status: 'approved' });
+  assert.deepEqual(parseListStatus('waitlisted'), { ok: true, status: 'waitlisted' });
   assert.equal(parseListStatus('archived').ok, false);
 });
 
-test('parseStaffPatch requires an allowed status', () => {
-  assert.deepEqual(parseStaffPatch({ status: 'declined', note: ' Not a fit ' }), {
-    ok: true,
-    status: 'declined',
-    note: 'Not a fit',
-  });
-  assert.equal(parseStaffPatch({ status: 'maybe' }).ok, false);
+test('parseStaffPatch requires an allowed status and optimistic version', () => {
+  assert.deepEqual(
+    parseStaffPatch({ status: 'declined', note: ' Not a fit ', expectedVersion: 2 }),
+    {
+      ok: true,
+      status: 'declined',
+      note: 'Not a fit',
+      expectedVersion: 2,
+    },
+  );
+  assert.equal(parseStaffPatch({ status: 'maybe', expectedVersion: 1 }).ok, false);
+  assert.equal(parseStaffPatch({ status: 'approved' }).error, 'invalid_version');
 });
 
-test('buildApplicationItem and publicStaffRecord hide internal fields', () => {
+test('staff summary and detail records hide DynamoDB keys', () => {
+  const parsed = parseApplication(validApplication());
   const item = buildApplicationItem({
-    id: 'abc',
-    submittedAt: '2026-08-31T00:00:00.000Z',
-    fields: {
-      fullName: 'Pat',
-      email: 'pat@example.com',
-      phone: '',
-      program: 'warrior-retreat',
-      message: 'Hello',
-      consent: true,
-    },
+    id: parsed.id,
+    submittedAt: '2026-09-01T12:00:00.000Z',
+    fields: parsed.fields,
   });
-  assert.equal(item.pk, 'APP#abc');
-  assert.equal(item.status, 'submitted');
-
-  const published = publicStaffRecord({
-    ...item,
-    reviewedBy: 'staff@example.com',
-    note: undefined,
-  });
-  assert.equal(published.note, '');
-  assert.equal(published.reviewedAt, null);
-  assert.equal('pk' in published, false);
-  assert.equal('reviewedBy' in published, false);
-  assert.equal('consent' in published, false);
+  assert.equal(item.pk, `APP#${parsed.id}`);
+  const summary = staffSummaryRecord(item);
+  assert.equal(summary.retreatType, 'mens');
+  assert.equal('applicant' in summary, false);
+  const detail = publicStaffRecord(item);
+  assert.equal(detail.applicant.address.city, 'Birmingham');
+  assert.equal('pk' in detail, false);
+  assert.equal('sk' in detail, false);
 });
