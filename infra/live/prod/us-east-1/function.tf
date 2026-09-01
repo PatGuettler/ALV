@@ -1,7 +1,8 @@
 data "archive_file" "retreat_api" {
   type        = "zip"
-  source_file = "${path.module}/../../../functions/retreat-api/index.mjs"
+  source_dir  = "${path.module}/../../../functions/retreat-api"
   output_path = "${path.module}/../../../functions/retreat-api/retreat-api.zip"
+  excludes    = ["*.zip"]
 }
 
 data "aws_iam_policy_document" "retreat_assume" {
