@@ -13,7 +13,7 @@
     "preview": "astro preview --host 0.0.0.0",
     "test": "npm run test:site && npm run test:rollup",
     "test:browser": "npm run build && node scripts/browser-smoke.mjs",
-    "test:rollup": "node --test scripts/tests/*.test.mjs",
+    "test:rollup": "node --test \"scripts/tests/**/*.test.mjs\"",
     "test:site": "node scripts/validate-site.mjs"
   },
   "devDependencies": {

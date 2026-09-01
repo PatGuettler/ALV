@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import { retreatLive } from '../src/config/retreat.js';
@@ -92,11 +93,13 @@ for (const script of [
   'retreat-application',
   'retreat-staff',
 ]) {
-  const javascript = await readFile(resolve(sourceRoot, 'scripts', `${script}.js`), 'utf8');
-  try {
-    new Function(javascript);
-  } catch (error) {
-    failures.push(`${script}.js has invalid syntax: ${error.message}`);
+  const scriptPath = resolve(sourceRoot, 'scripts', `${script}.js`);
+  const javascript = await readFile(scriptPath, 'utf8');
+  const syntax = spawnSync(process.execPath, ['--check', scriptPath], { encoding: 'utf8' });
+  if (syntax.status !== 0) {
+    failures.push(
+      `${script}.js has invalid syntax: ${(syntax.stderr || syntax.stdout).trim() || 'node --check failed'}`,
+    );
   }
   for (const marker of forbiddenPrototypeMarkers) {
     if (javascript.includes(marker))
