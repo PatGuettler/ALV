@@ -1,9 +1,9 @@
 mock_provider "aws" {}
 
 variables {
-  bucket_name            = "avl-test-web-origin"
-  access_log_bucket_name = "avl-test-central-logs"
-  deployment_role_arns   = ["arn:aws:iam::111111111111:role/avl-test-deploy"]
+  bucket_name            = "alv-test-web-origin"
+  access_log_bucket_name = "alv-test-central-logs"
+  deployment_role_arns   = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
   tags = {
     Project     = "alabama-veteran"
     Environment = "test"
@@ -66,7 +66,7 @@ run "reject_self_logging" {
   command = plan
 
   variables {
-    access_log_bucket_name = "avl-test-web-origin"
+    access_log_bucket_name = "alv-test-web-origin"
   }
 
   expect_failures = [var.access_log_bucket_name]
