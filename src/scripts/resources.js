@@ -1432,6 +1432,18 @@ function filterType(type, btn) {
   });
   checkNoResults();
 }
+export function resourceCardMatches(query, card) {
+  const q = String(query || '')
+    .toLowerCase()
+    .trim();
+  if (!q) return true;
+  return [card.name, card.desc, card.cat, card.type].some((value) =>
+    String(value || '')
+      .toLowerCase()
+      .includes(q),
+  );
+}
+
 function handleSearch(val) {
   const q = val.toLowerCase().trim();
   document.querySelectorAll('.cat-section').forEach((s) => s.classList.remove('visible'));
@@ -1447,11 +1459,12 @@ function handleSearch(val) {
   }
   let found = 0;
   document.querySelectorAll('#all-grid .res-card').forEach((c) => {
-    const match =
-      c.dataset.name.includes(q) ||
-      c.dataset.desc.includes(q) ||
-      c.dataset.cat.includes(q) ||
-      c.dataset.type.includes(q);
+    const match = resourceCardMatches(q, {
+      name: c.dataset.name,
+      desc: c.dataset.desc,
+      cat: c.dataset.cat,
+      type: c.dataset.type,
+    });
     c.classList.toggle('hidden-res', !match);
     if (match) found++;
   });
@@ -1466,20 +1479,22 @@ function checkNoResults() {
   const v = document.querySelectorAll('#all-grid .res-card:not(.hidden-res)').length;
   document.getElementById('no-results').classList.toggle('visible', v === 0);
 }
-document.addEventListener('DOMContentLoaded', () => {
-  populateGrids();
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    populateGrids();
 
-  document.querySelectorAll('[data-resource-section]').forEach((button) => {
-    button.addEventListener('click', () => showSection(button.dataset.resourceSection, button));
-  });
-  document.querySelectorAll('[data-resource-filter]').forEach((button) => {
-    button.addEventListener('click', () => filterType(button.dataset.resourceFilter, button));
-  });
+    document.querySelectorAll('[data-resource-section]').forEach((button) => {
+      button.addEventListener('click', () => showSection(button.dataset.resourceSection, button));
+    });
+    document.querySelectorAll('[data-resource-filter]').forEach((button) => {
+      button.addEventListener('click', () => filterType(button.dataset.resourceFilter, button));
+    });
 
-  const searchInput = document.getElementById('search-input');
-  searchInput?.addEventListener('input', () => handleSearch(searchInput.value));
-  document
-    .querySelector('[data-resource-search]')
-    ?.addEventListener('click', () => handleSearch(searchInput?.value || ''));
-  document.querySelector('[data-print-page]')?.addEventListener('click', () => window.print());
-});
+    const searchInput = document.getElementById('search-input');
+    searchInput?.addEventListener('input', () => handleSearch(searchInput.value));
+    document
+      .querySelector('[data-resource-search]')
+      ?.addEventListener('click', () => handleSearch(searchInput?.value || ''));
+    document.querySelector('[data-print-page]')?.addEventListener('click', () => window.print());
+  });
+}

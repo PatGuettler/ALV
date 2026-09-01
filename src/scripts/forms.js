@@ -1,3 +1,9 @@
+export function contactMailtoHref({ name, email, message, contact }) {
+  const subject = encodeURIComponent(`${contact.subject} ${name}`);
+  const body = encodeURIComponent(`From: ${name} (${email})\n\n${message}`);
+  return `mailto:${contact.email}?subject=${subject}&body=${body}`;
+}
+
 const defaultContact = {
   email: 'info@alabamaveteran.org',
   title: 'Contact Alabama Veteran',
@@ -45,29 +51,34 @@ function sendContact(form) {
   const name = String(data.get('cname') || '');
   const email = String(data.get('cemail') || '');
   const message = String(data.get('cmsg') || '');
-  const subject = encodeURIComponent(`${currentContact.subject} ${name}`);
-  const body = encodeURIComponent(`From: ${name} (${email})\n\n${message}`);
-  window.location.href = `mailto:${currentContact.email}?subject=${subject}&body=${body}`;
+  window.location.href = contactMailtoHref({
+    name,
+    email,
+    message,
+    contact: currentContact,
+  });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('[data-contact]').forEach((trigger) => {
-    trigger.addEventListener('click', (event) => {
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-contact]').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        openContact(trigger);
+      });
+    });
+
+    document.querySelector('[data-contact-close]')?.addEventListener('click', closeContact);
+    document.querySelector('[data-contact-overlay]')?.addEventListener('click', (event) => {
+      if (event.target === event.currentTarget) closeContact();
+    });
+    document.querySelector('[data-contact-form]')?.addEventListener('submit', (event) => {
       event.preventDefault();
-      openContact(trigger);
+      sendContact(event.currentTarget);
     });
   });
 
-  document.querySelector('[data-contact-close]')?.addEventListener('click', closeContact);
-  document.querySelector('[data-contact-overlay]')?.addEventListener('click', (event) => {
-    if (event.target === event.currentTarget) closeContact();
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeContact();
   });
-  document.querySelector('[data-contact-form]')?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    sendContact(event.currentTarget);
-  });
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') closeContact();
-});
+}
