@@ -1,0 +1,120 @@
+<fieldset
+  class="application-step"
+  data-application-step
+  hidden
+  aria-labelledby="contact-step-title"
+>
+  <legend id="contact-step-title">Your contact information</legend>
+  <p class="step-intro">
+    Use contact information that ALV staff can use for application follow-up.
+  </p>
+
+  <div class="field-grid">
+    <label class="form-field"
+      >First name <span aria-hidden="true">*</span>
+      <input name="firstName" type="text" autocomplete="given-name" maxlength="60" required />
+    </label>
+    <label class="form-field"
+      >Last name <span aria-hidden="true">*</span>
+      <input name="lastName" type="text" autocomplete="family-name" maxlength="60" required />
+    </label>
+    <label class="form-field"
+      >Email <span aria-hidden="true">*</span>
+      <input name="email" type="email" autocomplete="email" maxlength="254" required />
+    </label>
+    <label class="form-field"
+      >Phone <span aria-hidden="true">*</span>
+      <input name="phone" type="tel" autocomplete="tel" maxlength="40" required />
+    </label>
+    <label class="form-field field-span"
+      >Street address
+      <input name="street" type="text" autocomplete="street-address" maxlength="120" />
+    </label>
+    <label class="form-field"
+      >City <span aria-hidden="true">*</span>
+      <input name="city" type="text" autocomplete="address-level2" maxlength="80" required />
+    </label>
+    <label class="form-field"
+      >State <span aria-hidden="true">*</span>
+      <select name="state" autocomplete="address-level1" required>
+        <option value="">Select a state</option>
+        <option value="AL">Alabama</option>
+        <option value="FL">Florida</option>
+        <option value="GA">Georgia</option>
+        <option value="MS">Mississippi</option>
+        <option value="TN">Tennessee</option>
+        <option value="other">Another state</option>
+      </select>
+    </label>
+    <label class="form-field"
+      >ZIP code <span aria-hidden="true">*</span>
+      <input
+        name="postalCode"
+        type="text"
+        autocomplete="postal-code"
+        inputmode="numeric"
+        maxlength="10"
+        pattern="[0-9]{5}(-[0-9]{4})?"
+        required
+      />
+    </label>
+    <label class="form-field"
+      >Alabama county
+      <input name="county" type="text" maxlength="80" />
+    </label>
+    <label class="form-field"
+      >How did you hear about ALV?
+      <select name="referralSource">
+        <option value="">Select an option</option>
+        <option value="friend-family">Friend or family</option>
+        <option value="veteran-service-organization">Veteran service organization</option>
+        <option value="employer-agency">Employer or agency</option>
+        <option value="social-media">Social media</option>
+        <option value="event">ALV event</option>
+        <option value="search">Web search</option>
+        <option value="other">Other</option>
+      </select>
+    </label>
+    <label class="form-field"
+      >Person or organization that referred you
+      <input name="referredBy" type="text" maxlength="120" />
+    </label>
+  </div>
+
+  <section id="spouse-fields" class="conditional-panel" data-condition="marriage" hidden>
+    <h2>Spouse information</h2>
+    <p class="field-help">Marriage Retreat applications include the spouse who plans to attend.</p>
+    <div class="field-grid">
+      <label class="form-field"
+        >Spouse first name <span aria-hidden="true">*</span>
+        <input
+          name="spouseFirstName"
+          type="text"
+          autocomplete="off"
+          maxlength="60"
+          required
+          disabled
+        />
+      </label>
+      <label class="form-field"
+        >Spouse last name <span aria-hidden="true">*</span>
+        <input
+          name="spouseLastName"
+          type="text"
+          autocomplete="off"
+          maxlength="60"
+          required
+          disabled
+        />
+      </label>
+      <label class="form-field"
+        >Spouse email
+        <input name="spouseEmail" type="email" autocomplete="off" maxlength="254" disabled />
+      </label>
+      <label class="form-field"
+        >Spouse phone
+        <input name="spousePhone" type="tel" autocomplete="off" maxlength="40" disabled />
+      </label>
+    </div>
+  </section>
+</fieldset>

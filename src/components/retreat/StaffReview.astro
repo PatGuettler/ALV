@@ -21,16 +21,50 @@ const base = import.meta.env.BASE_URL;
   </div>
   <p id="retreat-staff-status" class="retreat-form-status" role="status"></p>
   <div id="retreat-staff-list" hidden>
-    <label class="retreat-filter">
-      Status
-      <select id="retreat-staff-status-filter">
-        <option value="submitted">Submitted</option>
-        <option value="approved">Approved</option>
-        <option value="declined">Declined</option>
-      </select>
-    </label>
+    <div class="retreat-staff-filters">
+      <label class="retreat-filter">
+        Status
+        <select id="retreat-staff-status-filter">
+          <option value="submitted">Submitted</option>
+          <option value="approved">Approved</option>
+          <option value="waitlisted">Waitlisted</option>
+          <option value="declined">Declined</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label class="retreat-filter">
+        Search this list
+        <input id="retreat-staff-search" type="search" autocomplete="off" />
+      </label>
+    </div>
     <ul id="retreat-staff-items" class="retreat-staff-items"></ul>
   </div>
+  <dialog id="retreat-staff-dialog" class="retreat-staff-dialog">
+    <div class="eyebrow">Restricted staff view</div>
+    <h2 id="retreat-staff-dialog-title">Application</h2>
+    <div id="retreat-staff-detail" class="retreat-staff-detail"></div>
+    <div class="retreat-staff-decision">
+      <label class="retreat-filter">
+        Decision
+        <select id="retreat-staff-decision-status">
+          <option value="submitted">Submitted</option>
+          <option value="approved">Approved</option>
+          <option value="waitlisted">Waitlisted</option>
+          <option value="declined">Declined</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label class="retreat-filter">
+        Internal review note
+        <textarea id="retreat-staff-note" rows="4" maxlength="1000"></textarea>
+      </label>
+    </div>
+    <p id="retreat-staff-dialog-status" class="retreat-form-status" role="status"></p>
+    <div class="retreat-staff-actions">
+      <button id="retreat-staff-save" type="button">Save decision</button>
+      <button id="retreat-staff-close" class="button-secondary" type="button">Close</button>
+    </div>
+  </dialog>
   <p class="return-link">
     <a href={`${base}warrior-retreat/`}>Return to Warrior Retreat</a>
   </p>

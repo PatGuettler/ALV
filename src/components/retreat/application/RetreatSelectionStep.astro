@@ -1,0 +1,64 @@
+<fieldset class="application-step" data-application-step aria-labelledby="retreat-step-title">
+  <legend id="retreat-step-title">Choose your retreat</legend>
+  <p class="step-intro">Tell us which community and program best match your application.</p>
+
+  <div class="form-group">
+    <span class="form-label">I am applying as <span aria-hidden="true">*</span></span>
+    <div class="choice-grid">
+      <label class="choice-card">
+        <input name="applicantType" type="radio" value="military" required />
+        <span
+          ><strong>Veteran or military member</strong>Veteran, active duty, Guard, Reserve, or
+          retired</span
+        >
+      </label>
+      <label class="choice-card">
+        <input name="applicantType" type="radio" value="first-responder" required />
+        <span
+          ><strong>First responder</strong>Law enforcement, fire, EMS, dispatch, or corrections</span
+        >
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <span class="form-label">Retreat requested <span aria-hidden="true">*</span></span>
+    <div class="choice-grid choice-grid-wide">
+      <label class="choice-card">
+        <input name="retreatType" type="radio" value="mens" required />
+        <span
+          ><strong>Men's Warrior Retreat</strong>Four days of fellowship and post-traumatic growth</span
+        >
+      </label>
+      <label class="choice-card">
+        <input name="retreatType" type="radio" value="womens" required />
+        <span
+          ><strong>Women's Warrior Retreat</strong>A dedicated experience for women who served</span
+        >
+      </label>
+      <label class="choice-card">
+        <input name="retreatType" type="radio" value="marriage" required />
+        <span
+          ><strong>Marriage Retreat</strong>Connection and practical tools for veteran couples</span
+        >
+      </label>
+      <label class="choice-card">
+        <input name="retreatType" type="radio" value="endurance" required />
+        <span><strong>Endurance Retreat</strong>A physically demanding team challenge</span>
+      </label>
+    </div>
+  </div>
+
+  <label class="form-field">
+    Timing preference <span aria-hidden="true">*</span>
+    <select name="timingPreference" required>
+      <option value="">Select a preference</option>
+      <option value="next-available">Next available retreat</option>
+      <option value="future-date">A future date</option>
+      <option value="staff-contact">Contact me about available dates</option>
+    </select>
+  </label>
+  <p class="field-help">
+    Actual retreat dates are confirmed by staff; this page does not show mock sessions.
+  </p>
+</fieldset>

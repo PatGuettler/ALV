@@ -1,0 +1,82 @@
+<fieldset
+  class="application-step"
+  data-application-step
+  hidden
+  aria-labelledby="workforce-step-title"
+>
+  <legend id="workforce-step-title">Employment and workforce</legend>
+  <p class="step-intro">Optional workforce services can continue beyond the retreat.</p>
+
+  <div class="field-grid">
+    <label class="form-field"
+      >Employment status <span aria-hidden="true">*</span>
+      <select name="employmentStatus" required>
+        <option value="">Select a status</option><option value="full-time"
+          >Employed full-time</option
+        >
+        <option value="part-time">Employed part-time</option><option value="self-employed"
+          >Self-employed</option
+        >
+        <option value="unemployed-looking">Unemployed and looking</option>
+        <option value="unemployed-not-looking">Unemployed and not looking</option>
+        <option value="retired">Retired</option><option value="student">Student</option>
+        <option value="unable-to-work">Unable to work</option><option value="prefer-not-to-answer"
+          >Prefer not to answer</option
+        >
+      </select>
+    </label>
+    <label class="form-field"
+      >Current employer
+      <input name="employer" type="text" autocomplete="organization" maxlength="120" />
+    </label>
+    <label class="form-field"
+      >Job title or occupation
+      <input name="jobTitle" type="text" autocomplete="organization-title" maxlength="100" />
+    </label>
+    <label class="form-field"
+      >Employment satisfaction
+      <select name="employmentSatisfaction">
+        <option value="">Select an option</option><option value="satisfied">Satisfied</option>
+        <option value="somewhat">Somewhat satisfied</option><option value="not-satisfied"
+          >Not satisfied</option
+        >
+        <option value="not-applicable">Not applicable</option><option value="prefer-not-to-answer"
+          >Prefer not to answer</option
+        >
+      </select>
+    </label>
+  </div>
+
+  <div class="form-group">
+    <span class="form-label">Workforce assistance interests</span>
+    <div class="check-grid">
+      <label
+        ><input name="workforceInterests" type="checkbox" value="resume" /> Resume and applications</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="interview" /> Interview coaching</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="career-placement" /> Career counseling
+        and placement</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="training" /> Skills training or certification</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="business" /> Small business support</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="education-benefits" /> Education benefits
+        guidance</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="financial-literacy" /> Financial literacy</label
+      >
+    </div>
+  </div>
+  <label class="form-field"
+    >Employment or workforce goal notes
+    <textarea name="workforceNotes" rows="4" maxlength="1000"></textarea>
+  </label>
+</fieldset>

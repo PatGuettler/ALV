@@ -1,0 +1,96 @@
+<fieldset class="application-step" data-application-step hidden aria-labelledby="final-step-title">
+  <legend id="final-step-title">Final details</legend>
+  <p class="step-intro">Provide an emergency contact, retreat history, and your agreement.</p>
+
+  <section class="conditional-panel">
+    <h2>Emergency contact</h2>
+    <div class="field-grid">
+      <label class="form-field"
+        >Contact name <span aria-hidden="true">*</span>
+        <input name="emergencyName" type="text" maxlength="120" required />
+      </label>
+      <label class="form-field"
+        >Relationship <span aria-hidden="true">*</span>
+        <input name="emergencyRelationship" type="text" maxlength="60" required />
+      </label>
+      <label class="form-field"
+        >Primary phone <span aria-hidden="true">*</span>
+        <input name="emergencyPhone" type="tel" maxlength="40" required />
+      </label>
+      <label class="form-field"
+        >Secondary phone
+        <input name="emergencySecondaryPhone" type="tel" maxlength="40" />
+      </label>
+    </div>
+  </section>
+
+  <div class="form-group">
+    <span class="form-label">Previous ALV retreats attended</span>
+    <div class="check-grid">
+      <label><input name="previousRetreats" type="checkbox" value="mens" /> Men's Retreat</label>
+      <label><input name="previousRetreats" type="checkbox" value="womens" /> Women's Retreat</label
+      >
+      <label
+        ><input name="previousRetreats" type="checkbox" value="marriage" /> Marriage Retreat</label
+      >
+      <label
+        ><input name="previousRetreats" type="checkbox" value="endurance" /> Endurance Retreat</label
+      >
+    </div>
+  </div>
+  <label class="form-field"
+    >Approximate year or years attended
+    <input
+      name="previousRetreatYears"
+      type="text"
+      maxlength="60"
+      placeholder="For example: 2024, 2025"
+    />
+  </label>
+  <label class="form-field"
+    >What do you hope to gain from this retreat? <span aria-hidden="true">*</span>
+    <textarea name="goals" rows="5" maxlength="1500" required></textarea>
+  </label>
+  <label class="form-field"
+    >Anything else the retreat team should know?
+    <textarea name="additionalNotes" rows="4" maxlength="1500"></textarea>
+  </label>
+
+  <div class="application-notice application-notice-alert">
+    This application is not a medical or emergency service and is not continuously monitored. If you
+    need immediate crisis support, call 988 and press 1 for the Veterans Crisis Line.
+  </div>
+
+  <div class="form-group agreements">
+    <span class="form-label">Agreement <span aria-hidden="true">*</span></span>
+    <label
+      ><input name="accuracyAgreement" type="checkbox" required /> I certify that my answers are accurate
+      to the best of my knowledge.</label
+    >
+    <label
+      ><input name="contactConsent" type="checkbox" required /> I consent to ALV storing this application
+      and contacting me about retreat coordination.</label
+    >
+    <label
+      ><input name="placementAgreement" type="checkbox" required /> I understand that applying does not
+      guarantee a place at a retreat.</label
+    >
+    <label
+      ><input name="policyAgreement" type="checkbox" required /> I agree to follow retreat policies provided
+      by ALV staff.</label
+    >
+  </div>
+  <div class="field-grid">
+    <label class="form-field"
+      >Digital signature (type your full name) <span aria-hidden="true">*</span>
+      <input name="signature" type="text" autocomplete="name" maxlength="120" required />
+    </label>
+    <label class="form-field"
+      >Signature date <span aria-hidden="true">*</span>
+      <input name="signatureDate" type="date" required />
+    </label>
+  </div>
+  <p id="signature-error" class="field-error" role="alert" hidden>
+    The digital signature must match the applicant's first and last name.
+  </p>
+</fieldset>

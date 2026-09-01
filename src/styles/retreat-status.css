@@ -16,7 +16,7 @@ html {
 }
 
 body {
-  align-items: center;
+  align-items: flex-start;
   background:
     linear-gradient(rgba(26, 32, 48, 0.88), rgba(26, 32, 48, 0.95)),
     var(--retreat-image) center / cover;
@@ -38,6 +38,427 @@ body {
   max-width: 760px;
   padding: clamp(32px, 7vw, 64px);
   width: 100%;
+  margin: auto;
+}
+
+.retreat-application-shell {
+  background: var(--paper);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
+  color: var(--blue);
+  margin: 0 auto;
+  max-width: 1040px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.retreat-application-header {
+  background: var(--blue);
+  border-top: 8px solid var(--red);
+  color: #fff;
+  padding: clamp(28px, 6vw, 58px) clamp(24px, 7vw, 72px) 38px;
+}
+
+.retreat-application-header h1 {
+  font-size: clamp(3.8rem, 10vw, 7rem);
+  margin-bottom: 18px;
+  overflow-wrap: anywhere;
+}
+
+.retreat-application-header p {
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 680px;
+}
+
+.application-back {
+  color: #fff;
+  margin-bottom: 30px;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.application-progress {
+  background: #fff;
+  border-bottom: 1px solid #d9dce3;
+  overflow-x: auto;
+  padding: 18px clamp(20px, 5vw, 56px);
+}
+
+.application-progress ol {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(6, minmax(86px, 1fr));
+  list-style: none;
+  margin: 0;
+  min-width: 640px;
+  padding: 0;
+}
+
+.application-progress li {
+  align-items: center;
+  color: #747987;
+  display: flex;
+  font-size: 0.7rem;
+  font-weight: 800;
+  gap: 7px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.application-progress li span:first-child {
+  align-items: center;
+  background: #e7e8eb;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 26px;
+  height: 26px;
+  justify-content: center;
+}
+
+.application-progress li[aria-current='step'],
+.application-progress li[data-complete='true'] {
+  color: var(--blue);
+}
+
+.application-progress li[aria-current='step'] span:first-child {
+  background: var(--red);
+  color: #fff;
+}
+
+.application-progress li[data-complete='true'] span:first-child {
+  background: var(--blue);
+  color: #fff;
+}
+
+.retreat-application-shell > .retreat-form {
+  display: block;
+  padding: clamp(28px, 6vw, 64px) clamp(22px, 7vw, 72px) clamp(34px, 7vw, 72px);
+}
+
+.application-step {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+.application-step[hidden] {
+  display: none;
+}
+
+.application-step > legend {
+  color: var(--blue);
+  float: left;
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(2.8rem, 7vw, 4.6rem);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.application-step > legend + * {
+  clear: both;
+}
+
+.step-intro {
+  max-width: 720px;
+}
+
+.form-group,
+.form-field,
+.conditional-panel {
+  margin-top: 24px;
+}
+
+.form-label,
+.form-field {
+  color: var(--blue);
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.form-field {
+  display: block;
+}
+
+.form-field > input,
+.form-field > select,
+.form-field > textarea {
+  display: block;
+  margin-top: 8px;
+}
+
+.field-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field-span {
+  grid-column: 1 / -1;
+}
+
+.choice-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
+.choice-grid-wide {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-card {
+  align-items: flex-start;
+  background: #fff;
+  border: 2px solid #d7dae2;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  min-height: 112px;
+  padding: 18px;
+}
+
+.choice-card:has(input:checked) {
+  border-color: var(--red);
+  box-shadow: inset 0 0 0 1px var(--red);
+}
+
+.choice-card input,
+.check-grid input,
+.agreements input {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  min-height: 20px;
+  width: 20px;
+}
+
+.choice-card span {
+  color: #626876;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.choice-card strong {
+  color: var(--blue);
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.retreat-application-shell input,
+.retreat-application-shell select,
+.retreat-application-shell textarea {
+  background: #fff;
+  border: 1px solid #b9bec9;
+  border-radius: 2px;
+  color: var(--blue);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.retreat-application-shell textarea {
+  resize: vertical;
+}
+
+.retreat-application-shell input[type='radio'],
+.retreat-application-shell input[type='checkbox'] {
+  min-height: 20px;
+  padding: 0;
+  width: 20px;
+}
+
+.retreat-application-shell input:focus-visible,
+.retreat-application-shell select:focus-visible,
+.retreat-application-shell textarea:focus-visible,
+.retreat-application-shell button:focus-visible,
+.retreat-application-shell a:focus-visible {
+  outline: 3px solid #2276c9;
+  outline-offset: 3px;
+}
+
+.field-help {
+  color: #686e7b;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  margin: 7px 0 0;
+}
+
+.conditional-panel {
+  background: #fff;
+  border-left: 5px solid var(--red);
+  padding: clamp(20px, 4vw, 32px);
+}
+
+.conditional-panel[hidden] {
+  display: none;
+}
+
+.conditional-panel h2,
+.application-receipt h2 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.check-grid,
+.agreements {
+  display: grid;
+  gap: 11px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.check-grid label,
+.agreements label {
+  align-items: flex-start;
+  color: #424958;
+  display: flex;
+  font-size: 0.84rem;
+  font-weight: 600;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.agreements {
+  background: #fff;
+  grid-template-columns: 1fr;
+  padding: 24px;
+}
+
+.agreements .form-label {
+  margin-bottom: 2px;
+}
+
+.application-notice {
+  background: #e8eaf0;
+  border-left: 5px solid var(--blue);
+  color: #454b58;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  margin-top: 26px;
+  padding: 18px 20px;
+}
+
+.application-notice strong {
+  color: var(--blue);
+  display: block;
+}
+
+.application-notice-alert {
+  background: #fff1f1;
+  border-color: var(--red);
+}
+
+.field-error {
+  color: #8b1418;
+  font-size: 0.85rem;
+  font-weight: 800;
+  margin-top: 10px;
+}
+
+.application-navigation {
+  border-top: 1px solid #d7dae2;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 38px;
+  padding-top: 24px;
+}
+
+.application-navigation button {
+  background: var(--red);
+  border: 2px solid var(--red);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  min-height: 48px;
+  padding: 0 22px;
+  text-transform: uppercase;
+}
+
+.application-navigation .button-secondary {
+  background: transparent;
+  color: var(--red);
+  margin-right: auto;
+}
+
+.application-navigation button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.application-review {
+  display: grid;
+  gap: 16px;
+}
+
+.review-section {
+  background: #fff;
+  border-left: 4px solid var(--red);
+  padding: 20px;
+}
+
+.review-section h2 {
+  color: var(--red);
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.review-section dl {
+  display: grid;
+  gap: 8px 18px;
+  grid-template-columns: minmax(120px, 0.35fr) 1fr;
+  margin: 0;
+}
+
+.review-section dt {
+  color: #6d7280;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.review-section dd {
+  color: var(--blue);
+  font-size: 0.82rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.application-receipt {
+  padding: clamp(36px, 7vw, 72px);
+}
+
+.application-receipt[hidden] {
+  display: none;
+}
+
+.application-receipt > strong {
+  background: var(--blue);
+  color: #fff;
+  display: inline-block;
+  font-family: monospace;
+  font-size: clamp(1.2rem, 5vw, 2rem);
+  letter-spacing: 0.06em;
+  margin: 4px 0 22px;
+  overflow-wrap: anywhere;
+  padding: 14px 18px;
 }
 
 .eyebrow {
@@ -171,6 +592,108 @@ a {
   margin: 8px 0 0;
 }
 
+.retreat-staff-card > button {
+  background: transparent;
+  border: 2px solid var(--red);
+  color: var(--red);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-top: 14px;
+  min-height: 44px;
+  padding: 8px 14px;
+  text-transform: uppercase;
+}
+
+.retreat-staff-filters {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.retreat-filter input,
+.retreat-filter textarea {
+  border: 1px solid #c5c9d3;
+  font: inherit;
+  font-weight: 400;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.retreat-staff-dialog {
+  background: var(--paper);
+  border: 0;
+  border-top: 8px solid var(--red);
+  color: var(--blue);
+  max-height: min(880px, 92vh);
+  max-width: 900px;
+  overflow: auto;
+  padding: clamp(24px, 5vw, 48px);
+  width: calc(100% - 32px);
+}
+
+.retreat-staff-dialog::backdrop {
+  background: rgba(15, 20, 32, 0.78);
+}
+
+.retreat-staff-dialog h2 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 10px 0 22px;
+  text-transform: uppercase;
+}
+
+.retreat-staff-detail {
+  display: grid;
+  gap: 14px;
+}
+
+.retreat-staff-detail .review-section h3 {
+  color: var(--red);
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.retreat-staff-detail dl {
+  display: grid;
+  gap: 8px 18px;
+  grid-template-columns: minmax(140px, 0.35fr) 1fr;
+  margin: 0;
+}
+
+.retreat-staff-detail dt {
+  color: #6d7280;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.retreat-staff-detail dd {
+  font-size: 0.82rem;
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.retreat-staff-decision {
+  border-top: 2px solid #d7dae2;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(180px, 0.4fr) 1fr;
+  margin-top: 24px;
+  padding-top: 24px;
+}
+
+.retreat-staff-actions .button-secondary {
+  background: transparent;
+  border: 2px solid var(--red);
+  color: var(--red);
+}
+
 @media (max-width: 480px) {
   body {
     align-items: flex-start;
@@ -182,6 +705,86 @@ a {
     border-top-width: 6px;
     margin-block: auto;
     padding: 28px 24px 32px;
+  }
+
+  .retreat-application-header {
+    border-top-width: 6px;
+    padding: 28px 22px 30px;
+  }
+
+  .retreat-application-header h1 {
+    font-size: clamp(2.5rem, 10.5vw, 3.2rem);
+  }
+
+  .application-back {
+    margin-bottom: 22px;
+  }
+
+  .application-progress {
+    padding-inline: 18px;
+  }
+
+  .application-progress ol {
+    grid-template-columns: repeat(6, 1fr);
+    min-width: 0;
+  }
+
+  .application-progress li {
+    justify-content: center;
+  }
+
+  .application-progress li span:last-child {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .retreat-application-shell > .retreat-form {
+    padding: 30px 20px 36px;
+  }
+
+  .field-grid,
+  .choice-grid,
+  .choice-grid-wide,
+  .check-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .choice-card {
+    min-height: 0;
+  }
+
+  .conditional-panel {
+    padding: 20px 16px;
+  }
+
+  .application-navigation {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .application-navigation button,
+  .application-navigation .button-secondary {
+    margin: 0;
+    width: 100%;
+  }
+
+  .review-section dl {
+    grid-template-columns: 1fr;
+  }
+
+  .review-section dd + dt {
+    margin-top: 8px;
+  }
+
+  .retreat-staff-filters,
+  .retreat-staff-decision,
+  .retreat-staff-detail dl {
+    grid-template-columns: 1fr;
   }
 
   .eyebrow {

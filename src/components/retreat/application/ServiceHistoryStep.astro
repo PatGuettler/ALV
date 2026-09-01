@@ -1,0 +1,119 @@
+<fieldset
+  class="application-step"
+  data-application-step
+  hidden
+  aria-labelledby="service-step-title"
+>
+  <legend id="service-step-title">Your service</legend>
+  <p class="step-intro">
+    We use this information to confirm program eligibility and plan staff follow-up.
+  </p>
+
+  <section id="military-service-fields" class="conditional-panel" data-condition="military" hidden>
+    <h2>Military service</h2>
+    <div class="field-grid">
+      <label class="form-field"
+        >Branch <span aria-hidden="true">*</span>
+        <select name="militaryBranch" required disabled>
+          <option value="">Select a branch</option>
+          <option value="army">Army</option><option value="marine-corps">Marine Corps</option>
+          <option value="navy">Navy</option><option value="air-force">Air Force</option>
+          <option value="space-force">Space Force</option><option value="coast-guard"
+            >Coast Guard</option
+          >
+          <option value="national-guard">National Guard</option>
+        </select>
+      </label>
+      <label class="form-field"
+        >Service status <span aria-hidden="true">*</span>
+        <select name="militaryStatus" required disabled>
+          <option value="">Select a status</option>
+          <option value="veteran">Veteran</option><option value="active-duty">Active duty</option>
+          <option value="guard-reserve">Guard or Reserve</option><option value="retired"
+            >Retired</option
+          >
+        </select>
+      </label>
+      <label class="form-field"
+        >Years of service
+        <input name="militaryYears" type="number" inputmode="numeric" min="0" max="60" disabled />
+      </label>
+      <label class="form-field"
+        >Highest rank or grade
+        <input name="militaryRank" type="text" maxlength="40" disabled />
+      </label>
+      <label class="form-field field-span"
+        >Combat-zone deployment
+        <select name="combatDeployment" disabled>
+          <option value="">Select an option</option><option value="yes">Yes</option>
+          <option value="no">No</option><option value="prefer-not-to-answer"
+            >Prefer not to answer</option
+          >
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section
+    id="first-responder-fields"
+    class="conditional-panel"
+    data-condition="first-responder"
+    hidden
+  >
+    <h2>First responder service</h2>
+    <div class="field-grid">
+      <label class="form-field"
+        >Service type <span aria-hidden="true">*</span>
+        <select name="responderType" required disabled>
+          <option value="">Select a type</option><option value="law-enforcement"
+            >Law enforcement</option
+          >
+          <option value="fire">Fire service</option><option value="ems">EMS</option>
+          <option value="dispatch">911 dispatch</option><option value="corrections"
+            >Corrections</option
+          >
+          <option value="search-rescue">Search and rescue</option><option value="other"
+            >Other</option
+          >
+        </select>
+      </label>
+      <label class="form-field"
+        >Current or last agency <span aria-hidden="true">*</span>
+        <input name="agency" type="text" maxlength="120" required disabled />
+      </label>
+      <label class="form-field"
+        >Employment status <span aria-hidden="true">*</span>
+        <select name="responderStatus" required disabled>
+          <option value="">Select a status</option><option value="active">Active</option>
+          <option value="retired">Retired</option><option value="separated">Separated</option>
+          <option value="medical-separation">Medical separation</option><option value="leave"
+            >On leave</option
+          >
+        </select>
+      </label>
+      <label class="form-field"
+        >Years of service
+        <input name="responderYears" type="number" inputmode="numeric" min="0" max="60" disabled />
+      </label>
+      <label class="form-field"
+        >Rank or title
+        <input name="responderRank" type="text" maxlength="60" disabled />
+      </label>
+      <label class="form-field"
+        >Critical incident experience
+        <select name="criticalIncident" disabled>
+          <option value="">Select an option</option><option value="yes">Yes</option>
+          <option value="no">No</option><option value="prefer-not-to-answer"
+            >Prefer not to answer</option
+          >
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <div class="application-notice">
+    <strong>Service verification is not connected to ID.me.</strong>
+    ALV staff will explain the approved verification process during follow-up. Do not upload or enter
+    a DD-214, military ID, badge number, or other identity document here.
+  </div>
+</fieldset>

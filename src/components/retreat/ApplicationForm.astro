@@ -1,54 +1,78 @@
 ---
 import { retreatPublic } from '../../config/retreat';
+import ApplicantDetailsStep from './application/ApplicantDetailsStep.astro';
+import FinalDetailsStep from './application/FinalDetailsStep.astro';
+import RetreatSelectionStep from './application/RetreatSelectionStep.astro';
+import ServiceHistoryStep from './application/ServiceHistoryStep.astro';
+import WorkforceStep from './application/WorkforceStep.astro';
 
 const base = import.meta.env.BASE_URL;
 ---
 
-<main class="retreat-status">
-  <div class="eyebrow">Alabama Veteran · Warrior Retreat</div>
-  <h1>Apply for a Warrior Retreat</h1>
-  <p>
-    Share a short note about your household. A staff member will follow up. Do not include medical
-    details or social security numbers.
-  </p>
-  <form id="retreat-application-form" class="retreat-form" novalidate>
-    <label>
-      Full name
-      <input name="fullName" type="text" autocomplete="name" maxlength="120" required />
-    </label>
-    <label>
-      Email
-      <input name="email" type="email" autocomplete="email" maxlength="254" required />
-    </label>
-    <label>
-      Phone
-      <input name="phone" type="tel" autocomplete="tel" maxlength="40" />
-    </label>
-    <label>
-      Program
-      <select name="program" required>
-        <option value="">Select a program</option>
-        <option value="warrior-retreat">Warrior Retreat</option>
-        <option value="marriage-retreat">Marriage Retreat</option>
-        <option value="peer-to-peer">Peer-to-Peer Programs</option>
-        <option value="ambassador">AV Ambassador Program</option>
-      </select>
-    </label>
-    <label>
-      How can we help?
-      <textarea name="message" rows="5" maxlength="1000"></textarea>
-    </label>
-    <label class="retreat-consent">
-      <input name="consent" type="checkbox" required />
-      I agree to be contacted about this application and understand this is not a medical or emergency
-      service.
-    </label>
-    <p id="retreat-application-status" class="retreat-form-status" role="status"></p>
-    <button type="submit">Submit application</button>
+<main class="retreat-application-shell">
+  <header class="retreat-application-header">
+    <a class="application-back" href={`${base}warrior-retreat/`}>← Warrior Retreat</a>
+    <div class="eyebrow">Alabama Veteran · Warrior Retreat</div>
+    <h1>Retreat application</h1>
+    <p>
+      Apply for the next available Warrior, Marriage, or Endurance Retreat. Your answers go to the
+      secure ALV staff review system.
+    </p>
+  </header>
+
+  <nav class="application-progress" aria-label="Application progress">
+    <ol>
+      {
+        ['Retreat', 'Contact', 'Service', 'Workforce', 'Final details', 'Review'].map(
+          (label, index) => (
+            <li data-progress-step={index} aria-current={index === 0 ? 'step' : undefined}>
+              <>
+                <span>{index + 1}</span>
+                <span>{label}</span>
+              </>
+            </li>
+          ),
+        )
+      }
+    </ol>
+  </nav>
+
+  <form id="retreat-application-form" class="retreat-form" autocomplete="on">
+    <RetreatSelectionStep />
+    <ApplicantDetailsStep />
+    <ServiceHistoryStep />
+    <WorkforceStep />
+    <FinalDetailsStep />
+
+    <fieldset class="application-step" data-application-step hidden aria-labelledby="review-title">
+      <legend id="review-title">Review and submit</legend>
+      <p class="step-intro">
+        Check your answers before sending. Use Previous to make changes. Your application is not
+        complete until a reference number appears.
+      </p>
+      <div id="retreat-application-review" class="application-review"></div>
+    </fieldset>
+
+    <div class="application-navigation">
+      <button id="retreat-previous" class="button-secondary" type="button" hidden>Previous</button>
+      <button id="retreat-next" type="button">Next</button>
+      <button id="retreat-submit" type="submit" hidden>Submit application</button>
+    </div>
+    <p id="retreat-application-status" class="retreat-form-status" role="status" aria-live="polite">
+    </p>
   </form>
-  <p class="return-link">
+
+  <section id="retreat-application-receipt" class="application-receipt" hidden tabindex="-1">
+    <div class="eyebrow">Application received</div>
+    <h2>Thank you for applying.</h2>
+    <p>
+      ALV staff will review your application and contact you. Save this reference number for your
+      records:
+    </p>
+    <strong id="retreat-application-reference"></strong>
+    <p>This form is not monitored for emergencies. For immediate crisis support, call 988.</p>
     <a href={`${base}warrior-retreat/`}>Return to Warrior Retreat</a>
-  </p>
+  </section>
 </main>
 
 <script is:inline define:vars={{ apiUrl: retreatPublic.apiUrl }}>

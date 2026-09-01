@@ -16,6 +16,108 @@ export function staffAuthorizeUrl({ cognitoDomain, clientId, redirectUri, challe
   return url.href;
 }
 
+function humanize(value) {
+  if (Array.isArray(value)) return value.length ? value.map(humanize).join(', ') : 'None';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  const result = String(value || '').replace(/-/g, ' ');
+  return result ? result.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Not provided';
+}
+
+export function staffDetailSections(record) {
+  const applicant = record.applicant || {};
+  const address = applicant.address || {};
+  const service = record.service || {};
+  const workforce = record.workforce || {};
+  const finalDetails = record.finalDetails || {};
+  const emergency = finalDetails.emergencyContact || {};
+  return [
+    {
+      title: 'Application',
+      rows: [
+        ['Reference', record.id],
+        ['Submitted', record.submittedAt],
+        ['Applicant type', humanize(record.applicantType)],
+        ['Retreat', humanize(record.retreatType)],
+        ['Timing', humanize(record.retreat?.timingPreference)],
+        ['Service verification', 'Staff follow-up required'],
+      ],
+    },
+    {
+      title: 'Applicant and contact',
+      rows: [
+        ['Name', record.fullName],
+        ['Email', record.email],
+        ['Phone', record.phone],
+        ['Street', address.street],
+        [
+          'City / state / ZIP',
+          [address.city, address.state, address.postalCode].filter(Boolean).join(', '),
+        ],
+        ['County', address.county],
+        ['Referral source', humanize(applicant.referral?.source)],
+        ['Referred by', applicant.referral?.referredBy],
+        [
+          'Spouse',
+          applicant.spouse
+            ? `${applicant.spouse.firstName || ''} ${applicant.spouse.lastName || ''}`.trim()
+            : 'Not applicable',
+        ],
+      ],
+    },
+    {
+      title: 'Service history',
+      rows:
+        service.kind === 'military'
+          ? [
+              ['Type', 'Military'],
+              ['Branch', humanize(service.branch)],
+              ['Status', humanize(service.status)],
+              ['Years', service.years],
+              ['Rank', service.rank],
+              ['Combat-zone deployment', humanize(service.combatDeployment)],
+            ]
+          : [
+              ['Type', 'First responder'],
+              ['Role', humanize(service.type)],
+              ['Agency', service.agency],
+              ['Status', humanize(service.status)],
+              ['Years', service.years],
+              ['Rank', service.rank],
+              ['Critical incident', humanize(service.criticalIncident)],
+            ],
+    },
+    {
+      title: 'Workforce',
+      rows: [
+        ['Employment status', humanize(workforce.employmentStatus)],
+        ['Employer', workforce.employer],
+        ['Job title', workforce.jobTitle],
+        ['Satisfaction', humanize(workforce.satisfaction)],
+        ['Assistance interests', humanize(workforce.interests)],
+        ['Notes', workforce.notes],
+      ],
+    },
+    {
+      title: 'Final details',
+      rows: [
+        ['Emergency contact', emergency.name],
+        ['Relationship', emergency.relationship],
+        ['Emergency phone', emergency.phone],
+        ['Previous retreats', humanize(finalDetails.previousRetreats)],
+        ['Years attended', finalDetails.previousRetreatYears],
+        ['Goals', finalDetails.goals],
+        ['Additional notes', finalDetails.additionalNotes],
+        ['Signature', finalDetails.signature],
+        ['Signature date', finalDetails.signatureDate],
+        ['Consent version', record.consent?.version],
+      ],
+    },
+  ].map((section) => ({
+    ...section,
+    rows: section.rows.map(([label, value]) => [label, humanize(value)]),
+  }));
+}
+
 if (typeof document !== 'undefined') {
   const config = window.__RETREAT_STAFF__;
   const signInButton = document.getElementById('retreat-staff-signin');
@@ -24,6 +126,15 @@ if (typeof document !== 'undefined') {
   const list = document.getElementById('retreat-staff-list');
   const items = document.getElementById('retreat-staff-items');
   const filter = document.getElementById('retreat-staff-status-filter');
+  const search = document.getElementById('retreat-staff-search');
+  const dialog = document.getElementById('retreat-staff-dialog');
+  const dialogTitle = document.getElementById('retreat-staff-dialog-title');
+  const detail = document.getElementById('retreat-staff-detail');
+  const decisionStatus = document.getElementById('retreat-staff-decision-status');
+  const note = document.getElementById('retreat-staff-note');
+  const saveButton = document.getElementById('retreat-staff-save');
+  const closeButton = document.getElementById('retreat-staff-close');
+  const dialogStatus = document.getElementById('retreat-staff-dialog-status');
 
   if (
     !config?.apiUrl ||
@@ -32,7 +143,16 @@ if (typeof document !== 'undefined') {
     !(status instanceof HTMLElement) ||
     !(list instanceof HTMLElement) ||
     !(items instanceof HTMLElement) ||
-    !(filter instanceof HTMLSelectElement)
+    !(filter instanceof HTMLSelectElement) ||
+    !(search instanceof HTMLInputElement) ||
+    !(dialog instanceof HTMLDialogElement) ||
+    !(dialogTitle instanceof HTMLElement) ||
+    !(detail instanceof HTMLElement) ||
+    !(decisionStatus instanceof HTMLSelectElement) ||
+    !(note instanceof HTMLTextAreaElement) ||
+    !(saveButton instanceof HTMLButtonElement) ||
+    !(closeButton instanceof HTMLButtonElement) ||
+    !(dialogStatus instanceof HTMLElement)
   ) {
     throw new Error('Retreat staff page is not connected.');
   }
@@ -40,6 +160,8 @@ if (typeof document !== 'undefined') {
   const redirectUri = staffRedirectUri(window.location.origin, config.base);
   const tokenKey = 'alv-retreat-tokens';
   const verifierKey = 'alv-retreat-pkce';
+  let records = [];
+  let selectedRecord = null;
 
   function randomVerifier() {
     const bytes = crypto.getRandomValues(new Uint8Array(32));
@@ -112,8 +234,7 @@ if (typeof document !== 'undefined') {
       body,
     });
     if (!response.ok) throw new Error('token_exchange_failed');
-    const tokens = await response.json();
-    writeTokens(tokens);
+    writeTokens(await response.json());
     sessionStorage.removeItem(verifierKey);
     window.history.replaceState({}, document.title, redirectUri);
   }
@@ -133,58 +254,113 @@ if (typeof document !== 'undefined') {
       clearSession();
       throw new Error('signed_out');
     }
-    if (!response.ok) throw new Error('api_error');
+    if (!response.ok) {
+      const error = new Error(response.status === 409 ? 'version_conflict' : 'api_error');
+      error.status = response.status;
+      throw error;
+    }
     return response.json();
   }
 
-  function renderItems(records) {
+  function renderItems() {
     items.replaceChildren();
-    if (!records.length) {
+    const term = search.value.trim().toLocaleLowerCase('en-US');
+    const visible = records.filter((record) =>
+      `${record.fullName || ''} ${record.email || ''} ${record.phone || ''}`
+        .toLocaleLowerCase('en-US')
+        .includes(term),
+    );
+    if (!visible.length) {
       const empty = document.createElement('li');
-      empty.textContent = 'No applications in this status.';
+      empty.textContent = term
+        ? 'No applications match this search.'
+        : 'No applications in this status.';
       items.append(empty);
       return;
     }
-    for (const record of records) {
+    for (const record of visible) {
       const item = document.createElement('li');
       item.className = 'retreat-staff-card';
       const title = document.createElement('strong');
       title.textContent = record.fullName;
       const meta = document.createElement('p');
-      meta.textContent = `${record.email} · ${record.program || 'unspecified'} · ${record.submittedAt}`;
-      const message = document.createElement('p');
-      message.textContent = record.message || 'No additional note.';
-      item.append(title, meta, message);
-      if (record.status === 'submitted') {
-        const actions = document.createElement('div');
-        actions.className = 'retreat-staff-actions';
-        for (const next of ['approved', 'declined']) {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.textContent = next === 'approved' ? 'Approve' : 'Decline';
-          button.addEventListener('click', () => updateStatus(record.id, next));
-          actions.append(button);
-        }
-        item.append(actions);
-      }
+      meta.textContent = `${record.email} · ${humanize(record.retreatType)} · ${new Date(record.submittedAt).toLocaleString()}`;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = 'View application';
+      button.addEventListener('click', () => openApplication(record.id));
+      item.append(title, meta, button);
       items.append(item);
     }
+  }
+
+  function renderDetail(record) {
+    detail.replaceChildren();
+    for (const section of staffDetailSections(record)) {
+      const container = document.createElement('section');
+      container.className = 'review-section';
+      const heading = document.createElement('h3');
+      heading.textContent = section.title;
+      const list = document.createElement('dl');
+      for (const [label, value] of section.rows) {
+        const term = document.createElement('dt');
+        const description = document.createElement('dd');
+        term.textContent = label;
+        description.textContent = value;
+        list.append(term, description);
+      }
+      container.append(heading, list);
+      detail.append(container);
+    }
+  }
+
+  async function openApplication(id) {
+    status.textContent = 'Loading application…';
+    const record = await api(`/v1/staff/applications/${encodeURIComponent(id)}`);
+    selectedRecord = record;
+    dialogTitle.textContent = record.fullName || 'Application';
+    decisionStatus.value = record.status;
+    note.value = record.note || '';
+    dialogStatus.textContent = '';
+    renderDetail(record);
+    dialog.showModal();
+    status.textContent = '';
   }
 
   async function loadList() {
     status.textContent = 'Loading applications…';
     const payload = await api(`/v1/staff/applications?status=${encodeURIComponent(filter.value)}`);
-    renderItems(payload.items || []);
+    records = payload.items || [];
+    renderItems();
     status.textContent = '';
   }
 
-  async function updateStatus(id, nextStatus) {
-    status.textContent = 'Saving…';
-    await api(`/v1/staff/applications/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: nextStatus }),
-    });
-    await loadList();
+  async function saveDecision() {
+    if (!selectedRecord) return;
+    saveButton.disabled = true;
+    dialogStatus.textContent = 'Saving decision…';
+    try {
+      selectedRecord = await api(
+        `/v1/staff/applications/${encodeURIComponent(selectedRecord.id)}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            status: decisionStatus.value,
+            note: note.value,
+            expectedVersion: selectedRecord.version,
+          }),
+        },
+      );
+      dialog.close();
+      await loadList();
+    } catch (error) {
+      dialogStatus.textContent =
+        error?.message === 'version_conflict'
+          ? 'Another staff member changed this application. Close and reopen it before saving.'
+          : 'The decision could not be saved. Try again.';
+    } finally {
+      saveButton.disabled = false;
+    }
   }
 
   function showSignedIn() {
@@ -207,10 +383,11 @@ if (typeof document !== 'undefined') {
   });
   signOutButton.addEventListener('click', startLogout);
   filter.addEventListener('change', () => {
-    loadList().catch(() => {
-      showSignedOut('Session expired. Sign in again.');
-    });
+    loadList().catch(() => showSignedOut('Session expired. Sign in again.'));
   });
+  search.addEventListener('input', renderItems);
+  saveButton.addEventListener('click', saveDecision);
+  closeButton.addEventListener('click', () => dialog.close());
 
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
@@ -224,14 +401,10 @@ if (typeof document !== 'undefined') {
         showSignedIn();
         return loadList();
       })
-      .catch(() => {
-        showSignedOut('Sign-in could not be completed. Try again.');
-      });
+      .catch(() => showSignedOut('Sign-in could not be completed. Try again.'));
   } else if (readTokens()?.access_token) {
     showSignedIn();
-    loadList().catch(() => {
-      showSignedOut('Session expired. Sign in again.');
-    });
+    loadList().catch(() => showSignedOut('Session expired. Sign in again.'));
   } else {
     showSignedOut('');
   }

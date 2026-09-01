@@ -305,13 +305,29 @@ async function assertRetreatStatus(page, label) {
   await page.goto(new URL('warrior-retreat-application/', siteUrl).href, {
     waitUntil: 'networkidle',
   });
-  const heading = retreatLive ? 'Apply for a Warrior Retreat' : 'Application service not connected';
+  const heading = retreatLive ? 'Retreat application' : 'Application service not connected';
   await page.getByRole('heading', { name: heading }).waitFor({ state: 'visible' });
   await assertNoHorizontalOverflow(page, `${label} retreat status`);
 
-  const layout = await page.evaluate(() => {
-    const card = document.querySelector('.retreat-status').getBoundingClientRect();
-    const link = document.querySelector('.return-link a').getBoundingClientRect();
+  if (retreatLive) {
+    await page.locator('input[name="applicantType"][value="military"]').check();
+    await page.locator('input[name="retreatType"][value="mens"]').check();
+    await page.locator('select[name="timingPreference"]').selectOption('next-available');
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page
+      .getByRole('group', { name: 'Your contact information' })
+      .waitFor({ state: 'visible' });
+    await assertNoHorizontalOverflow(page, `${label} retreat contact step`);
+    await page.getByRole('button', { name: 'Previous' }).click();
+  }
+
+  const layout = await page.evaluate((live) => {
+    const card = document
+      .querySelector(live ? '.retreat-application-shell' : '.retreat-status')
+      .getBoundingClientRect();
+    const link = document
+      .querySelector(live ? '.application-back' : '.return-link a')
+      .getBoundingClientRect();
     return {
       viewportWidth: document.documentElement.clientWidth,
       card: {
@@ -331,7 +347,7 @@ async function assertRetreatStatus(page, label) {
         height: link.height,
       },
     };
-  });
+  }, retreatLive);
   const usable =
     layout.card.width > 0 &&
     layout.card.left >= 0 &&
