@@ -70,3 +70,33 @@ test('rejects missing account guards and deprecated state locking', () => {
   assert.match(failures, /use_lockfile/);
   assert.match(failures, /deprecated DynamoDB/);
 });
+
+test('rejects an AWS access key and a private key block', () => {
+  const files = [
+    ...compliantRoot('org'),
+    ...compliantRoot('nonprod'),
+    ...compliantRoot('prod'),
+    {
+      path: 'infra/modules/unsafe/secrets.tf',
+      source: `
+        # AKIAIOSFODNN7EXAMPLE is the AWS documentation example, not a live key.
+        unused = "AKIAIOSFODNN7EXAMPLE"
+        pem = <<-EOF
+        -----BEGIN RSA PRIVATE KEY-----
+        fake
+        -----END RSA PRIVATE KEY-----
+        EOF
+      `,
+    },
+  ];
+  const failures = checkTerraformPolicy(files).join('\n');
+  assert.match(failures, /AWS access key/);
+  assert.match(failures, /private key/);
+});
+
+test('rejects a missing environment providers file and backend example', () => {
+  const files = [...compliantRoot('nonprod'), ...compliantRoot('prod')];
+  const failures = checkTerraformPolicy(files).join('\n');
+  assert.match(failures, /infra\/live\/org\/us-east-1\/providers.tf is required/);
+  assert.match(failures, /infra\/live\/org\/us-east-1\/backend.s3.tfbackend.example is required/);
+});
