@@ -87,22 +87,12 @@ resource "aws_cloudfront_origin_access_control" "origin" {
   signing_protocol                  = "sigv4"
 }
 
-check "distribution_belongs_to_account" {
-  assert {
-    condition = startswith(
-      var.cloudfront_distribution_arn,
-      "arn:aws:cloudfront::${var.aws_account_id}:distribution/",
-    )
-    error_message = "cloudfront_distribution_arn must belong to aws_account_id."
-  }
-}
-
 locals {
   cloudfront_origin_policy = {
     action         = "s3:GetObject"
     principal      = "cloudfront.amazonaws.com"
     source_account = var.aws_account_id
-    source_arn     = var.cloudfront_distribution_arn
+    source_arn     = aws_cloudfront_distribution.site.arn
   }
 }
 

@@ -10,5 +10,15 @@ CloudFront receives read-only object access from its service principal, restrict
 distribution ARN and source account. The distribution must use the exported OAC ID with the S3
 regional endpoint; never use the public S3 website endpoint.
 
+The distribution rewrites `/path/` and extensionless `/path` requests to their generated
+`index.html` objects at the viewer-request edge, so deep Astro routes do not depend on an SPA
+fallback. HTML and other mutable content can cache for at most five minutes; fingerprinted `_astro`
+assets cache for one year. The caller must supply the issued certificate, approved aliases,
+customer-approved CSP, WAF ARN, and dedicated CloudFront log bucket from their focused modules.
+
+The initial distribution intentionally has one origin and no geographic allowlist. Multi-origin
+failover requires the customer-approved RPO/RTO and recovery design in #63/#93. Alabama Veteran's
+public resources remain globally readable; the attached WAF from #84 supplies the traffic boundary.
+
 Releases use versioning plus 90-day noncurrent retention by default. `force_destroy` is not exposed,
 so Terraform cannot silently delete a populated origin bucket.

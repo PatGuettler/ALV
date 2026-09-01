@@ -9,13 +9,26 @@ override_resource {
   }
 }
 
+override_resource {
+  target          = aws_cloudfront_distribution.site
+  override_during = plan
+  values = {
+    arn = "arn:aws:cloudfront::111111111111:distribution/E1234567890ABC"
+  }
+}
+
 variables {
-  bucket_name                 = "alv-test-web-origin"
-  access_log_bucket_name      = "alv-test-central-logs"
-  deployment_role_arns        = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
-  aws_account_id              = "111111111111"
-  cloudfront_distribution_arn = "arn:aws:cloudfront::111111111111:distribution/E1234567890ABC"
-  origin_access_control_name  = "alv-test-origin"
+  bucket_name                       = "alv-test-web-origin"
+  access_log_bucket_name            = "alv-test-central-logs"
+  deployment_role_arns              = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
+  aws_account_id                    = "111111111111"
+  distribution_name                 = "alv-test"
+  origin_access_control_name        = "alv-test-origin"
+  domain_aliases                    = ["www.example.com"]
+  acm_certificate_arn               = "arn:aws:acm:us-east-1:111111111111:certificate/12345678-1234-1234-1234-123456789abc"
+  web_acl_arn                       = "arn:aws:wafv2:us-east-1:111111111111:global/webacl/alv-test/12345678-1234-1234-1234-123456789abc"
+  cloudfront_log_bucket_domain_name = "alv-test-edge-logs.s3.amazonaws.com"
+  content_security_policy           = "default-src 'self'; object-src 'none'; frame-ancestors 'self'"
   tags = {
     Project     = "alabama-veteran"
     Environment = "test"
@@ -99,6 +112,53 @@ run "secure_origin_defaults" {
     )
     error_message = "CloudFront access must use the service principal and read-only account scope."
   }
+
+  assert {
+    condition     = aws_cloudfront_distribution.site.default_root_object == "index.html"
+    error_message = "CloudFront must resolve the root document without S3 website hosting."
+  }
+
+  assert {
+    condition     = aws_cloudfront_distribution.site.http_version == "http2and3"
+    error_message = "CloudFront must enable HTTP/2 and HTTP/3."
+  }
+
+  assert {
+    condition     = one(aws_cloudfront_distribution.site.default_cache_behavior).compress
+    error_message = "CloudFront must compress eligible site responses."
+  }
+
+  assert {
+    condition = (
+      one(aws_cloudfront_distribution.site.default_cache_behavior).viewer_protocol_policy ==
+      "redirect-to-https"
+    )
+    error_message = "CloudFront must redirect HTTP requests to HTTPS."
+  }
+
+  assert {
+    condition = (
+      one(aws_cloudfront_distribution.site.viewer_certificate).minimum_protocol_version ==
+      "TLSv1.2_2021"
+    )
+    error_message = "CloudFront must reject legacy TLS versions."
+  }
+
+  assert {
+    condition = (
+      aws_cloudfront_cache_policy.html.max_ttl == 300 &&
+      aws_cloudfront_cache_policy.immutable.min_ttl == 31536000
+    )
+    error_message = "HTML must remain short-lived while fingerprinted assets remain immutable."
+  }
+
+  assert {
+    condition = strcontains(
+      aws_cloudfront_function.directory_rewrite.code,
+      "request.uri = uri + '/index.html'",
+    )
+    error_message = "The viewer-request function must resolve extensionless directory routes."
+  }
 }
 
 run "reject_self_logging" {
@@ -111,12 +171,12 @@ run "reject_self_logging" {
   expect_failures = [var.access_log_bucket_name]
 }
 
-run "reject_cross_account_distribution" {
+run "reject_cross_account_certificate" {
   command = plan
 
   variables {
-    cloudfront_distribution_arn = "arn:aws:cloudfront::222222222222:distribution/E1234567890ABC"
+    acm_certificate_arn = "arn:aws:acm:us-east-1:222222222222:certificate/12345678-1234-1234-1234-123456789abc"
   }
 
-  expect_failures = [check.distribution_belongs_to_account]
+  expect_failures = [check.certificate_belongs_to_account]
 }

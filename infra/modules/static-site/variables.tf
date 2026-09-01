@@ -60,16 +60,13 @@ variable "aws_account_id" {
   }
 }
 
-variable "cloudfront_distribution_arn" {
-  description = "Exact CloudFront distribution ARN allowed to read origin objects."
+variable "distribution_name" {
+  description = "Environment-specific prefix for the distribution and edge policies."
   type        = string
 
   validation {
-    condition = can(regex(
-      "^arn:aws:cloudfront::[0-9]{12}:distribution/[A-Z0-9]+$",
-      var.cloudfront_distribution_arn,
-    ))
-    error_message = "cloudfront_distribution_arn must be an exact CloudFront distribution ARN."
+    condition     = can(regex("^[a-z0-9-]{3,32}$", var.distribution_name))
+    error_message = "distribution_name must contain 3-32 lowercase letters, digits, or hyphens."
   }
 }
 
@@ -83,6 +80,97 @@ variable "origin_access_control_name" {
       length(var.origin_access_control_name) <= 64
     )
     error_message = "origin_access_control_name must contain 3-64 characters."
+  }
+}
+
+variable "domain_aliases" {
+  description = "Approved production hostnames attached to the CloudFront distribution."
+  type        = set(string)
+
+  validation {
+    condition = (
+      length(var.domain_aliases) > 0 &&
+      alltrue([
+        for alias in var.domain_aliases : can(
+          regex("^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$", alias),
+        )
+      ])
+    )
+    error_message = "domain_aliases must contain one or more valid lowercase DNS names."
+  }
+}
+
+variable "acm_certificate_arn" {
+  description = "Issued us-east-1 ACM certificate covering every domain alias."
+  type        = string
+
+  validation {
+    condition = can(regex(
+      "^arn:aws:acm:us-east-1:[0-9]{12}:certificate/[0-9a-f-]+$",
+      var.acm_certificate_arn,
+    ))
+    error_message = "acm_certificate_arn must be an ACM certificate ARN from us-east-1."
+  }
+}
+
+variable "web_acl_arn" {
+  description = "Approved CloudFront-scope WAFv2 web ACL ARN provisioned by issue #84."
+  type        = string
+
+  validation {
+    condition = can(regex(
+      "^arn:aws:wafv2:us-east-1:[0-9]{12}:global/webacl/[A-Za-z0-9_-]+/[0-9a-f-]+$",
+      var.web_acl_arn,
+    ))
+    error_message = "web_acl_arn must be a global CloudFront WAFv2 web ACL ARN."
+  }
+}
+
+variable "cloudfront_log_bucket_domain_name" {
+  description = "Dedicated legacy-ACL-compatible S3 log bucket domain name provisioned by issue #84."
+  type        = string
+
+  validation {
+    condition = can(regex(
+      "^[a-z0-9][a-z0-9.-]+\\.s3\\.amazonaws\\.com$",
+      var.cloudfront_log_bucket_domain_name,
+    ))
+    error_message = "cloudfront_log_bucket_domain_name must be an S3 bucket domain name."
+  }
+}
+
+variable "cloudfront_log_prefix" {
+  description = "Environment-specific prefix for CloudFront standard logs."
+  type        = string
+  default     = "cloudfront/"
+
+  validation {
+    condition     = length(trimspace(var.cloudfront_log_prefix)) > 0
+    error_message = "cloudfront_log_prefix must not be empty."
+  }
+}
+
+variable "content_security_policy" {
+  description = "Customer-approved CSP covering the site's explicit external integrations."
+  type        = string
+
+  validation {
+    condition = (
+      length(trimspace(var.content_security_policy)) > 0 &&
+      strcontains(lower(var.content_security_policy), "default-src")
+    )
+    error_message = "content_security_policy must define at least a default-src directive."
+  }
+}
+
+variable "price_class" {
+  description = "Approved CloudFront price class."
+  type        = string
+  default     = "PriceClass_100"
+
+  validation {
+    condition     = contains(["PriceClass_100", "PriceClass_200", "PriceClass_All"], var.price_class)
+    error_message = "price_class must be a supported CloudFront price class."
   }
 }
 
