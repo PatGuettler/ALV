@@ -45,6 +45,20 @@ data "aws_iam_policy_document" "retreat_api" {
       aws_dynamodb_table.application_audit.arn,
     ]
   }
+
+  statement {
+    sid    = "UseRetreatDataKey"
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+      "kms:Encrypt",
+      "kms:GenerateDataKey",
+      "kms:ReEncryptFrom",
+      "kms:ReEncryptTo",
+    ]
+    resources = [aws_kms_key.retreat.arn]
+  }
 }
 
 resource "aws_iam_role" "retreat_api" {
