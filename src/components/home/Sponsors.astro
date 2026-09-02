@@ -28,14 +28,21 @@ const sponsors = [
       {
         sponsors.map(({ src, alt }) => (
           <div class="spon-item">
-            <img src={src} alt={alt} height="42" decoding="async" />
+            <img
+              src={src}
+              alt={alt}
+              height="42"
+              loading="lazy"
+              fetchpriority="low"
+              decoding="async"
+            />
           </div>
         ))
       }
       {
         sponsors.map(({ src }) => (
           <div class="spon-item" aria-hidden="true">
-            <img src={src} alt="" height="42" loading="lazy" decoding="async" />
+            <img src={src} alt="" height="42" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
         ))
       }

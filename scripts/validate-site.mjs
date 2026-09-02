@@ -115,6 +115,14 @@ if (!retreatPage.includes('Application service not connected')) {
   failures.push('The retreat service status component is missing.');
 }
 
+const sponsors = await readFile(
+  resolve(sourceRoot, 'components', 'home', 'Sponsors.astro'),
+  'utf8',
+);
+if ((sponsors.match(/loading="lazy"/g) || []).length < 2) {
+  failures.push('Homepage sponsor logos must load lazily so they do not compete with LCP.');
+}
+
 if (failures.length > 0) {
   console.error(failures.join('\n'));
   process.exit(1);
