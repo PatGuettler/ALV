@@ -99,7 +99,8 @@ try {
 
     for (const route of routes) {
       const url = new URL(route, siteUrl).href;
-      const response = await page.goto(url, { waitUntil: 'networkidle' });
+      // GHL widgets keep network activity open; wait for the document, not networkidle.
+      const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
       if (!response?.ok()) throw new Error(`${viewport.name} route failed to load: ${url}`);
 
       const results = await new AxeBuilder({ page }).withTags(axeTags).analyze();

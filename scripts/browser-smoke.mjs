@@ -52,6 +52,8 @@ server.stderr.on('data', (chunk) => (serverOutput += chunk));
 
 const trimmedBase = (process.env.BASE_PATH || '/').replace(/^\/+|\/+$/g, '');
 const siteUrl = `http://127.0.0.1:4173/${trimmedBase ? `${trimmedBase}/` : ''}`;
+/** GoHighLevel embeds keep connections open, so networkidle never settles. */
+const pageReady = 'domcontentloaded';
 
 for (let attempt = 0; attempt < 50; attempt++) {
   try {
@@ -81,7 +83,7 @@ async function stopPreviewServer() {
 
 async function loadRoute(page, pageId, route, browserErrors) {
   browserErrors.length = 0;
-  await page.goto(new URL(route, siteUrl).href, { waitUntil: 'networkidle' });
+  await page.goto(new URL(route, siteUrl).href, { waitUntil: pageReady });
   await page.locator(`#page-${pageId}.active`).waitFor({ state: 'visible' });
 
   if (browserErrors.length > 0) {
@@ -303,7 +305,7 @@ async function assertCrisisControl(page, label, width) {
 
 async function assertRetreatStatus(page, label) {
   await page.goto(new URL('warrior-retreat-application/', siteUrl).href, {
-    waitUntil: 'networkidle',
+    waitUntil: pageReady,
   });
   const heading = retreatLive ? 'Warrior Retreat Application' : 'Application service not connected';
   await page.getByRole('heading', { name: heading }).waitFor({ state: 'visible' });
@@ -361,7 +363,7 @@ async function assertRetreatStatus(page, label) {
   assertLayout(usable, `${label} retreat status panel or return link is clipped`, layout);
 
   if (retreatLive) {
-    await page.goto(new URL('warrior-retreat-staff/', siteUrl).href, { waitUntil: 'networkidle' });
+    await page.goto(new URL('warrior-retreat-staff/', siteUrl).href, { waitUntil: pageReady });
     await page
       .getByRole('heading', { name: 'Retreat Administration' })
       .waitFor({ state: 'visible' });
