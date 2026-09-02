@@ -406,6 +406,120 @@ async function assertRetreatStatus(page, label) {
   }
 }
 
+async function completeRequiredRetreatSteps(page) {
+  await page.goto(new URL('warrior-retreat-application/', siteUrl).href, {
+    waitUntil: pageReady,
+  });
+  await page.locator('input[name="applicantType"][value="military"]').check();
+  await page.locator('input[name="retreatType"][value="mens"]').check();
+  await page.locator('select[name="timingPreference"]').selectOption('next-available');
+  await page.locator('#retreat-next').focus();
+  await page.keyboard.press('Enter');
+  await page.locator('#contact-step-title').waitFor({ state: 'visible' });
+  const focusedContactHeading = await page.evaluate(
+    () => document.activeElement?.id === 'contact-step-title',
+  );
+  assertLayout(focusedContactHeading, 'Retreat step heading did not receive keyboard focus', {});
+
+  await page.locator('#retreat-next').click();
+  const focusedInvalidField = await page.evaluate(
+    () => document.activeElement?.getAttribute('name') === 'firstName',
+  );
+  assertLayout(focusedInvalidField, 'Retreat validation did not focus the first invalid field', {});
+
+  await page.locator('input[name="firstName"]').fill('Test');
+  await page.locator('input[name="lastName"]').fill('Applicant');
+  await page.locator('input[name="dateOfBirth"]').fill('1980-01-01');
+  await page.locator('input[name="phone"]').fill('2055550100');
+  await page.locator('input[name="email"]').fill('test.applicant@example.com');
+  await page.locator('input[name="city"]').fill('Birmingham');
+  await page.locator('select[name="state"]').selectOption('AL');
+  await page.locator('input[name="postalCode"]').fill('35203');
+  await page.locator('#retreat-next').click();
+
+  await page.locator('input[name="militaryStatus"][value="veteran"]').check();
+  await page.locator('select[name="militaryBranch"]').selectOption('army');
+  await page.locator('#retreat-next').click();
+  await page.locator('select[name="employmentStatus"]').selectOption('retired');
+  await page.locator('#retreat-next').click();
+  await page.locator('#retreat-next').click();
+
+  await page.locator('input[name="emergencyName"]').fill('Test Contact');
+  await page.locator('input[name="emergencyRelationship"]').fill('Friend');
+  await page.locator('input[name="emergencyPhone"]').fill('2055550199');
+  await page.locator('textarea[name="goals"]').fill('Test the application workflow.');
+  for (const name of [
+    'accuracyAgreement',
+    'contactConsent',
+    'placementAgreement',
+    'policyAgreement',
+  ]) {
+    await page.locator(`input[name="${name}"]`).check();
+  }
+  await page.locator('input[name="signature"]').fill('Test Applicant');
+  await page.locator('input[name="signatureDate"]').fill(new Date().toISOString().slice(0, 10));
+  await page.locator('#retreat-next').click();
+  await page.locator('#review-title').waitFor({ state: 'visible' });
+}
+
+async function assertRetreatSubmissionFailuresAndRetry(page) {
+  const applicationRoute = '**/v1/applications';
+  let attempts = 0;
+  await page.route(applicationRoute, async (route) => {
+    attempts += 1;
+    if (attempts === 1) {
+      await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });
+      return;
+    }
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: 'test-browser-receipt' }),
+    });
+  });
+  await completeRequiredRetreatSteps(page);
+  await page.locator('#retreat-submit').click();
+  await page
+    .getByText('The application could not be sent. Your entries are still here; please try again.')
+    .waitFor({ state: 'visible' });
+  const retainedGoal = await page.locator('textarea[name="goals"]').inputValue();
+  assertLayout(
+    retainedGoal === 'Test the application workflow.',
+    'Retreat API failure discarded entered data',
+    { retainedGoal },
+  );
+  await page.locator('#retreat-submit').click();
+  await page.locator('#retreat-application-receipt').waitFor({ state: 'visible' });
+  const reference = await page.locator('#retreat-application-reference').textContent();
+  const receiptFocused = await page.evaluate(
+    () => document.activeElement?.id === 'retreat-application-receipt',
+  );
+  assertLayout(
+    attempts === 2 && reference === 'TEST-BROWSER-RECEIPT' && receiptFocused,
+    'Retreat retry did not produce a focused durable receipt',
+    { attempts, reference, receiptFocused },
+  );
+  await page.unroute(applicationRoute);
+}
+
+async function assertRetreatSubmissionTimeout(page) {
+  const applicationRoute = '**/v1/applications';
+  await page.route(applicationRoute, async (route) => {
+    await new Promise((resolveWait) => setTimeout(resolveWait, 1_000));
+    await route
+      .fulfill({ status: 504, contentType: 'application/json', body: '{}' })
+      .catch(() => {});
+  });
+  await completeRequiredRetreatSteps(page);
+  await page.locator('#retreat-submit').click();
+  await page
+    .getByText('The request timed out. Your entries are still here; please try again.')
+    .waitFor({ state: 'visible' });
+  const stillEditable = await page.locator('textarea[name="goals"]').isEditable();
+  assertLayout(stillEditable, 'Retreat timeout did not restore the editable form', {});
+  await page.unroute(applicationRoute);
+}
+
 async function assertCustomerReportedLayouts(page, label, width, browserErrors) {
   await loadRoute(page, 'events', 'events/', browserErrors);
   await assertNoHorizontalOverflow(page, `${label} events`);
@@ -476,6 +590,9 @@ try {
     isMobile: true,
   });
   const mobile = await mobileContext.newPage();
+  await mobile.addInitScript(() => {
+    window.__RETREAT_REQUEST_TIMEOUT_MS__ = 100;
+  });
   const mobileErrors = [];
   mobile.on('pageerror', (error) => mobileErrors.push(error.message));
 
@@ -512,6 +629,12 @@ try {
   for (const width of [320, 375, 412, 768]) {
     await mobile.setViewportSize({ width, height: 915 });
     await assertCustomerReportedLayouts(mobile, `${width}px`, width, mobileErrors);
+  }
+
+  if (retreatLive) {
+    await mobile.setViewportSize({ width: 412, height: 915 });
+    await assertRetreatSubmissionFailuresAndRetry(mobile);
+    await assertRetreatSubmissionTimeout(mobile);
   }
 
   await mobileContext.close();

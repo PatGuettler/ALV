@@ -798,7 +798,8 @@ if (typeof document !== 'undefined') {
       consentTimestamp: new Date().toISOString(),
     });
     const abortController = new AbortController();
-    const timeoutId = window.setTimeout(() => abortController.abort(), 20_000);
+    const requestTimeout = Number(window.__RETREAT_REQUEST_TIMEOUT_MS__) || 20_000;
+    const timeoutId = window.setTimeout(() => abortController.abort(), requestTimeout);
     submitButton.disabled = true;
     previousButton.disabled = true;
     form.setAttribute('aria-busy', 'true');
