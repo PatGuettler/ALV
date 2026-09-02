@@ -136,8 +136,14 @@ footer .foot-links a.foot-accent {
 #page-resources .rc-phone,
 #page-resources .rc-addr,
 #page-resources .filter-label,
-#page-resources .sec-head-text p {
+#page-resources .sec-head-text p,
+#page-resources .resource-results-count {
   color: var(--mg);
+}
+
+#page-resources .res-suggest p,
+#page-resources .res-reviewed {
+  color: var(--muted-on-dark);
 }
 
 #page-resources .res-card:hover .rc-desc,
