@@ -14,3 +14,5 @@ locals {
 
 # Workload modules remain deliberately unwired until their focused resource issues are implemented.
 # Warrior Retreat intake is provisioned in this root (Cognito, API, DynamoDB) for ALV prod.
+# Media originals/derivatives (#277) live in infra/modules/media and are applied from this root after
+# the logging bucket, uploader role, and alarm topic are issued.
