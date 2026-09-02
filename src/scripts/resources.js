@@ -1377,6 +1377,11 @@ const BADGE_LABELS = {
   nonprofit: 'Nonprofit',
   hotline: 'Hotline',
 };
+const RESOURCE_PAGE_SIZE = 12;
+let currentQuery = '';
+let currentType = 'all';
+let visibleLimit = RESOURCE_PAGE_SIZE;
+
 function buildCard(r) {
   const phone = r.phone ? `<div class="rc-phone">📞 ${r.phone}</div>` : '';
   return `<a href="${r.url}" target="_blank" rel="noopener" class="res-card" data-cat="${r.cat}" data-type="${r.type}" data-name="${r.name.toLowerCase()}" data-desc="${r.desc.toLowerCase()}"><div class="rc-head"><div class="rc-name">${r.name}</div><span class="rc-badge badge-${r.type}">${BADGE_LABELS[r.type]}</span></div>
@@ -1408,6 +1413,7 @@ function populateGrids() {
         .map(buildCard)
         .join('');
   });
+  updateAllGrid();
 }
 function showSection(id, btn) {
   document.querySelectorAll('.cat-section').forEach((s) => s.classList.remove('visible'));
@@ -1417,7 +1423,10 @@ function showSection(id, btn) {
   if (btn) btn.classList.add('active');
   const searchInput = document.getElementById('search-input');
   if (searchInput) searchInput.value = '';
-  showAllCards();
+  currentQuery = '';
+  currentType = 'all';
+  visibleLimit = RESOURCE_PAGE_SIZE;
+  updateAllGrid();
   document.getElementById('no-results')?.classList.remove('visible');
   const categoryNavigation = document.querySelector('.cat-nav-wrap');
   if (categoryNavigation) {
@@ -1427,10 +1436,9 @@ function showSection(id, btn) {
 function filterType(type, btn) {
   document.querySelectorAll('.filter-row .f-btn').forEach((b) => b.classList.remove('active'));
   btn?.classList.add('active');
-  document.querySelectorAll('#all-grid .res-card').forEach((c) => {
-    c.classList.toggle('hidden-res', type !== 'all' && c.dataset.type !== type);
-  });
-  checkNoResults();
+  currentType = type;
+  visibleLimit = RESOURCE_PAGE_SIZE;
+  updateAllGrid();
 }
 export function resourceCardMatches(query, card) {
   const q = String(query || '')
@@ -1453,31 +1461,42 @@ function handleSearch(val) {
   var _ab = document.querySelector('.cat-btn');
   if (_ab) _ab.classList.add('active');
   if (!q) {
-    showAllCards();
-    document.getElementById('no-results')?.classList.remove('visible');
+    currentQuery = '';
+    currentType = 'all';
+    visibleLimit = RESOURCE_PAGE_SIZE;
+    updateAllGrid();
     return;
   }
-  let found = 0;
-  document.querySelectorAll('#all-grid .res-card').forEach((c) => {
-    const match = resourceCardMatches(q, {
-      name: c.dataset.name,
-      desc: c.dataset.desc,
-      cat: c.dataset.cat,
-      type: c.dataset.type,
-    });
-    c.classList.toggle('hidden-res', !match);
-    if (match) found++;
-  });
-  document.getElementById('no-results').classList.toggle('visible', found === 0);
+  currentQuery = q;
+  currentType = 'all';
+  visibleLimit = RESOURCE_PAGE_SIZE;
+  updateAllGrid();
   document.querySelectorAll('.filter-row .f-btn').forEach((b) => b.classList.remove('active'));
   document.querySelector('.filter-row .f-btn')?.classList.add('active');
 }
-function showAllCards() {
-  document.querySelectorAll('#all-grid .res-card').forEach((c) => c.classList.remove('hidden-res'));
-}
-function checkNoResults() {
-  const v = document.querySelectorAll('#all-grid .res-card:not(.hidden-res)').length;
-  document.getElementById('no-results').classList.toggle('visible', v === 0);
+
+function updateAllGrid() {
+  const cards = [...document.querySelectorAll('#all-grid .res-card')];
+  const matches = cards.filter(
+    (card) =>
+      (currentType === 'all' || card.dataset.type === currentType) &&
+      resourceCardMatches(currentQuery, {
+        name: card.dataset.name,
+        desc: card.dataset.desc,
+        cat: card.dataset.cat,
+        type: card.dataset.type,
+      }),
+  );
+  const visibleCards = new Set(matches.slice(0, visibleLimit));
+  cards.forEach((card) => card.classList.toggle('hidden-res', !visibleCards.has(card)));
+
+  const shown = Math.min(matches.length, visibleLimit);
+  const count = document.getElementById('resource-results-count');
+  if (count)
+    count.textContent = matches.length ? `Showing ${shown} of ${matches.length} resources` : '';
+  const loadMore = document.getElementById('resource-load-more');
+  if (loadMore instanceof HTMLButtonElement) loadMore.hidden = shown >= matches.length;
+  document.getElementById('no-results')?.classList.toggle('visible', matches.length === 0);
 }
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
@@ -1495,6 +1514,10 @@ if (typeof document !== 'undefined') {
     document
       .querySelector('[data-resource-search]')
       ?.addEventListener('click', () => handleSearch(searchInput?.value || ''));
+    document.getElementById('resource-load-more')?.addEventListener('click', () => {
+      visibleLimit += RESOURCE_PAGE_SIZE;
+      updateAllGrid();
+    });
     document.querySelector('[data-print-page]')?.addEventListener('click', () => window.print());
   });
 }

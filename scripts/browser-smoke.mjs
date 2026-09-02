@@ -495,6 +495,17 @@ try {
     return cards.length > 0 && cards.some((card) => card.offsetParent !== null);
   });
 
+  await mobile.locator('#search-input').fill('');
+  const initialResourceCount = await mobile.locator('#all-grid .res-card:visible').count();
+  if (initialResourceCount !== 12) {
+    throw new Error(`Resources pagination showed ${initialResourceCount} cards instead of 12.`);
+  }
+  await mobile.getByRole('button', { name: 'Show more resources' }).click();
+  const expandedResourceCount = await mobile.locator('#all-grid .res-card:visible').count();
+  if (expandedResourceCount !== 24) {
+    throw new Error(`Resources pagination showed ${expandedResourceCount} cards after expansion.`);
+  }
+
   const crisisHref = await mobile.locator('a[href="tel:988"]').first().getAttribute('href');
   if (crisisHref !== 'tel:988') throw new Error('The 988 crisis link is missing.');
 

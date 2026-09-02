@@ -27,6 +27,11 @@
       ><button class="f-btn" type="button" data-resource-filter="hotline">Hotlines</button>
     </div>
     <div class="res-grid" id="all-grid"></div>
+    <div class="resource-pagination" aria-live="polite">
+      <p id="resource-results-count" class="resource-results-count"></p>
+      <button id="resource-load-more" class="btn-r" type="button" hidden>Show more resources</button
+      >
+    </div>
     <div class="no-results" id="no-results">
       <h3>No Resources Found</h3>
       <p>Try a different keyword or clear your search to browse everything.</p>
@@ -396,100 +401,100 @@
       </div>
     </div>
     <div class="res-grid" id="transition-grid"></div>
-    <div id="section-ministry" class="cat-section">
-      <div class="sec-head">
-        <div class="sec-head-icon">✝️</div>
-        <div class="sec-head-text">
-          <h2>Ministry &amp; Faith-Based</h2>
-          <p>
-            Faith-centered programs and ministries serving veterans, first responders, and their
-            families — retreats, peer support, and spiritual care.
-          </p>
-          <div class="redbar"></div>
-        </div>
+  </div>
+  <div id="section-ministry" class="cat-section">
+    <div class="sec-head">
+      <div class="sec-head-icon">✝️</div>
+      <div class="sec-head-text">
+        <h2>Ministry &amp; Faith-Based</h2>
+        <p>
+          Faith-centered programs and ministries serving veterans, first responders, and their
+          families — retreats, peer support, and spiritual care.
+        </p>
+        <div class="redbar"></div>
       </div>
-      <div class="res-grid" id="ministry-grid"></div>
     </div>
-    <div id="section-women" class="cat-section">
-      <div class="sec-head">
-        <div class="sec-head-icon">👩‍✈️</div>
-        <div class="sec-head-text">
-          <h2>Women Veterans</h2>
-          <p>
-            Resources built for the unique needs of women who served — health care, peer support,
-            advocacy, and help navigating VA benefits.
-          </p>
-          <div class="redbar"></div>
-        </div>
+    <div class="res-grid" id="ministry-grid"></div>
+  </div>
+  <div id="section-women" class="cat-section">
+    <div class="sec-head">
+      <div class="sec-head-icon">👩‍✈️</div>
+      <div class="sec-head-text">
+        <h2>Women Veterans</h2>
+        <p>
+          Resources built for the unique needs of women who served — health care, peer support,
+          advocacy, and help navigating VA benefits.
+        </p>
+        <div class="redbar"></div>
       </div>
-      <div class="res-grid" id="women-grid"></div>
     </div>
-    <div id="section-adaptive" class="cat-section">
-      <div class="sec-head">
-        <div class="sec-head-icon">🏅</div>
-        <div class="sec-head-text">
-          <h2>Adaptive Sports &amp; Recreation</h2>
-          <p>
-            Stay active after service. Adaptive sports, fitness, and outdoor recreation for veterans
-            of every ability, including Alabama’s own Lakeshore Foundation.
-          </p>
-          <div class="redbar"></div>
-        </div>
+    <div class="res-grid" id="women-grid"></div>
+  </div>
+  <div id="section-adaptive" class="cat-section">
+    <div class="sec-head">
+      <div class="sec-head-icon">🏅</div>
+      <div class="sec-head-text">
+        <h2>Adaptive Sports &amp; Recreation</h2>
+        <p>
+          Stay active after service. Adaptive sports, fitness, and outdoor recreation for veterans
+          of every ability, including Alabama’s own Lakeshore Foundation.
+        </p>
+        <div class="redbar"></div>
       </div>
-      <div class="res-grid" id="adaptive-grid"></div>
     </div>
-    <div id="section-recovery" class="cat-section">
-      <div class="sec-head">
-        <div class="sec-head-icon">🫂</div>
-        <div class="sec-head-text">
-          <h2>Substance Use &amp; Recovery</h2>
-          <p>
-            Confidential treatment and recovery support for alcohol and substance use — free,
-            judgment-free, and available around the clock.
-          </p>
-          <div class="redbar"></div>
-        </div>
+    <div class="res-grid" id="adaptive-grid"></div>
+  </div>
+  <div id="section-recovery" class="cat-section">
+    <div class="sec-head">
+      <div class="sec-head-icon">🫂</div>
+      <div class="sec-head-text">
+        <h2>Substance Use &amp; Recovery</h2>
+        <p>
+          Confidential treatment and recovery support for alcohol and substance use — free,
+          judgment-free, and available around the clock.
+        </p>
+        <div class="redbar"></div>
       </div>
-      <div class="res-grid" id="recovery-grid"></div>
     </div>
-    <div id="section-servicedogs" class="cat-section">
-      <div class="sec-head">
-        <div class="sec-head-icon">🦮</div>
-        <div class="sec-head-text">
-          <h2>Service Dogs</h2>
-          <p>
-            Organizations that train and place service dogs at no cost for veterans living with
-            PTSD, traumatic brain injury, or mobility needs, serving Alabama and the Southeast.
-          </p>
-          <div class="redbar"></div>
-        </div>
+    <div class="res-grid" id="recovery-grid"></div>
+  </div>
+  <div id="section-servicedogs" class="cat-section">
+    <div class="sec-head">
+      <div class="sec-head-icon">🦮</div>
+      <div class="sec-head-text">
+        <h2>Service Dogs</h2>
+        <p>
+          Organizations that train and place service dogs at no cost for veterans living with PTSD,
+          traumatic brain injury, or mobility needs, serving Alabama and the Southeast.
+        </p>
+        <div class="redbar"></div>
       </div>
-      <div class="res-grid" id="servicedogs-grid"></div>
     </div>
-    <div class="res-suggest">
-      <h3>Don’t See What You Need?</h3>
-      <p>
-        We are always adding resources. Tell us what is missing, or print this guide to share with a
-        veteran who needs it.
-      </p>
-      <div class="rs-btns">
-        <button class="rs-btn" type="button" data-contact> Suggest a Resource</button><button
-          class="rs-btn-o"
-          type="button"
-          data-print-page>Print This Guide</button
-        >
-      </div>
-      <div
-        style="
+    <div class="res-grid" id="servicedogs-grid"></div>
+  </div>
+  <div class="res-suggest">
+    <h3>Don’t See What You Need?</h3>
+    <p>
+      We are always adding resources. Tell us what is missing, or print this guide to share with a
+      veteran who needs it.
+    </p>
+    <div class="rs-btns">
+      <button class="rs-btn" type="button" data-contact> Suggest a Resource</button><button
+        class="rs-btn-o"
+        type="button"
+        data-print-page>Print This Guide</button
+      >
+    </div>
+    <div
+      style="
             margin-top: 24px;
             font-size: 11px;
             letter-spacing: 1px;
             text-transform: uppercase;
             color: rgba(255, 255, 255, 0.42);
           "
-      >
-        Directory last reviewed August 1, 2026 · Next review by September 30, 2026
-      </div>
+    >
+      Directory last reviewed August 1, 2026 · Next review by September 30, 2026
     </div>
   </div>
 </div>
