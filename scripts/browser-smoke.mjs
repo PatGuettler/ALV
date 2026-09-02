@@ -396,6 +396,12 @@ async function assertRetreatStatus(page, label) {
     await page
       .getByRole('button', { name: 'Continue to secure sign in' })
       .waitFor({ state: 'visible' });
+    if ((await page.locator('#retreat-staff-dialog-reference').count()) !== 1) {
+      throw new Error('Staff application dialog is missing the reference number.');
+    }
+    if ((await page.getByPlaceholder('Name, email, phone, or reference number').count()) !== 1) {
+      throw new Error('Staff search does not look up the application reference number.');
+    }
     await assertNoHorizontalOverflow(page, `${label} retreat staff login`);
   }
 }

@@ -94,7 +94,12 @@ const base = import.meta.env.BASE_URL;
       </label>
       <label class="retreat-filter">
         Search this list
-        <input id="retreat-staff-search" type="search" autocomplete="off" />
+        <input
+          id="retreat-staff-search"
+          type="search"
+          autocomplete="off"
+          placeholder="Name, email, phone, or reference number"
+        />
       </label>
     </div>
 
@@ -103,6 +108,7 @@ const base = import.meta.env.BASE_URL;
         <thead>
           <tr>
             <th>Applicant</th>
+            <th>Reference</th>
             <th>Type</th>
             <th>Retreat</th>
             <th>Timing</th>
@@ -120,6 +126,7 @@ const base = import.meta.env.BASE_URL;
   <dialog id="retreat-staff-dialog" class="retreat-staff-dialog">
     <div class="eyebrow">Restricted staff view</div>
     <h2 id="retreat-staff-dialog-title">Application</h2>
+    <p id="retreat-staff-dialog-reference" class="retreat-staff-reference"></p>
     <div id="retreat-staff-detail" class="retreat-staff-detail"></div>
     <div class="retreat-staff-decision">
       <label class="retreat-filter">

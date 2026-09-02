@@ -16,10 +16,12 @@ import {
 } from '../../src/scripts/retreat-application.js';
 import {
   filterStaffRecords,
+  formatStaffValue,
   staffAuthorizeUrl,
   staffDashboardStats,
   staffDetailSections,
   staffRedirectUri,
+  staffReference,
   statusBadgeClass,
 } from '../../src/scripts/retreat-staff.js';
 
@@ -40,6 +42,20 @@ function applicationFormData() {
     militaryBranch: 'army',
     militaryStatus: 'veteran',
     employmentStatus: 'full-time',
+    phqHopeless: '1',
+    phqInterest: '2',
+    anxietyFrequency: '3',
+    nightmares: 'occasionally',
+    mentalHealthOverall: '3',
+    inCare: 'yes',
+    suicideHistory: 'no',
+    crisisStatus: 'stable',
+    medicalConditions: 'test',
+    medications: 'none',
+    allergies: 'none',
+    mobility: 'none',
+    dietary: 'none',
+    serviceDog: 'none',
     emergencyName: 'Casey Guettler',
     emergencyRelationship: 'Spouse',
     emergencyPhone: '(205) 555-0101',
@@ -48,6 +64,8 @@ function applicationFormData() {
     signatureDate: '2026-09-01',
   };
   for (const [name, value] of Object.entries(fields)) data.set(name, value);
+  data.append('diagnoses', 'ptsd');
+  data.append('diagnoses', 'anxiety');
   for (const name of [
     'accuracyAgreement',
     'contactConsent',
@@ -141,6 +159,9 @@ test('review helpers produce safe display sections and receipt references', () =
     ['Retreat', 'Applicant', 'Service', 'Workforce', 'Health and wellbeing', 'Final details'],
   );
   assert.equal(applicationReference('abc-123'), 'ABC-123');
+  assert.equal(payload.wellbeing.medicalConditions, 'test');
+  assert.equal(payload.wellbeing.crisisStatus, 'stable');
+  assert.deepEqual(payload.wellbeing.diagnoses, ['ptsd', 'anxiety']);
 });
 
 test('staffRedirectUri keeps the GitHub Pages repo path', () => {
@@ -170,7 +191,7 @@ test('staffAuthorizeUrl builds a PKCE hosted UI URL', () => {
 test('staffDetailSections exposes approved applicant fields without internal keys', () => {
   const payload = applicationPayloadFromFormData(applicationFormData());
   const sections = staffDetailSections({
-    id: 'abc',
+    id: '6191d7d7-3d64-4537-91db-42f676652150',
     fullName: 'Pat Guettler',
     email: 'pat@example.com',
     phone: '555-0100',
@@ -179,11 +200,27 @@ test('staffDetailSections exposes approved applicant fields without internal key
     submittedAt: '2026-09-01T12:00:00.000Z',
     ...payload,
   });
+  const health = sections.find((section) => section.title === 'Health and wellbeing');
+  const application = sections.find((section) => section.title === 'Application');
   assert.equal(
     sections.some((section) => section.title === 'Service history'),
     true,
   );
+  assert.equal(
+    application.rows.find(([label]) => label === 'Reference number')[1],
+    '6191D7D7-3D64-4537-91DB-42F676652150',
+  );
+  assert.equal(health.rows.find(([label]) => label === 'Medical conditions')[1], 'Test');
+  assert.equal(health.rows.find(([label]) => label === 'Crisis status')[1], 'Stable');
+  assert.match(health.rows.find(([label]) => label === 'PHQ hopeless')[1], /Several days/);
   assert.equal(JSON.stringify(sections).includes('APP#'), false);
+});
+
+test('staff search matches the applicant reference number and keeps UUID hyphens', () => {
+  const id = '6191d7d7-3d64-4537-91db-42f676652150';
+  assert.equal(staffReference(id), '6191D7D7-3D64-4537-91DB-42F676652150');
+  assert.equal(formatStaffValue(id), '6191D7D7-3D64-4537-91DB-42F676652150');
+  assert.equal(formatStaffValue('full-time'), 'Employed full-time');
 });
 
 test('staffDashboardStats counts live records without inventing totals', () => {
@@ -204,6 +241,7 @@ test('staffDashboardStats counts live records without inventing totals', () => {
 test('filterStaffRecords applies retreat, status, type, and search filters', () => {
   const records = [
     {
+      id: '6191d7d7-3d64-4537-91db-42f676652150',
       fullName: 'Pat Guettler',
       email: 'pat@example.com',
       phone: '555-0100',
@@ -224,6 +262,7 @@ test('filterStaffRecords applies retreat, status, type, and search filters', () 
   assert.equal(filterStaffRecords(records, { status: 'approved' })[0].fullName, 'Casey Example');
   assert.equal(filterStaffRecords(records, { applicantType: 'military' }).length, 1);
   assert.equal(filterStaffRecords(records, { query: 'casey' }).length, 1);
+  assert.equal(filterStaffRecords(records, { query: '6191d7d7-3d64-4537-91db' }).length, 1);
   assert.equal(statusBadgeClass('submitted'), 'badge-pending');
   assert.equal(statusBadgeClass('declined'), 'badge-denied');
 });

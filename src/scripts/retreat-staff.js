@@ -16,14 +16,39 @@ export function staffAuthorizeUrl({ cognitoDomain, clientId, redirectUri, challe
   return url.href;
 }
 
-export const STAFF_LIST_STATUSES = ['submitted', 'approved', 'waitlisted', 'declined', 'cancelled'];
-
-export function humanize(value) {
-  if (Array.isArray(value)) return value.length ? value.map(humanize).join(', ') : 'None';
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-  const result = String(value || '').replace(/-/g, ' ');
-  return result ? result.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Not provided';
+export function staffReference(id) {
+  return String(id || '').toUpperCase();
 }
+
+export function formatStaffValue(value) {
+  if (Array.isArray(value)) {
+    return value.length ? value.map(formatStaffValue).join(', ') : 'None selected';
+  }
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  const text = String(value ?? '').trim();
+  if (!text) return 'Not provided';
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(text)) {
+    return staffReference(text);
+  }
+  if (text.includes('@') || /^\d{4}-\d{2}-\d{2}/.test(text) || /^\(\d{3}\)/.test(text)) return text;
+  const labels = {
+    mst: 'Military sexual trauma (MST)',
+    ptsd: 'PTSD',
+    tbi: 'TBI',
+    'full-time': 'Employed full-time',
+    'prefer-not-to-say': 'Prefer not to say',
+    'prefer-not-to-answer': 'Prefer not to answer',
+  };
+  if (labels[text]) return labels[text];
+  if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(text) && text === text.toLowerCase()) {
+    return text.replace(/-/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }
+  return text;
+}
+
+export const humanize = formatStaffValue;
+
+export const STAFF_LIST_STATUSES = ['submitted', 'approved', 'waitlisted', 'declined', 'cancelled'];
 
 export function staffDashboardStats(records) {
   return {
@@ -46,7 +71,7 @@ export function filterStaffRecords(records, filters = {}) {
     if (filters.applicantType && record.applicantType !== filters.applicantType) return false;
     if (
       term &&
-      !`${record.fullName || ''} ${record.email || ''} ${record.phone || ''}`
+      !`${record.fullName || ''} ${record.email || ''} ${record.phone || ''} ${record.id || ''}`
         .toLocaleLowerCase('en-US')
         .includes(term)
     ) {
@@ -73,17 +98,39 @@ export function staffDetailSections(record) {
   const address = applicant.address || {};
   const service = record.service || {};
   const workforce = record.workforce || {};
+  const wellbeing = record.wellbeing || {};
+  const dog = wellbeing.dog || {};
   const finalDetails = record.finalDetails || {};
   const emergency = finalDetails.emergencyContact || {};
+  const phqDays = {
+    0: '0 — Not at all',
+    1: '1 — Several days',
+    2: '2 — More than half the days',
+    3: '3 — Nearly every day',
+  };
+  const anxiety = {
+    0: '0 — Never',
+    1: '1 — Rarely',
+    2: '2 — Sometimes',
+    3: '3 — Often',
+    4: '4 — Always',
+  };
+  const overall = {
+    1: '1 — Very poor',
+    2: '2 — Poor',
+    3: '3 — Fair',
+    4: '4 — Good',
+    5: '5 — Excellent',
+  };
   return [
     {
       title: 'Application',
       rows: [
-        ['Reference', record.id],
+        ['Reference number', staffReference(record.id)],
         ['Submitted', record.submittedAt],
-        ['Applicant type', humanize(record.applicantType)],
-        ['Retreat', humanize(record.retreatType)],
-        ['Timing', humanize(record.retreat?.timingPreference)],
+        ['Applicant type', formatStaffValue(record.applicantType)],
+        ['Retreat', formatStaffValue(record.retreatType)],
+        ['Timing', formatStaffValue(record.retreat?.timingPreference)],
         ['Service verification', 'Staff follow-up required'],
       ],
     },
@@ -93,14 +140,20 @@ export function staffDetailSections(record) {
         ['Name', record.fullName],
         ['Email', record.email],
         ['Phone', record.phone],
+        ['Date of birth', applicant.dateOfBirth],
+        ['Gender', applicant.gender],
+        ['Marital status', applicant.maritalStatus],
+        ['Dependents', applicant.dependents],
+        ['Race / ethnicity', applicant.raceEthnicity],
+        ['Household income', applicant.householdIncome],
+        ['Education', applicant.educationLevel],
         ['Street', address.street],
         [
           'City / state / ZIP',
           [address.city, address.state, address.postalCode].filter(Boolean).join(', '),
         ],
         ['County', address.county],
-        ['Referral source', humanize(applicant.referral?.source)],
-        ['Date of birth', applicant.dateOfBirth],
+        ['Referral source', applicant.referral?.source],
         ['Referred by', applicant.referral?.referredBy],
         [
           'Spouse',
@@ -116,51 +169,73 @@ export function staffDetailSections(record) {
         service.kind === 'military'
           ? [
               ['Type', 'Military'],
-              ['Branch', humanize(service.branch)],
-              ['Status', humanize(service.status)],
+              ['Branch', service.branch],
+              ['Status', service.status],
               ['Years', service.years],
               ['Rank', service.rank],
-              ['Combat-zone deployment', humanize(service.combatDeployment)],
+              ['MOS / AFSC / rating', service.mos],
+              ['Entered service', service.enteredService],
+              ['Separated / ETS', service.separatedService],
+              ['Discharge type', service.dischargeType],
+              ['Component', service.component],
+              ['VA disability rating', service.vaRating],
+              ['VA care', service.vaCare],
+              ['Combat-zone deployment', service.combatDeployment],
+              ['Combat theaters', service.combatTheaters],
             ]
           : [
               ['Type', 'First responder'],
-              ['Role', humanize(service.type)],
+              ['Role', service.type],
               ['Agency', service.agency],
-              ['Status', humanize(service.status)],
+              ['Agency location', service.agencyLocation],
+              ['Status', service.status],
               ['Years', service.years],
               ['Rank', service.rank],
-              ['Critical incident', humanize(service.criticalIncident)],
+              ['Critical incident', service.criticalIncident],
+              ['Department support', service.departmentSupport],
             ],
     },
     {
       title: 'Workforce',
       rows: [
-        ['Employment status', humanize(workforce.employmentStatus)],
+        ['Employment status', workforce.employmentStatus],
         ['Employer', workforce.employer],
         ['Job title', workforce.jobTitle],
-        ['Satisfaction', humanize(workforce.satisfaction)],
-        ['Assistance interests', humanize(workforce.interests)],
+        ['Industry', workforce.industry],
+        ['Satisfaction', workforce.satisfaction],
+        ['Employment challenge', workforce.challenge],
+        ['Assistance interests', workforce.interests],
         ['Notes', workforce.notes],
       ],
     },
     {
       title: 'Health and wellbeing',
       rows: [
-        ['PHQ hopeless', record.wellbeing?.phqHopeless],
-        ['PHQ interest', record.wellbeing?.phqInterest],
-        ['Anxiety', record.wellbeing?.anxietyFrequency],
-        ['Nightmares / flashbacks', record.wellbeing?.nightmares],
-        ['Overall mental health', record.wellbeing?.mentalHealthOverall],
-        ['Diagnoses', record.wellbeing?.diagnoses],
-        ['In care', record.wellbeing?.inCare],
-        ['Suicide history', record.wellbeing?.suicideHistory],
-        ['Crisis status', record.wellbeing?.crisisStatus],
-        ['Medical conditions', record.wellbeing?.medicalConditions],
-        ['Medications', record.wellbeing?.medications],
-        ['Allergies', record.wellbeing?.allergies],
-        ['Mobility', record.wellbeing?.mobility],
-        ['Dietary', record.wellbeing?.dietary],
-        ['Service dog', record.wellbeing?.serviceDog],
+        ['PHQ hopeless', phqDays[String(wellbeing.phqHopeless ?? '')] || wellbeing.phqHopeless],
+        ['PHQ interest', phqDays[String(wellbeing.phqInterest ?? '')] || wellbeing.phqInterest],
+        [
+          'Anxiety',
+          anxiety[String(wellbeing.anxietyFrequency ?? '')] || wellbeing.anxietyFrequency,
+        ],
+        ['Nightmares / flashbacks', wellbeing.nightmares],
+        [
+          'Overall mental health',
+          overall[String(wellbeing.mentalHealthOverall ?? '')] || wellbeing.mentalHealthOverall,
+        ],
+        ['Diagnoses', wellbeing.diagnoses],
+        ['In care', wellbeing.inCare],
+        ['Suicide history', wellbeing.suicideHistory],
+        ['Crisis status', wellbeing.crisisStatus],
+        ['Medical conditions', wellbeing.medicalConditions],
+        ['Medications', wellbeing.medications],
+        ['Allergies', wellbeing.allergies],
+        ['Mobility', wellbeing.mobility],
+        ['Dietary', wellbeing.dietary],
+        ['Service dog', wellbeing.serviceDog],
+        ['Dog name', dog.name],
+        ['Dog breed', dog.breed],
+        ['Dog certification', dog.certification],
+        ['Dog tasks', dog.tasks],
       ],
     },
     {
@@ -169,7 +244,8 @@ export function staffDetailSections(record) {
         ['Emergency contact', emergency.name],
         ['Relationship', emergency.relationship],
         ['Emergency phone', emergency.phone],
-        ['Previous retreats', humanize(finalDetails.previousRetreats)],
+        ['Backup phone', emergency.secondaryPhone],
+        ['Previous retreats', finalDetails.previousRetreats],
         ['Years attended', finalDetails.previousRetreatYears],
         ['Goals', finalDetails.goals],
         ['Additional notes', finalDetails.additionalNotes],
@@ -180,7 +256,7 @@ export function staffDetailSections(record) {
     },
   ].map((section) => ({
     ...section,
-    rows: section.rows.map(([label, value]) => [label, humanize(value)]),
+    rows: section.rows.map(([label, value]) => [label, formatStaffValue(value)]),
   }));
 }
 
@@ -201,6 +277,7 @@ if (typeof document !== 'undefined') {
   const statReturning = document.getElementById('retreat-stat-returning');
   const dialog = document.getElementById('retreat-staff-dialog');
   const dialogTitle = document.getElementById('retreat-staff-dialog-title');
+  const dialogReference = document.getElementById('retreat-staff-dialog-reference');
   const detail = document.getElementById('retreat-staff-detail');
   const decisionStatus = document.getElementById('retreat-staff-decision-status');
   const note = document.getElementById('retreat-staff-note');
@@ -225,6 +302,7 @@ if (typeof document !== 'undefined') {
     !(statReturning instanceof HTMLElement) ||
     !(dialog instanceof HTMLDialogElement) ||
     !(dialogTitle instanceof HTMLElement) ||
+    !(dialogReference instanceof HTMLElement) ||
     !(detail instanceof HTMLElement) ||
     !(decisionStatus instanceof HTMLSelectElement) ||
     !(note instanceof HTMLTextAreaElement) ||
@@ -363,7 +441,7 @@ if (typeof document !== 'undefined') {
     if (!visible.length) {
       const empty = document.createElement('tr');
       const cell = document.createElement('td');
-      cell.colSpan = 8;
+      cell.colSpan = 9;
       cell.textContent = search.value.trim()
         ? 'No applications match this search.'
         : 'No applications in this view.';
@@ -380,6 +458,10 @@ if (typeof document !== 'undefined') {
       email.className = 'table-sub';
       email.textContent = record.email || '';
       applicant.append(name, email);
+
+      const reference = document.createElement('td');
+      reference.className = 'table-sub';
+      reference.textContent = staffReference(record.id);
 
       const type = document.createElement('td');
       type.textContent = humanize(record.applicantType);
@@ -415,7 +497,7 @@ if (typeof document !== 'undefined') {
       button.addEventListener('click', () => openApplication(record.id));
       actions.append(button);
 
-      row.append(applicant, type, retreat, timing, statusCell, past, applied, actions);
+      row.append(applicant, reference, type, retreat, timing, statusCell, past, applied, actions);
       items.append(row);
     }
   }
@@ -445,6 +527,7 @@ if (typeof document !== 'undefined') {
     const record = await api(`/v1/staff/applications/${encodeURIComponent(id)}`);
     selectedRecord = record;
     dialogTitle.textContent = record.fullName || 'Application';
+    dialogReference.textContent = `Reference ${staffReference(record.id)}`;
     decisionStatus.value = record.status;
     note.value = record.note || '';
     dialogStatus.textContent = '';

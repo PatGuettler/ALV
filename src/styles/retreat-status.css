@@ -1454,8 +1454,16 @@ body:has(.retreat-status) {
   font-size: 26px;
   font-weight: 400;
   letter-spacing: 1px;
-  margin: 8px 0 24px;
+  margin: 8px 0 4px;
   text-transform: uppercase;
+}
+
+.retreat-staff-reference {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  margin: 0 0 24px;
 }
 
 .retreat-staff-detail {

@@ -232,6 +232,18 @@ export function fieldIssue(name, data) {
   }
 }
 
+export function formDataIncludingDisabled(form) {
+  const disabled = [];
+  for (const control of form.querySelectorAll('input, select, textarea')) {
+    if (!control.disabled) continue;
+    disabled.push(control);
+    control.disabled = false;
+  }
+  const data = new FormData(form);
+  for (const control of disabled) control.disabled = true;
+  return data;
+}
+
 export function applicationPayloadFromFormData(
   data,
   { submissionId = '', consentTimestamp = '' } = {},
@@ -544,7 +556,7 @@ if (typeof document !== 'undefined') {
   }
 
   function syncConditionalFields() {
-    const data = new FormData(form);
+    const data = formDataIncludingDisabled(form);
     const applicantType = text(data, 'applicantType');
     const retreatType = text(data, 'retreatType');
     const referral = text(data, 'referralSource');
@@ -657,7 +669,7 @@ if (typeof document !== 'undefined') {
 
   function validateControl(control) {
     if (!(control instanceof HTMLElement) || !control.name || control.disabled) return true;
-    const message = fieldIssue(control.name, new FormData(form));
+    const message = fieldIssue(control.name, formDataIncludingDisabled(form));
     setFieldError(control, message);
     if (control.name === 'signature') signatureError.hidden = !message;
     return !message;
@@ -680,7 +692,7 @@ if (typeof document !== 'undefined') {
     let firstInvalid = null;
     let firstMessage = '';
     for (const control of stepControls(step)) {
-      const message = fieldIssue(control.name, new FormData(form));
+      const message = fieldIssue(control.name, formDataIncludingDisabled(form));
       if (show) setFieldError(control, message);
       if (message && !firstInvalid) {
         firstInvalid = control;
@@ -724,7 +736,9 @@ if (typeof document !== 'undefined') {
 
   function renderReview() {
     review.replaceChildren();
-    const payload = applicationPayloadFromFormData(new FormData(form), { submissionId });
+    const payload = applicationPayloadFromFormData(formDataIncludingDisabled(form), {
+      submissionId,
+    });
     for (const section of applicationReviewSections(payload)) {
       const container = document.createElement('section');
       container.className = 'review-section';
@@ -779,7 +793,7 @@ if (typeof document !== 'undefined') {
     syncConditionalFields();
     if (!validateAllSteps()) return;
 
-    const payload = applicationPayloadFromFormData(new FormData(form), {
+    const payload = applicationPayloadFromFormData(formDataIncludingDisabled(form), {
       submissionId,
       consentTimestamp: new Date().toISOString(),
     });

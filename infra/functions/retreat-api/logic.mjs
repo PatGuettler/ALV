@@ -124,6 +124,11 @@ export function cleanText(value, max) {
   return value.trim().slice(0, max);
 }
 
+function cleanScale(value) {
+  if (typeof value === 'number' && Number.isInteger(value)) value = String(value);
+  return cleanText(value, 2);
+}
+
 function cleanEnum(value, allowed) {
   const result = cleanText(value, 80);
   return allowed.has(result) ? result : null;
@@ -570,11 +575,11 @@ export function parseApplication(payload) {
         notes: cleanText(payload.workforce?.notes, 1000),
       },
       wellbeing: {
-        phqHopeless: cleanText(payload.wellbeing?.phqHopeless, 2),
-        phqInterest: cleanText(payload.wellbeing?.phqInterest, 2),
-        anxietyFrequency: cleanText(payload.wellbeing?.anxietyFrequency, 2),
+        phqHopeless: cleanScale(payload.wellbeing?.phqHopeless),
+        phqInterest: cleanScale(payload.wellbeing?.phqInterest),
+        anxietyFrequency: cleanScale(payload.wellbeing?.anxietyFrequency),
         nightmares: cleanText(payload.wellbeing?.nightmares, 40),
-        mentalHealthOverall: cleanText(payload.wellbeing?.mentalHealthOverall, 2),
+        mentalHealthOverall: cleanScale(payload.wellbeing?.mentalHealthOverall),
         diagnoses: Array.isArray(payload.wellbeing?.diagnoses)
           ? payload.wellbeing.diagnoses.map((item) => cleanText(item, 40)).slice(0, 12)
           : [],
@@ -594,7 +599,7 @@ export function parseApplication(payload) {
               certification: cleanText(payload.wellbeing.dog.certification, 80),
               tasks: cleanText(payload.wellbeing.dog.tasks, 200),
             }
-          : null,
+          : undefined,
       },
       finalDetails: {
         emergencyContact,
