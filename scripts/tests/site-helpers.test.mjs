@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { contactMailtoHref } from '../../src/scripts/forms.js';
+import { contactMailtoHref, shouldOpenSubscribeModal } from '../../src/scripts/forms.js';
 import { resourceCardMatches } from '../../src/scripts/resources.js';
 
 test('contactMailtoHref encodes name, email, and message', () => {
@@ -17,6 +17,13 @@ test('contactMailtoHref encodes name, email, and message', () => {
   assert.equal(url.searchParams.get('subject'), 'Website Contact from Pat Guettler');
   assert.match(url.searchParams.get('body'), /From: Pat Guettler \(pat@example.com\)/);
   assert.match(url.searchParams.get('body'), /Need help with a retreat\./);
+});
+
+test('shouldOpenSubscribeModal recognizes in-page subscribe hashes', () => {
+  assert.equal(shouldOpenSubscribeModal('#subscribe'), true);
+  assert.equal(shouldOpenSubscribeModal('#footer-signup'), true);
+  assert.equal(shouldOpenSubscribeModal('#contact'), false);
+  assert.equal(shouldOpenSubscribeModal(''), false);
 });
 
 test('resourceCardMatches finds name, description, category, and type', () => {

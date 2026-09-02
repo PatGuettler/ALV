@@ -4,6 +4,10 @@ export function contactMailtoHref({ name, email, message, contact }) {
   return `mailto:${contact.email}?subject=${subject}&body=${body}`;
 }
 
+export function shouldOpenSubscribeModal(hash) {
+  return hash === '#subscribe' || hash === '#footer-signup';
+}
+
 const defaultContact = {
   email: 'info@alabamaveteran.org',
   title: 'Contact Alabama Veteran',
@@ -12,6 +16,20 @@ const defaultContact = {
 
 let currentContact = { ...defaultContact };
 let previousFocus = null;
+
+function isModalOpen(id) {
+  return Boolean(document.getElementById(id)?.classList.contains('open'));
+}
+
+function lockBody() {
+  document.body.classList.add('modal-open');
+}
+
+function unlockBody() {
+  if (!isModalOpen('contact-modal') && !isModalOpen('subscribe-modal')) {
+    document.body.classList.remove('modal-open');
+  }
+}
 
 function openContact(trigger) {
   const modal = document.getElementById('contact-modal');
@@ -34,6 +52,7 @@ function openContact(trigger) {
   previousFocus = document.activeElement;
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
+  lockBody();
   modal.querySelector('input')?.focus();
 }
 
@@ -43,6 +62,32 @@ function closeContact() {
 
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
+  unlockBody();
+  previousFocus?.focus?.();
+}
+
+function openSubscribe(trigger) {
+  const modal = document.getElementById('subscribe-modal');
+  const iframe = document.getElementById('subscribe-embed');
+  if (!modal || !(iframe instanceof HTMLIFrameElement)) return;
+
+  const src = iframe.getAttribute('data-src');
+  if (src && iframe.getAttribute('src') !== src) iframe.src = src;
+
+  previousFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  lockBody();
+  modal.querySelector('[data-subscribe-close]')?.focus();
+}
+
+function closeSubscribe() {
+  const modal = document.getElementById('subscribe-modal');
+  if (!modal?.classList.contains('open')) return;
+
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  unlockBody();
   previousFocus?.focus?.();
 }
 
@@ -68,6 +113,13 @@ if (typeof document !== 'undefined') {
       });
     });
 
+    document.querySelectorAll('[data-subscribe]').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        openSubscribe(trigger);
+      });
+    });
+
     document.querySelector('[data-contact-close]')?.addEventListener('click', closeContact);
     document.querySelector('[data-contact-overlay]')?.addEventListener('click', (event) => {
       if (event.target === event.currentTarget) closeContact();
@@ -76,9 +128,22 @@ if (typeof document !== 'undefined') {
       event.preventDefault();
       sendContact(event.currentTarget);
     });
+
+    document.querySelector('[data-subscribe-close]')?.addEventListener('click', closeSubscribe);
+    document.querySelector('[data-subscribe-overlay]')?.addEventListener('click', (event) => {
+      if (event.target === event.currentTarget) closeSubscribe();
+    });
+
+    if (shouldOpenSubscribeModal(window.location.hash)) openSubscribe();
+  });
+
+  window.addEventListener('hashchange', () => {
+    if (shouldOpenSubscribeModal(window.location.hash)) openSubscribe();
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeContact();
+    if (event.key !== 'Escape') return;
+    if (isModalOpen('subscribe-modal')) closeSubscribe();
+    else closeContact();
   });
 }

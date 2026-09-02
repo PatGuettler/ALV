@@ -10,10 +10,6 @@
   flex-wrap: wrap;
   border-radius: 2px;
 }
-.av-signup--ghl {
-  align-items: stretch;
-  flex-direction: column;
-}
 .av-signup .su-eyebrow {
   font-size: 10px;
   font-weight: 700;
@@ -33,84 +29,58 @@
 }
 .av-signup .su-text p {
   font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.82);
   line-height: 1.6;
-  max-width: 640px;
+  max-width: 430px;
 }
 .av-signup .su-form {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
-  min-width: 300px;
-  flex: 1;
-  max-width: 440px;
+  min-width: 220px;
 }
-.av-signup--ghl .su-form {
-  margin: 0 auto;
-  max-width: 640px;
-  width: 100%;
-}
-.av-signup .su-embed {
-  background: #fff;
-  border: 0;
-  border-radius: 2px;
-  min-height: 420px;
-  width: 100%;
-}
-.av-signup--ghl .su-embed {
-  min-height: 1080px;
-}
-.av-signup .su-fields {
-  display: flex;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 2px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-}
-.av-signup input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 14px 16px;
-  color: #fff;
-  font-family: 'Libre Franklin', sans-serif;
-  font-size: 14px;
-}
-.av-signup input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-.av-signup .su-fields button {
+.av-signup .su-open {
   background: #b21f24;
   border: none;
-  padding: 14px 26px;
   color: #fff;
+  cursor: pointer;
   font-family: 'Libre Franklin', sans-serif;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  min-height: 48px;
+  padding: 14px 26px;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
 }
-.av-signup .su-fields button:hover {
+.av-signup .su-open:hover {
   background: #891519;
 }
 .av-signup .su-note {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.78);
 }
-.av-signup .su-note a {
-  color: #ffd4d6;
-  font-weight: 700;
+body.modal-open {
+  overflow: hidden;
 }
-.av-signup .su-ok {
-  display: none;
-  color: #fff;
-  font-size: 15px;
+.su-modal {
+  max-width: 640px;
+  padding: 36px 28px 24px;
+}
+.su-modal .su-embed {
+  background: #fff;
+  border: 0;
+  min-height: min(70vh, 760px);
+  width: 100%;
+}
+.su-modal-note {
+  color: #666;
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+.su-modal-note a {
+  color: #b21f24;
   font-weight: 700;
-  padding: 10px 0;
 }
 @media (max-width: 680px) {
   .av-signup {
@@ -122,6 +92,9 @@
     width: 100%;
     max-width: none;
     min-width: 0;
+  }
+  .av-signup .su-open {
+    width: 100%;
   }
 }
 .cm-overlay {

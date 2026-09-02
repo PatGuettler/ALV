@@ -1,0 +1,28 @@
+---
+import { ghlWidgets } from '../../config/ghl';
+---
+
+<div id="subscribe-modal" class="cm-overlay su-overlay" data-subscribe-overlay aria-hidden="true">
+  <div class="cm-box su-modal" role="dialog" aria-modal="true" aria-labelledby="su-title">
+    <button class="cm-close" type="button" aria-label="Close signup form" data-subscribe-close
+      >×</button
+    >
+    <div class="cm-eyebrow">Stay Connected</div>
+    <h3 id="su-title">Subscribe</h3>
+    <p class="cm-sub">
+      Name, phone, email, affiliation, and consent stay in GoHighLevel. Close this window to return
+      to the page.
+    </p>
+    <iframe
+      id="subscribe-embed"
+      class="su-embed"
+      data-src={ghlWidgets.newsletter}
+      title="Alabama Veteran newsletter signup"></iframe>
+    <p class="su-modal-note">
+      If the form does not load,
+      <a href={ghlWidgets.newsletter} target="_blank" rel="noopener noreferrer"
+        >open it in a new tab</a
+      >.
+    </p>
+  </div>
+</div>

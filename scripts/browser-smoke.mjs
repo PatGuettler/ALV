@@ -418,6 +418,23 @@ try {
   await desktop.locator('[data-contact-close]').click();
   await desktop.locator('#contact-modal[aria-hidden="true"]').waitFor({ state: 'hidden' });
 
+  await loadRoute(desktop, 'home', '', desktopErrors);
+  const homeUrl = desktop.url();
+  await desktop.locator('[data-subscribe]').first().click();
+  await desktop.locator('#subscribe-modal.open[aria-hidden="false"]').waitFor({ state: 'visible' });
+  const subscribeSrc = await desktop.locator('#subscribe-embed').getAttribute('src');
+  if (!subscribeSrc?.includes('hDcR5EwOHXT3Uuogr4eR')) {
+    throw new Error(`Subscribe modal did not load the GHL form: ${subscribeSrc}`);
+  }
+  if (desktop.url() !== homeUrl) {
+    throw new Error(`Subscribe click navigated away from ${homeUrl} to ${desktop.url()}`);
+  }
+  await desktop.locator('[data-subscribe-close]').click();
+  await desktop.locator('#subscribe-modal[aria-hidden="true"]').waitFor({ state: 'hidden' });
+  if (desktop.url() !== homeUrl) {
+    throw new Error(`Closing subscribe modal changed the page to ${desktop.url()}`);
+  }
+
   const mobileContext = await browser.newContext({
     viewport: { width: 412, height: 915 },
     screen: { width: 412, height: 915 },
