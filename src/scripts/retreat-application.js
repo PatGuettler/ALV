@@ -43,10 +43,18 @@ export function applicationPayloadFromFormData(
       applicantType,
       retreatType,
       timingPreference: text(data, 'timingPreference'),
+      enduranceEligible: text(data, 'enduranceEligible'),
     },
     applicant: {
       firstName: text(data, 'firstName'),
       lastName: text(data, 'lastName'),
+      dateOfBirth: text(data, 'dateOfBirth'),
+      gender: text(data, 'gender'),
+      maritalStatus: text(data, 'maritalStatus'),
+      dependents: text(data, 'dependents'),
+      raceEthnicity: text(data, 'raceEthnicity'),
+      householdIncome: text(data, 'householdIncome'),
+      educationLevel: text(data, 'educationLevel'),
       email: text(data, 'email'),
       phone: text(data, 'phone'),
       address: {
@@ -67,6 +75,8 @@ export function applicationPayloadFromFormData(
               lastName: text(data, 'spouseLastName'),
               email: text(data, 'spouseEmail'),
               phone: text(data, 'spousePhone'),
+              dateOfBirth: text(data, 'spouseDateOfBirth'),
+              gender: text(data, 'spouseGender'),
             }
           : null,
     },
@@ -78,26 +88,64 @@ export function applicationPayloadFromFormData(
             status: text(data, 'militaryStatus'),
             years: text(data, 'militaryYears'),
             rank: text(data, 'militaryRank'),
+            mos: text(data, 'militaryMos'),
+            enteredService: text(data, 'serviceEntered'),
+            separatedService: text(data, 'serviceSeparated'),
+            dischargeType: text(data, 'dischargeType'),
+            component: text(data, 'militaryComponent'),
+            vaRating: text(data, 'vaRating'),
+            vaCare: text(data, 'vaCare'),
             combatDeployment: text(data, 'combatDeployment'),
+            combatTheaters: text(data, 'combatTheaters'),
             verificationStatus: 'staff-follow-up',
           }
         : {
             kind: 'first-responder',
             type: text(data, 'responderType'),
             agency: text(data, 'agency'),
+            agencyLocation: text(data, 'agencyLocation'),
             status: text(data, 'responderStatus'),
             years: text(data, 'responderYears'),
             rank: text(data, 'responderRank'),
             criticalIncident: text(data, 'criticalIncident'),
+            departmentSupport: text(data, 'departmentSupport'),
             verificationStatus: 'staff-follow-up',
           },
     workforce: {
       employmentStatus: text(data, 'employmentStatus'),
       employer: text(data, 'employer'),
       jobTitle: text(data, 'jobTitle'),
+      industry: text(data, 'industry'),
       satisfaction: text(data, 'employmentSatisfaction'),
+      challenge: text(data, 'employmentChallenge'),
       interests: values(data, 'workforceInterests'),
       notes: text(data, 'workforceNotes'),
+    },
+    wellbeing: {
+      phqHopeless: text(data, 'phqHopeless'),
+      phqInterest: text(data, 'phqInterest'),
+      anxietyFrequency: text(data, 'anxietyFrequency'),
+      nightmares: text(data, 'nightmares'),
+      mentalHealthOverall: text(data, 'mentalHealthOverall'),
+      diagnoses: values(data, 'diagnoses'),
+      inCare: text(data, 'inCare'),
+      suicideHistory: text(data, 'suicideHistory'),
+      crisisStatus: text(data, 'crisisStatus'),
+      medicalConditions: text(data, 'medicalConditions'),
+      medications: text(data, 'medications'),
+      allergies: text(data, 'allergies'),
+      mobility: text(data, 'mobility'),
+      dietary: text(data, 'dietary'),
+      serviceDog: text(data, 'serviceDog'),
+      dog:
+        text(data, 'serviceDog') === 'bringing'
+          ? {
+              name: text(data, 'dogName'),
+              breed: text(data, 'dogBreed'),
+              certification: text(data, 'dogCertification'),
+              tasks: text(data, 'dogTasks'),
+            }
+          : null,
     },
     finalDetails: {
       emergencyContact: {
@@ -142,6 +190,7 @@ export function applicationReviewSections(payload) {
         ['Applicant type', humanize(payload.retreat?.applicantType)],
         ['Retreat requested', humanize(payload.retreat?.retreatType)],
         ['Timing', humanize(payload.retreat?.timingPreference)],
+        ['Endurance eligibility', humanize(payload.retreat?.enduranceEligible)],
       ],
     },
     {
@@ -151,6 +200,7 @@ export function applicationReviewSections(payload) {
           'Name',
           `${payload.applicant?.firstName || ''} ${payload.applicant?.lastName || ''}`.trim(),
         ],
+        ['Date of birth', payload.applicant?.dateOfBirth],
         ['Email', payload.applicant?.email],
         ['Phone', payload.applicant?.phone],
         [
@@ -209,6 +259,21 @@ export function applicationReviewSections(payload) {
       ],
     },
     {
+      title: 'Health and wellbeing',
+      rows: [
+        ['PHQ hopeless', payload.wellbeing?.phqHopeless],
+        ['PHQ interest', payload.wellbeing?.phqInterest],
+        ['Anxiety', payload.wellbeing?.anxietyFrequency],
+        ['Nightmares / flashbacks', humanize(payload.wellbeing?.nightmares)],
+        ['Overall mental health', payload.wellbeing?.mentalHealthOverall],
+        ['Diagnoses', humanize(payload.wellbeing?.diagnoses)],
+        ['In care', humanize(payload.wellbeing?.inCare)],
+        ['Crisis status', humanize(payload.wellbeing?.crisisStatus)],
+        ['Dietary', payload.wellbeing?.dietary],
+        ['Service dog', humanize(payload.wellbeing?.serviceDog)],
+      ],
+    },
+    {
       title: 'Final details',
       rows: [
         ['Emergency contact', payload.finalDetails?.emergencyContact?.name],
@@ -242,6 +307,7 @@ if (typeof document !== 'undefined') {
   const receipt = document.getElementById('retreat-application-receipt');
   const reference = document.getElementById('retreat-application-reference');
   const signatureError = document.getElementById('signature-error');
+  const stepCounter = document.getElementById('retreat-step-counter');
   const apiUrl = window.__RETREAT_API_URL__;
   const steps = Array.from(document.querySelectorAll('[data-application-step]'));
   const progressSteps = Array.from(document.querySelectorAll('[data-progress-step]'));
@@ -276,9 +342,20 @@ if (typeof document !== 'undefined') {
     const data = new FormData(form);
     const applicantType = text(data, 'applicantType');
     const retreatType = text(data, 'retreatType');
+    const referral = text(data, 'referralSource');
+    const enduranceEligible = text(data, 'enduranceEligible');
+    const serviceDog = text(data, 'serviceDog');
     for (const panel of form.querySelectorAll('[data-condition]')) {
       const condition = panel.getAttribute('data-condition');
-      setPanelState(panel, condition === applicantType || condition === retreatType);
+      const visible =
+        condition === applicantType ||
+        condition === retreatType ||
+        condition === referral ||
+        (condition === 'service-dog-details' && serviceDog === 'bringing') ||
+        (condition === 'endurance-ineligible' &&
+          retreatType === 'endurance' &&
+          enduranceEligible === 'no');
+      setPanelState(panel, visible);
     }
   }
 
@@ -295,6 +372,9 @@ if (typeof document !== 'undefined') {
     previousButton.hidden = currentStep === 0;
     nextButton.hidden = currentStep === steps.length - 1;
     submitButton.hidden = currentStep !== steps.length - 1;
+    if (stepCounter) {
+      stepCounter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
+    }
     status.textContent = '';
     if (focusHeading) {
       const heading = steps[currentStep].querySelector('legend');
@@ -323,6 +403,12 @@ if (typeof document !== 'undefined') {
       invalid.focus();
       if ('reportValidity' in invalid) invalid.reportValidity();
       status.textContent = 'Complete the required fields before continuing.';
+      return false;
+    }
+    const data = new FormData(form);
+    if (text(data, 'retreatType') === 'endurance' && text(data, 'enduranceEligible') === 'no') {
+      status.textContent =
+        "The Endurance Retreat requires a prior Men's or Women's Retreat. Choose another retreat to continue.";
       return false;
     }
     if (currentStep === steps.length - 2 && !signatureIsValid()) {

@@ -2,6 +2,7 @@
 import { retreatPublic } from '../../config/retreat';
 import ApplicantDetailsStep from './application/ApplicantDetailsStep.astro';
 import FinalDetailsStep from './application/FinalDetailsStep.astro';
+import HealthWellbeingStep from './application/HealthWellbeingStep.astro';
 import RetreatSelectionStep from './application/RetreatSelectionStep.astro';
 import ServiceHistoryStep from './application/ServiceHistoryStep.astro';
 import WorkforceStep from './application/WorkforceStep.astro';
@@ -10,64 +11,100 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <main class="retreat-application-shell">
-  <header class="retreat-application-header">
+  <header class="application-hero">
     <a class="application-back" href={`${base}warrior-retreat/`}>← Warrior Retreat</a>
-    <div class="eyebrow">Alabama Veteran · Warrior Retreat</div>
-    <h1>Retreat application</h1>
-    <p>
-      Apply for the next available Warrior, Marriage, or Endurance Retreat. Your answers go to the
-      secure ALV staff review system.
+    <div class="eyebrow">Alabama Veteran · Serving those who served</div>
+    <h1>Healing starts<br /><span class="accent">with stepping up</span></h1>
+    <p class="lede">
+      A Warrior Retreat for veterans, servicemembers, and first responders who have carried the
+      weight. No cost. Confidential. Built for those who served.
+    </p>
+    <div class="hero-chips">
+      <div class="hero-chip">Men's Retreat<span>Healing and brotherhood</span></div>
+      <div class="hero-chip">Women's Retreat<span>Heal, connect, grow</span></div>
+      <div class="hero-chip">Marriage Retreat<span>Rebuild together</span></div>
+      <div class="hero-chip">Endurance Retreat<span>Stay connected</span></div>
+    </div>
+    <p class="hero-disclaimer">
+      Alabama Veteran is a private nonprofit — <strong
+        >not affiliated with the VA or the U.S. military</strong
+      >. Your application is stored in the ALV staff review system.
     </p>
   </header>
 
-  <nav class="application-progress" aria-label="Application progress">
-    <ol>
-      {
-        ['Retreat', 'Contact', 'Service', 'Workforce', 'Final details', 'Review'].map(
-          (label, index) => (
+  <div class="form-card">
+    <div class="form-card-header">
+      <h2>Warrior Retreat Application</h2>
+      <p>All information is kept confidential and reviewed only by invited ALV staff.</p>
+    </div>
+
+    <nav class="application-progress" aria-label="Application progress">
+      <ol>
+        {
+          [
+            'Applicant',
+            'Personal',
+            'Service',
+            'Workforce',
+            'Health',
+            'Final details',
+            'Review',
+          ].map((label, index) => (
             <li data-progress-step={index} aria-current={index === 0 ? 'step' : undefined}>
               <>
                 <span>{index + 1}</span>
                 <span>{label}</span>
               </>
             </li>
-          ),
-        )
-      }
-    </ol>
-  </nav>
+          ))
+        }
+      </ol>
+    </nav>
 
-  <form id="retreat-application-form" class="retreat-form" autocomplete="on">
-    <RetreatSelectionStep />
-    <ApplicantDetailsStep />
-    <ServiceHistoryStep />
-    <WorkforceStep />
-    <FinalDetailsStep />
+    <form id="retreat-application-form" class="retreat-form" autocomplete="on">
+      <RetreatSelectionStep />
+      <ApplicantDetailsStep />
+      <ServiceHistoryStep />
+      <WorkforceStep />
+      <HealthWellbeingStep />
+      <FinalDetailsStep />
 
-    <fieldset class="application-step" data-application-step hidden aria-labelledby="review-title">
-      <legend id="review-title">Review and submit</legend>
-      <p class="step-intro">
-        Check your answers before sending. Use Previous to make changes. Your application is not
-        complete until a reference number appears.
+      <fieldset
+        class="application-step"
+        data-application-step
+        hidden
+        aria-labelledby="review-title"
+      >
+        <legend id="review-title">Review and submit</legend>
+        <p class="step-intro">
+          Check your answers before sending. Use Previous to make changes. Your application is not
+          complete until a reference number appears.
+        </p>
+        <div id="retreat-application-review" class="application-review"></div>
+      </fieldset>
+
+      <div class="application-navigation">
+        <span class="step-counter" id="retreat-step-counter">Step 1 of 7</span>
+        <button id="retreat-previous" class="button-secondary" type="button" hidden>Back</button>
+        <button id="retreat-next" type="button">Next step</button>
+        <button id="retreat-submit" type="submit" hidden>Submit application</button>
+      </div>
+      <p
+        id="retreat-application-status"
+        class="retreat-form-status"
+        role="status"
+        aria-live="polite"
+      >
       </p>
-      <div id="retreat-application-review" class="application-review"></div>
-    </fieldset>
-
-    <div class="application-navigation">
-      <button id="retreat-previous" class="button-secondary" type="button" hidden>Previous</button>
-      <button id="retreat-next" type="button">Next</button>
-      <button id="retreat-submit" type="submit" hidden>Submit application</button>
-    </div>
-    <p id="retreat-application-status" class="retreat-form-status" role="status" aria-live="polite">
-    </p>
-  </form>
+    </form>
+  </div>
 
   <section id="retreat-application-receipt" class="application-receipt" hidden tabindex="-1">
     <div class="eyebrow">Application received</div>
-    <h2>Thank you for applying.</h2>
+    <h2>Application submitted</h2>
     <p>
-      ALV staff will review your application and contact you. Save this reference number for your
-      records:
+      Thank you for applying to the Warrior Retreat. ALV staff will review your application and
+      reach out. Save this reference number for your records:
     </p>
     <strong id="retreat-application-reference"></strong>
     <p>This form is not monitored for emergencies. For immediate crisis support, call 988.</p>

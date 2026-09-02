@@ -138,7 +138,9 @@ if (process.env.CHECK_BUILD === '1') {
     resolve(projectRoot, 'dist', 'warrior-retreat-application', 'index.html'),
     'utf8',
   );
-  const retreatHeading = retreatLive ? 'Retreat application' : 'Application service not connected';
+  const retreatHeading = retreatLive
+    ? 'Warrior Retreat Application'
+    : 'Application service not connected';
   if (!builtRetreat.includes(retreatHeading)) {
     failures.push('Built retreat application route is incorrect.');
   }
@@ -147,7 +149,7 @@ if (process.env.CHECK_BUILD === '1') {
     resolve(projectRoot, 'dist', 'warrior-retreat-staff', 'index.html'),
     'utf8',
   );
-  const staffHeading = retreatLive ? 'Warrior Retreat review' : 'Application service not connected';
+  const staffHeading = retreatLive ? 'Retreat Administration' : 'Application service not connected';
   if (!builtStaff.includes(staffHeading)) {
     failures.push('Built retreat staff route is incorrect.');
   }

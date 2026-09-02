@@ -8,9 +8,12 @@ import {
   signatureMatches,
 } from '../../src/scripts/retreat-application.js';
 import {
+  filterStaffRecords,
   staffAuthorizeUrl,
+  staffDashboardStats,
   staffDetailSections,
   staffRedirectUri,
+  statusBadgeClass,
 } from '../../src/scripts/retreat-staff.js';
 
 function applicationFormData() {
@@ -21,6 +24,7 @@ function applicationFormData() {
     timingPreference: 'next-available',
     firstName: 'Pat',
     lastName: 'Guettler',
+    dateOfBirth: '1985-01-15',
     email: 'pat@example.com',
     phone: '555-0100',
     city: 'Birmingham',
@@ -87,7 +91,7 @@ test('review helpers produce safe display sections and receipt references', () =
   const sections = applicationReviewSections(payload);
   assert.deepEqual(
     sections.map((section) => section.title),
-    ['Retreat', 'Applicant', 'Service', 'Workforce', 'Final details'],
+    ['Retreat', 'Applicant', 'Service', 'Workforce', 'Health and wellbeing', 'Final details'],
   );
   assert.equal(applicationReference('abc-123'), 'ABC-123');
 });
@@ -133,4 +137,46 @@ test('staffDetailSections exposes approved applicant fields without internal key
     true,
   );
   assert.equal(JSON.stringify(sections).includes('APP#'), false);
+});
+
+test('staffDashboardStats counts live records without inventing totals', () => {
+  const stats = staffDashboardStats([
+    { status: 'submitted', previousRetreats: [] },
+    { status: 'submitted', previousRetreats: ['mens'] },
+    { status: 'approved', previousRetreats: [] },
+  ]);
+  assert.deepEqual(stats, { total: 3, submitted: 2, approved: 1, returning: 1 });
+  assert.deepEqual(staffDashboardStats([]), {
+    total: 0,
+    submitted: 0,
+    approved: 0,
+    returning: 0,
+  });
+});
+
+test('filterStaffRecords applies retreat, status, type, and search filters', () => {
+  const records = [
+    {
+      fullName: 'Pat Guettler',
+      email: 'pat@example.com',
+      phone: '555-0100',
+      retreatType: 'mens',
+      applicantType: 'military',
+      status: 'submitted',
+    },
+    {
+      fullName: 'Casey Example',
+      email: 'casey@example.com',
+      phone: '555-0101',
+      retreatType: 'marriage',
+      applicantType: 'first-responder',
+      status: 'approved',
+    },
+  ];
+  assert.equal(filterStaffRecords(records, { retreatType: 'mens' }).length, 1);
+  assert.equal(filterStaffRecords(records, { status: 'approved' })[0].fullName, 'Casey Example');
+  assert.equal(filterStaffRecords(records, { applicantType: 'military' }).length, 1);
+  assert.equal(filterStaffRecords(records, { query: 'casey' }).length, 1);
+  assert.equal(statusBadgeClass('submitted'), 'badge-pending');
+  assert.equal(statusBadgeClass('declined'), 'badge-denied');
 });

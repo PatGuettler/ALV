@@ -9,33 +9,72 @@ const { apiUrl, cognitoDomain, clientId } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
-<main class="retreat-status retreat-staff-page">
-  <header class="retreat-staff-login-header">
+<main class="retreat-staff-page">
+  <header class="admin-header">
     <div class="retreat-staff-mark" aria-hidden="true"><span>ALV</span><span>Staff</span></div>
     <div>
       <div class="eyebrow">Alabama Veteran · Secure staff portal</div>
-      <h1>Warrior Retreat review</h1>
+      <h1>Retreat Administration</h1>
       <p id="retreat-staff-copy">
-        Review retreat applications and record staff decisions. Sign in with the Cognito account
-        issued to you by the ALV administrator; this is not the AWS access portal.
+        Review submitted Warrior Retreat applications from the ALV production queue. Sign in with
+        the Cognito account issued to you by the ALV administrator; this is not the AWS access
+        portal.
       </p>
     </div>
+    <div class="admin-actions retreat-staff-actions retreat-staff-login-actions">
+      <button id="retreat-staff-signin" type="button">Continue to secure sign in</button>
+      <button id="retreat-staff-signout" type="button" hidden>Sign out</button>
+      <a class="button-secondary" href={`${base}warrior-retreat-application/`}>Public apply form</a>
+    </div>
   </header>
+
   <div class="retreat-staff-security">
-    <span>Invite-only access</span><span>Encrypted applicant records</span><span
+    <span>Invite-only access</span><span>Live DynamoDB applications</span><span
       >Audited decisions</span
     >
   </div>
-  <div class="retreat-staff-actions retreat-staff-login-actions">
-    <button id="retreat-staff-signin" type="button">Continue to secure sign in</button>
-    <button id="retreat-staff-signout" type="button" hidden>Sign out</button>
-  </div>
   <p id="retreat-staff-status" class="retreat-form-status" role="status" aria-live="polite"></p>
+
   <div id="retreat-staff-list" hidden>
-    <div class="retreat-staff-filters">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="s-label">Total applications</div>
+        <div class="s-val" id="retreat-stat-total">0</div>
+        <div class="s-sub">Loaded from the production queue</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Pending review</div>
+        <div class="s-val" id="retreat-stat-submitted">0</div>
+        <div class="s-sub">Status: submitted</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Approved</div>
+        <div class="s-val" id="retreat-stat-approved">0</div>
+        <div class="s-sub">Confirmed attendees</div>
+      </div>
+      <div class="stat-card">
+        <div class="s-label">Return applicants</div>
+        <div class="s-val" id="retreat-stat-returning">0</div>
+        <div class="s-sub">Listed a previous ALV retreat</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <span class="filter-label">Filter</span>
+      <label class="retreat-filter">
+        Retreat
+        <select id="retreat-staff-retreat-filter">
+          <option value="">All retreats</option>
+          <option value="mens">Men's Retreat</option>
+          <option value="womens">Women's Retreat</option>
+          <option value="marriage">Marriage Retreat</option>
+          <option value="endurance">Endurance Retreat</option>
+        </select>
+      </label>
       <label class="retreat-filter">
         Status
         <select id="retreat-staff-status-filter">
+          <option value="">All statuses</option>
           <option value="submitted">Submitted</option>
           <option value="approved">Approved</option>
           <option value="waitlisted">Waitlisted</option>
@@ -44,12 +83,38 @@ const base = import.meta.env.BASE_URL;
         </select>
       </label>
       <label class="retreat-filter">
+        Type
+        <select id="retreat-staff-type-filter">
+          <option value="">All types</option>
+          <option value="military">Veteran / military</option>
+          <option value="first-responder">First responder</option>
+        </select>
+      </label>
+      <label class="retreat-filter">
         Search this list
         <input id="retreat-staff-search" type="search" autocomplete="off" />
       </label>
     </div>
-    <ul id="retreat-staff-items" class="retreat-staff-items"></ul>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Applicant</th>
+            <th>Type</th>
+            <th>Retreat</th>
+            <th>Timing</th>
+            <th>Status</th>
+            <th>Past retreats</th>
+            <th>Applied</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="retreat-staff-items"></tbody>
+      </table>
+    </div>
   </div>
+
   <dialog id="retreat-staff-dialog" class="retreat-staff-dialog">
     <div class="eyebrow">Restricted staff view</div>
     <h2 id="retreat-staff-dialog-title">Application</h2>

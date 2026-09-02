@@ -305,7 +305,7 @@ async function assertRetreatStatus(page, label) {
   await page.goto(new URL('warrior-retreat-application/', siteUrl).href, {
     waitUntil: 'networkidle',
   });
-  const heading = retreatLive ? 'Retreat application' : 'Application service not connected';
+  const heading = retreatLive ? 'Warrior Retreat Application' : 'Application service not connected';
   await page.getByRole('heading', { name: heading }).waitFor({ state: 'visible' });
   await assertNoHorizontalOverflow(page, `${label} retreat status`);
 
@@ -363,7 +363,7 @@ async function assertRetreatStatus(page, label) {
   if (retreatLive) {
     await page.goto(new URL('warrior-retreat-staff/', siteUrl).href, { waitUntil: 'networkidle' });
     await page
-      .getByRole('heading', { name: 'Warrior Retreat review' })
+      .getByRole('heading', { name: 'Retreat Administration' })
       .waitFor({ state: 'visible' });
     await page
       .getByRole('button', { name: 'Continue to secure sign in' })

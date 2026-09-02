@@ -51,11 +51,156 @@ body {
   width: 100%;
 }
 
+.application-hero,
 .retreat-application-header {
   background: var(--blue);
   border-top: 8px solid var(--red);
   color: #fff;
   padding: clamp(28px, 6vw, 58px) clamp(24px, 7vw, 72px) 38px;
+}
+
+.application-hero h1 {
+  font-size: clamp(3.4rem, 9vw, 6.4rem);
+  line-height: 0.92;
+  margin-bottom: 18px;
+}
+
+.application-hero .accent {
+  color: #ff8a8e;
+}
+
+.application-hero .lede {
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 680px;
+}
+
+.hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 18px;
+}
+
+.hero-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  text-transform: uppercase;
+}
+
+.hero-chip span {
+  color: rgba(255, 255, 255, 0.7);
+  display: block;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-top: 4px;
+  text-transform: none;
+}
+
+.hero-disclaimer {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+  max-width: 720px;
+}
+
+.form-card {
+  background: var(--paper);
+}
+
+.form-card-header {
+  background: #fff;
+  border-bottom: 1px solid #d9dce3;
+  padding: 22px clamp(22px, 7vw, 72px) 8px;
+}
+
+.form-card-header h2 {
+  font-family: 'League Gothic', sans-serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.form-card-header p {
+  color: #626876;
+  margin: 8px 0 16px;
+}
+
+.info-box,
+.radio-stack,
+.section-label,
+.mh-scale,
+.scale-field {
+  margin-top: 22px;
+}
+
+.info-box {
+  background: #eef1f6;
+  border-left: 4px solid var(--red);
+  color: #39435a;
+  font-size: 0.9rem;
+  padding: 16px 18px;
+}
+
+.section-label {
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.radio-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.radio-stack label,
+.check-grid label {
+  align-items: flex-start;
+  display: flex;
+  font-weight: 600;
+  gap: 10px;
+}
+
+.scale-field {
+  border: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+.scale-field legend {
+  color: var(--blue);
+  font-size: 0.875rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.mh-scale {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+}
+
+.mh-scale label {
+  align-items: center;
+  background: #fff;
+  border: 2px solid #d7dae2;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 6px;
+  min-height: 72px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+.mh-scale label:has(input:checked) {
+  border-color: var(--red);
 }
 
 .retreat-application-header h1 {
@@ -90,10 +235,10 @@ body {
 .application-progress ol {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(6, minmax(86px, 1fr));
+  grid-template-columns: repeat(7, minmax(72px, 1fr));
   list-style: none;
   margin: 0;
-  min-width: 640px;
+  min-width: 720px;
   padding: 0;
 }
 
@@ -373,12 +518,23 @@ body {
 }
 
 .application-navigation {
+  align-items: center;
   border-top: 1px solid #d7dae2;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-end;
   margin-top: 38px;
   padding-top: 24px;
+}
+
+.step-counter {
+  color: #656a75;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin-right: auto;
+  text-transform: uppercase;
 }
 
 .application-navigation button {
@@ -397,7 +553,6 @@ body {
 .application-navigation .button-secondary {
   background: transparent;
   color: var(--red);
-  margin-right: auto;
 }
 
 .application-navigation button:disabled {
@@ -578,8 +733,240 @@ a {
   margin: 8px 0 20px;
 }
 
+body:has(.retreat-staff-page) {
+  align-items: stretch;
+  background: #f4f5f8;
+  padding: 0;
+}
+
 .retreat-staff-page {
-  max-width: 920px;
+  background: #f4f5f8;
+  border-top: 0;
+  box-shadow: none;
+  color: var(--blue);
+  margin: 0;
+  max-width: none;
+  min-height: 100svh;
+  padding: 28px clamp(16px, 4vw, 40px) 48px;
+  width: 100%;
+}
+
+.admin-header {
+  align-items: start;
+  background: linear-gradient(135deg, #2b3346, #48536a);
+  border-radius: 16px;
+  color: #fff;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 88px 1fr auto;
+  margin-bottom: 22px;
+  padding: 22px 28px;
+}
+
+.admin-header h1 {
+  color: #fff;
+  font-size: clamp(2.6rem, 6vw, 4.2rem);
+  margin: 8px 0 12px;
+}
+
+.admin-header p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 640px;
+}
+
+.admin-header .eyebrow {
+  color: #ff8a8e;
+}
+
+.admin-actions {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-actions .button-secondary {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  min-height: 44px;
+  padding: 0 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.stat-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 8px 0 22px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e3e6eb;
+  border-radius: 14px;
+  border-top: 3px solid #48536a;
+  padding: 18px 20px;
+}
+
+.s-label {
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.s-val {
+  color: #2b3346;
+  font-family: 'League Gothic', sans-serif;
+  font-size: 2.4rem;
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.s-sub {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+.filters {
+  align-items: end;
+  background: #fff;
+  border: 1px solid #e3e6eb;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 16px 20px;
+}
+
+.filter-label {
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filters .retreat-filter {
+  min-width: 160px;
+}
+
+.table-wrap {
+  background: #fff;
+  border: 1px solid #e3e6eb;
+  border-radius: 14px;
+  overflow-x: auto;
+}
+
+.table-wrap table {
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  min-width: 860px;
+  width: 100%;
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-wrap th {
+  background: #f7f8fb;
+  color: #515866;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.table-wrap td {
+  border-top: 1px solid #eef0f4;
+}
+
+.table-sub {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+
+.badge-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-approved {
+  background: #d1f0d8;
+  color: #1a5c2a;
+}
+
+.badge-waitlist {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.badge-denied {
+  background: #fde8e8;
+  color: #9b1c1c;
+}
+
+.badge-cancelled {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.badge-mens {
+  background: #e8edf5;
+  color: #48536a;
+}
+
+.badge-womens {
+  background: #fce8f3;
+  color: #9b1c6e;
+}
+
+.badge-marriage {
+  background: #fff3e0;
+  color: #c45a00;
+}
+
+.badge-endurance {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.table-wrap button {
+  background: transparent;
+  border: 2px solid var(--red);
+  color: var(--red);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 0 14px;
+  text-transform: uppercase;
 }
 
 .retreat-staff-login-header {
@@ -795,7 +1182,7 @@ a {
   }
 
   .application-progress ol {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     min-width: 0;
   }
 
@@ -857,14 +1244,24 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .admin-header,
   .retreat-staff-login-header {
     align-items: start;
     grid-template-columns: 72px 1fr;
   }
 
+  .admin-header h1,
   .retreat-staff-login-header h1 {
     font-size: clamp(2.5rem, 12vw, 3.4rem);
     overflow-wrap: anywhere;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters .retreat-filter {
+    min-width: 100%;
   }
 
   .retreat-staff-mark {

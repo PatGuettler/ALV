@@ -4,11 +4,10 @@
   hidden
   aria-labelledby="contact-step-title"
 >
-  <legend id="contact-step-title">Your contact information</legend>
-  <p class="step-intro">
-    Use contact information that ALV staff can use for application follow-up.
-  </p>
+  <legend id="contact-step-title">Personal information</legend>
+  <p class="step-intro">Your contact information and basic details.</p>
 
+  <h2 class="section-label">Primary applicant</h2>
   <div class="field-grid">
     <label class="form-field"
       >First name <span aria-hidden="true">*</span>
@@ -19,12 +18,26 @@
       <input name="lastName" type="text" autocomplete="family-name" maxlength="60" required />
     </label>
     <label class="form-field"
-      >Email <span aria-hidden="true">*</span>
-      <input name="email" type="email" autocomplete="email" maxlength="254" required />
+      >Date of birth <span aria-hidden="true">*</span>
+      <input name="dateOfBirth" type="date" autocomplete="bday" required />
     </label>
     <label class="form-field"
-      >Phone <span aria-hidden="true">*</span>
+      >Gender
+      <select name="gender">
+        <option value="">Select…</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="non-binary">Non-binary</option>
+        <option value="prefer-not-to-say">Prefer not to say</option>
+      </select>
+    </label>
+    <label class="form-field"
+      >Phone number <span aria-hidden="true">*</span>
       <input name="phone" type="tel" autocomplete="tel" maxlength="40" required />
+    </label>
+    <label class="form-field"
+      >Email address <span aria-hidden="true">*</span>
+      <input name="email" type="email" autocomplete="email" maxlength="254" required />
     </label>
     <label class="form-field field-span"
       >Street address
@@ -39,11 +52,7 @@
       <select name="state" autocomplete="address-level1" required>
         <option value="">Select a state</option>
         <option value="AL">Alabama</option>
-        <option value="FL">Florida</option>
-        <option value="GA">Georgia</option>
-        <option value="MS">Mississippi</option>
-        <option value="TN">Tennessee</option>
-        <option value="other">Another state</option>
+        <option value="other">Other</option>
       </select>
     </label>
     <label class="form-field"
@@ -59,61 +68,107 @@
       />
     </label>
     <label class="form-field"
-      >Alabama county
+      >County
       <input name="county" type="text" maxlength="80" />
     </label>
     <label class="form-field"
-      >How did you hear about ALV?
-      <select name="referralSource">
-        <option value="">Select an option</option>
-        <option value="friend-family">Friend or family</option>
-        <option value="veteran-service-organization">Veteran service organization</option>
-        <option value="employer-agency">Employer or agency</option>
-        <option value="social-media">Social media</option>
-        <option value="event">ALV event</option>
-        <option value="search">Web search</option>
-        <option value="other">Other</option>
+      >Marital status
+      <select name="maritalStatus">
+        <option value="">Select…</option>
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+        <option value="divorced">Divorced</option>
+        <option value="separated">Separated</option>
+        <option value="widowed">Widowed</option>
+        <option value="domestic-partnership">Domestic partnership</option>
       </select>
     </label>
     <label class="form-field"
-      >Person or organization that referred you
-      <input name="referredBy" type="text" maxlength="120" />
+      >Number of dependents
+      <select name="dependents">
+        <option value="">Select…</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5-plus">5+</option>
+      </select>
+    </label>
+  </div>
+
+  <h2 class="section-label">Demographics (for grant reporting)</h2>
+  <div class="field-grid">
+    <label class="form-field"
+      >Race / ethnicity
+      <select name="raceEthnicity">
+        <option value="">Prefer not to say</option>
+        <option value="white-non-hispanic">White / non-Hispanic</option>
+        <option value="black">Black or African American</option>
+        <option value="hispanic">Hispanic or Latino</option>
+        <option value="asian">Asian</option>
+        <option value="native-american">Native American / Alaska Native</option>
+        <option value="pacific-islander">Pacific Islander</option>
+        <option value="two-or-more">Two or more races</option>
+      </select>
+    </label>
+    <label class="form-field"
+      >Annual household income
+      <select name="householdIncome">
+        <option value="">Prefer not to say</option>
+        <option value="under-25k">Under $25,000</option>
+        <option value="25-49k">$25,000 – $49,999</option>
+        <option value="50-74k">$50,000 – $74,999</option>
+        <option value="75-99k">$75,000 – $99,999</option>
+        <option value="100k-plus">$100,000+</option>
+      </select>
+    </label>
+    <label class="form-field field-span"
+      >Highest education level
+      <select name="educationLevel">
+        <option value="">Select…</option>
+        <option value="high-school">High school diploma / GED</option>
+        <option value="some-college">Some college</option>
+        <option value="associate">Associate degree</option>
+        <option value="bachelor">Bachelor's degree</option>
+        <option value="graduate">Graduate degree</option>
+      </select>
     </label>
   </div>
 
   <section id="spouse-fields" class="conditional-panel" data-condition="marriage" hidden>
-    <h2>Spouse information</h2>
+    <h2 class="section-label">Spouse / partner information</h2>
     <p class="field-help">Marriage Retreat applications include the spouse who plans to attend.</p>
     <div class="field-grid">
       <label class="form-field"
         >Spouse first name <span aria-hidden="true">*</span>
-        <input
-          name="spouseFirstName"
-          type="text"
-          autocomplete="off"
-          maxlength="60"
-          required
-          disabled
-        />
+        <input name="spouseFirstName" type="text" maxlength="60" required disabled />
       </label>
       <label class="form-field"
         >Spouse last name <span aria-hidden="true">*</span>
-        <input
-          name="spouseLastName"
-          type="text"
-          autocomplete="off"
-          maxlength="60"
-          required
-          disabled
-        />
-      </label>
-      <label class="form-field"
-        >Spouse email
-        <input name="spouseEmail" type="email" autocomplete="off" maxlength="254" disabled />
+        <input name="spouseLastName" type="text" maxlength="60" required disabled />
       </label>
       <label class="form-field"
         >Spouse phone
-        <input name="spousePhone" type="tel" autocomplete="off" maxlength="40" disabled />
+        <input name="spousePhone" type="tel" maxlength="40" disabled />
+      </label>
+      <label class="form-field"
+        >Spouse email
+        <input name="spouseEmail" type="email" maxlength="254" disabled />
+      </label>
+      <label class="form-field"
+        >Spouse date of birth
+        <input name="spouseDateOfBirth" type="date" disabled />
+      </label>
+      <label class="form-field"
+        >Spouse gender
+        <select name="spouseGender" disabled>
+          <option value="">Select…</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="non-binary">Non-binary</option>
+          <option value="prefer-not-to-say">Prefer not to say</option>
+        </select>
       </label>
     </div>
   </section>

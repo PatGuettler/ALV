@@ -1,6 +1,9 @@
 <fieldset class="application-step" data-application-step aria-labelledby="retreat-step-title">
-  <legend id="retreat-step-title">Choose your retreat</legend>
-  <p class="step-intro">Tell us which community and program best match your application.</p>
+  <legend id="retreat-step-title">Who is applying?</legend>
+  <p class="step-intro">
+    Select whether you are a veteran, active duty servicemember, or a first responder, then choose
+    your retreat.
+  </p>
 
   <div class="form-group">
     <span class="form-label">I am applying as <span aria-hidden="true">*</span></span>
@@ -8,8 +11,8 @@
       <label class="choice-card">
         <input name="applicantType" type="radio" value="military" required />
         <span
-          ><strong>Veteran or military member</strong>Veteran, active duty, Guard, Reserve, or
-          retired</span
+          ><strong>Veteran / military</strong>Active duty, veteran, Guard, Reserve, or military
+          retiree</span
         >
       </label>
       <label class="choice-card">
@@ -22,35 +25,33 @@
   </div>
 
   <div class="form-group">
-    <span class="form-label">Retreat requested <span aria-hidden="true">*</span></span>
+    <span class="form-label">Select your retreat <span aria-hidden="true">*</span></span>
+    <p class="field-help">Choose the retreat you are applying for. Staff confirm actual dates.</p>
     <div class="choice-grid choice-grid-wide">
       <label class="choice-card">
         <input name="retreatType" type="radio" value="mens" required />
-        <span
-          ><strong>Men's Warrior Retreat</strong>Four days of fellowship and post-traumatic growth</span
-        >
+        <span><strong>Men's Retreat</strong>Healing, accountability, and brotherhood.</span>
       </label>
       <label class="choice-card">
         <input name="retreatType" type="radio" value="womens" required />
-        <span
-          ><strong>Women's Warrior Retreat</strong>A dedicated experience for women who served</span
-        >
+        <span><strong>Women's Retreat</strong>A safe space to heal, connect, and grow.</span>
       </label>
       <label class="choice-card">
         <input name="retreatType" type="radio" value="marriage" required />
         <span
-          ><strong>Marriage Retreat</strong>Connection and practical tools for veteran couples</span
+          ><strong>Marriage Retreat</strong>Rebuilding bonds for couples through shared experience.</span
         >
       </label>
       <label class="choice-card">
         <input name="retreatType" type="radio" value="endurance" required />
-        <span><strong>Endurance Retreat</strong>A physically demanding team challenge</span>
+        <span><strong>Endurance Retreat</strong>Building resilience through staying connected.</span
+        >
       </label>
     </div>
   </div>
 
   <label class="form-field">
-    Timing preference <span aria-hidden="true">*</span>
+    Preferred timing <span aria-hidden="true">*</span>
     <select name="timingPreference" required>
       <option value="">Select a preference</option>
       <option value="next-available">Next available retreat</option>
@@ -58,7 +59,68 @@
       <option value="staff-contact">Contact me about available dates</option>
     </select>
   </label>
-  <p class="field-help">
-    Actual retreat dates are confirmed by staff; this page does not show mock sessions.
-  </p>
+
+  <section class="conditional-panel" data-condition="endurance" hidden>
+    <div class="info-box">
+      The Endurance Retreat is a follow-up experience for those who have already completed a Men's
+      or Women's Retreat.
+    </div>
+    <div class="form-group">
+      <span class="form-label"
+        >Have you attended a Men's or Women's Retreat before? <span aria-hidden="true">*</span
+        ></span
+      >
+      <div class="radio-stack">
+        <label
+          ><input name="enduranceEligible" type="radio" value="yes" required disabled /> Yes — I have
+          attended a Men's or Women's Retreat</label
+        >
+        <label
+          ><input name="enduranceEligible" type="radio" value="no" required disabled /> No — I have not
+          attended one yet</label
+        >
+      </div>
+    </div>
+    <p
+      class="application-notice application-notice-alert"
+      data-condition="endurance-ineligible"
+      hidden
+    >
+      You must have attended a Men's or Women's Retreat before you are eligible for the Endurance
+      Retreat. Please choose a different retreat, or reach out to our team if you believe this is an
+      error.
+    </p>
+  </section>
+
+  <div class="form-group">
+    <span class="form-label">How did you hear about this retreat?</span>
+    <div class="radio-stack">
+      <label><input name="referralSource" type="radio" value="social-media" /> Social media</label>
+      <label
+        ><input name="referralSource" type="radio" value="word-of-mouth" /> Word of mouth / fellow veteran
+        or first responder</label
+      >
+      <label
+        ><input name="referralSource" type="radio" value="va-vet-center" /> VA or Vet Center</label
+      >
+      <label
+        ><input name="referralSource" type="radio" value="veteran-service-organization" /> Veteran or
+        first responder organization</label
+      >
+      <label
+        ><input name="referralSource" type="radio" value="healthcare-provider" /> Healthcare provider</label
+      >
+      <label
+        ><input name="referralSource" type="radio" value="faith-community" /> Church or faith community</label
+      >
+      <label
+        ><input name="referralSource" type="radio" value="employer-agency" /> Employer or department</label
+      >
+      <label><input name="referralSource" type="radio" value="other" /> Other</label>
+    </div>
+  </div>
+  <label class="form-field" data-condition="word-of-mouth" hidden>
+    Who referred you?
+    <input name="referredBy" type="text" maxlength="120" disabled />
+  </label>
 </fieldset>

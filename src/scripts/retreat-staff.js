@@ -16,11 +16,56 @@ export function staffAuthorizeUrl({ cognitoDomain, clientId, redirectUri, challe
   return url.href;
 }
 
-function humanize(value) {
+export const STAFF_LIST_STATUSES = ['submitted', 'approved', 'waitlisted', 'declined', 'cancelled'];
+
+export function humanize(value) {
   if (Array.isArray(value)) return value.length ? value.map(humanize).join(', ') : 'None';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   const result = String(value || '').replace(/-/g, ' ');
   return result ? result.replace(/\b\w/g, (letter) => letter.toUpperCase()) : 'Not provided';
+}
+
+export function staffDashboardStats(records) {
+  return {
+    total: records.length,
+    submitted: records.filter((record) => record.status === 'submitted').length,
+    approved: records.filter((record) => record.status === 'approved').length,
+    returning: records.filter(
+      (record) => Array.isArray(record.previousRetreats) && record.previousRetreats.length > 0,
+    ).length,
+  };
+}
+
+export function filterStaffRecords(records, filters = {}) {
+  const term = String(filters.query || '')
+    .toLocaleLowerCase('en-US')
+    .trim();
+  return records.filter((record) => {
+    if (filters.retreatType && record.retreatType !== filters.retreatType) return false;
+    if (filters.status && record.status !== filters.status) return false;
+    if (filters.applicantType && record.applicantType !== filters.applicantType) return false;
+    if (
+      term &&
+      !`${record.fullName || ''} ${record.email || ''} ${record.phone || ''}`
+        .toLocaleLowerCase('en-US')
+        .includes(term)
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export function statusBadgeClass(status) {
+  return (
+    {
+      submitted: 'badge-pending',
+      approved: 'badge-approved',
+      waitlisted: 'badge-waitlist',
+      declined: 'badge-denied',
+      cancelled: 'badge-cancelled',
+    }[status] || 'badge-waitlist'
+  );
 }
 
 export function staffDetailSections(record) {
@@ -55,6 +100,7 @@ export function staffDetailSections(record) {
         ],
         ['County', address.county],
         ['Referral source', humanize(applicant.referral?.source)],
+        ['Date of birth', applicant.dateOfBirth],
         ['Referred by', applicant.referral?.referredBy],
         [
           'Spouse',
@@ -98,6 +144,26 @@ export function staffDetailSections(record) {
       ],
     },
     {
+      title: 'Health and wellbeing',
+      rows: [
+        ['PHQ hopeless', record.wellbeing?.phqHopeless],
+        ['PHQ interest', record.wellbeing?.phqInterest],
+        ['Anxiety', record.wellbeing?.anxietyFrequency],
+        ['Nightmares / flashbacks', record.wellbeing?.nightmares],
+        ['Overall mental health', record.wellbeing?.mentalHealthOverall],
+        ['Diagnoses', record.wellbeing?.diagnoses],
+        ['In care', record.wellbeing?.inCare],
+        ['Suicide history', record.wellbeing?.suicideHistory],
+        ['Crisis status', record.wellbeing?.crisisStatus],
+        ['Medical conditions', record.wellbeing?.medicalConditions],
+        ['Medications', record.wellbeing?.medications],
+        ['Allergies', record.wellbeing?.allergies],
+        ['Mobility', record.wellbeing?.mobility],
+        ['Dietary', record.wellbeing?.dietary],
+        ['Service dog', record.wellbeing?.serviceDog],
+      ],
+    },
+    {
       title: 'Final details',
       rows: [
         ['Emergency contact', emergency.name],
@@ -126,7 +192,13 @@ if (typeof document !== 'undefined') {
   const list = document.getElementById('retreat-staff-list');
   const items = document.getElementById('retreat-staff-items');
   const filter = document.getElementById('retreat-staff-status-filter');
+  const retreatFilter = document.getElementById('retreat-staff-retreat-filter');
+  const typeFilter = document.getElementById('retreat-staff-type-filter');
   const search = document.getElementById('retreat-staff-search');
+  const statTotal = document.getElementById('retreat-stat-total');
+  const statSubmitted = document.getElementById('retreat-stat-submitted');
+  const statApproved = document.getElementById('retreat-stat-approved');
+  const statReturning = document.getElementById('retreat-stat-returning');
   const dialog = document.getElementById('retreat-staff-dialog');
   const dialogTitle = document.getElementById('retreat-staff-dialog-title');
   const detail = document.getElementById('retreat-staff-detail');
@@ -144,7 +216,13 @@ if (typeof document !== 'undefined') {
     !(list instanceof HTMLElement) ||
     !(items instanceof HTMLElement) ||
     !(filter instanceof HTMLSelectElement) ||
+    !(retreatFilter instanceof HTMLSelectElement) ||
+    !(typeFilter instanceof HTMLSelectElement) ||
     !(search instanceof HTMLInputElement) ||
+    !(statTotal instanceof HTMLElement) ||
+    !(statSubmitted instanceof HTMLElement) ||
+    !(statApproved instanceof HTMLElement) ||
+    !(statReturning instanceof HTMLElement) ||
     !(dialog instanceof HTMLDialogElement) ||
     !(dialogTitle instanceof HTMLElement) ||
     !(detail instanceof HTMLElement) ||
@@ -262,35 +340,82 @@ if (typeof document !== 'undefined') {
     return response.json();
   }
 
+  function currentFilters() {
+    return {
+      retreatType: retreatFilter.value,
+      status: filter.value,
+      applicantType: typeFilter.value,
+      query: search.value,
+    };
+  }
+
+  function renderStats() {
+    const stats = staffDashboardStats(records);
+    statTotal.textContent = String(stats.total);
+    statSubmitted.textContent = String(stats.submitted);
+    statApproved.textContent = String(stats.approved);
+    statReturning.textContent = String(stats.returning);
+  }
+
   function renderItems() {
     items.replaceChildren();
-    const term = search.value.trim().toLocaleLowerCase('en-US');
-    const visible = records.filter((record) =>
-      `${record.fullName || ''} ${record.email || ''} ${record.phone || ''}`
-        .toLocaleLowerCase('en-US')
-        .includes(term),
-    );
+    const visible = filterStaffRecords(records, currentFilters());
     if (!visible.length) {
-      const empty = document.createElement('li');
-      empty.textContent = term
+      const empty = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 8;
+      cell.textContent = search.value.trim()
         ? 'No applications match this search.'
-        : 'No applications in this status.';
+        : 'No applications in this view.';
+      empty.append(cell);
       items.append(empty);
       return;
     }
     for (const record of visible) {
-      const item = document.createElement('li');
-      item.className = 'retreat-staff-card';
-      const title = document.createElement('strong');
-      title.textContent = record.fullName;
-      const meta = document.createElement('p');
-      meta.textContent = `${record.email} · ${humanize(record.retreatType)} · ${new Date(record.submittedAt).toLocaleString()}`;
+      const row = document.createElement('tr');
+      const applicant = document.createElement('td');
+      const name = document.createElement('strong');
+      name.textContent = record.fullName || 'Unnamed applicant';
+      const email = document.createElement('div');
+      email.className = 'table-sub';
+      email.textContent = record.email || '';
+      applicant.append(name, email);
+
+      const type = document.createElement('td');
+      type.textContent = humanize(record.applicantType);
+
+      const retreat = document.createElement('td');
+      const retreatBadge = document.createElement('span');
+      retreatBadge.className = `badge badge-${record.retreatType || 'mens'}`;
+      retreatBadge.textContent = humanize(record.retreatType);
+      retreat.append(retreatBadge);
+
+      const timing = document.createElement('td');
+      timing.textContent = humanize(record.timingPreference);
+
+      const statusCell = document.createElement('td');
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `badge ${statusBadgeClass(record.status)}`;
+      statusBadge.textContent = humanize(record.status);
+      statusCell.append(statusBadge);
+
+      const past = document.createElement('td');
+      past.textContent = humanize(record.previousRetreats);
+
+      const applied = document.createElement('td');
+      applied.textContent = record.submittedAt
+        ? new Date(record.submittedAt).toLocaleDateString()
+        : 'Not provided';
+
+      const actions = document.createElement('td');
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = 'View application';
+      button.textContent = 'View';
       button.addEventListener('click', () => openApplication(record.id));
-      item.append(title, meta, button);
-      items.append(item);
+      actions.append(button);
+
+      row.append(applicant, type, retreat, timing, statusCell, past, applied, actions);
+      items.append(row);
     }
   }
 
@@ -329,8 +454,13 @@ if (typeof document !== 'undefined') {
 
   async function loadList() {
     status.textContent = 'Loading applications…';
-    const payload = await api(`/v1/staff/applications?status=${encodeURIComponent(filter.value)}`);
-    records = payload.items || [];
+    const pages = await Promise.all(
+      STAFF_LIST_STATUSES.map((nextStatus) =>
+        api(`/v1/staff/applications?status=${encodeURIComponent(nextStatus)}`),
+      ),
+    );
+    records = pages.flatMap((payload) => payload.items || []);
+    renderStats();
     renderItems();
     status.textContent = '';
   }
@@ -382,9 +512,9 @@ if (typeof document !== 'undefined') {
     });
   });
   signOutButton.addEventListener('click', startLogout);
-  filter.addEventListener('change', () => {
-    loadList().catch(() => showSignedOut('Session expired. Sign in again.'));
-  });
+  filter.addEventListener('change', renderItems);
+  retreatFilter.addEventListener('change', renderItems);
+  typeFilter.addEventListener('change', renderItems);
   search.addEventListener('input', renderItems);
   saveButton.addEventListener('click', saveDecision);
   closeButton.addEventListener('click', () => dialog.close());

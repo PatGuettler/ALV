@@ -5,78 +5,124 @@
   aria-labelledby="workforce-step-title"
 >
   <legend id="workforce-step-title">Employment and workforce</legend>
-  <p class="step-intro">Optional workforce services can continue beyond the retreat.</p>
+  <p class="step-intro">
+    Your current employment situation. Alabama Veteran also offers workforce development services at
+    no cost.
+  </p>
 
+  <h2 class="section-label">Current employment</h2>
   <div class="field-grid">
     <label class="form-field"
       >Employment status <span aria-hidden="true">*</span>
       <select name="employmentStatus" required>
-        <option value="">Select a status</option><option value="full-time"
-          >Employed full-time</option
-        >
-        <option value="part-time">Employed part-time</option><option value="self-employed"
-          >Self-employed</option
-        >
-        <option value="unemployed-looking">Unemployed and looking</option>
-        <option value="unemployed-not-looking">Unemployed and not looking</option>
-        <option value="retired">Retired</option><option value="student">Student</option>
-        <option value="unable-to-work">Unable to work</option><option value="prefer-not-to-answer"
-          >Prefer not to answer</option
-        >
+        <option value="">Select a status</option>
+        <option value="full-time">Employed full-time</option>
+        <option value="part-time">Employed part-time</option>
+        <option value="self-employed">Self-employed</option>
+        <option value="unemployed-looking">Unemployed, actively looking</option>
+        <option value="unemployed-not-looking">Unemployed, not looking</option>
+        <option value="retired">Retired</option>
+        <option value="student">Student</option>
+        <option value="unable-to-work">Disabled / unable to work</option>
+        <option value="prefer-not-to-answer">Prefer not to answer</option>
       </select>
     </label>
     <label class="form-field"
-      >Current employer
+      >Current employer (if applicable)
       <input name="employer" type="text" autocomplete="organization" maxlength="120" />
     </label>
     <label class="form-field"
-      >Job title or occupation
+      >Job title / occupation
       <input name="jobTitle" type="text" autocomplete="organization-title" maxlength="100" />
     </label>
     <label class="form-field"
-      >Employment satisfaction
+      >Industry / field
+      <select name="industry">
+        <option value="">Select…</option>
+        <option value="government">Government / public sector</option>
+        <option value="military-defense">Military / defense</option>
+        <option value="public-safety">Law enforcement / public safety</option>
+        <option value="healthcare">Healthcare</option>
+        <option value="trades">Construction / trades</option>
+        <option value="transportation">Transportation / logistics</option>
+        <option value="manufacturing">Manufacturing</option>
+        <option value="technology">Technology / IT</option>
+        <option value="education">Education</option>
+        <option value="finance">Finance / banking</option>
+        <option value="retail">Retail / service</option>
+        <option value="agriculture">Agriculture</option>
+        <option value="nonprofit">Non-profit / social services</option>
+        <option value="other">Other</option>
+      </select>
+    </label>
+    <label class="form-field field-span"
+      >Are you satisfied with your current employment situation?
       <select name="employmentSatisfaction">
-        <option value="">Select an option</option><option value="satisfied">Satisfied</option>
-        <option value="somewhat">Somewhat satisfied</option><option value="not-satisfied"
-          >Not satisfied</option
+        <option value="">Select an option</option>
+        <option value="satisfied">Yes, I am satisfied</option>
+        <option value="somewhat">Somewhat satisfied</option>
+        <option value="not-satisfied">Not satisfied — I would like to explore other options</option>
+        <option value="not-applicable">Not applicable (retired, student, etc.)</option>
+        <option value="prefer-not-to-answer">Prefer not to answer</option>
+      </select>
+    </label>
+    <label class="form-field field-span"
+      >If not fully satisfied, what is your biggest employment challenge?
+      <select name="employmentChallenge">
+        <option value="">Not applicable</option>
+        <option value="cannot-find-field">Unable to find work in my field</option>
+        <option value="underemployed">Underemployed / working below my skill level</option>
+        <option value="low-pay">Low pay or lack of benefits</option>
+        <option value="skill-translation"
+          >Difficulty translating service skills to civilian work</option
         >
-        <option value="not-applicable">Not applicable</option><option value="prefer-not-to-answer"
-          >Prefer not to answer</option
-        >
+        <option value="health-barrier">Physical or mental health barriers to employment</option>
+        <option value="credentials">Lack of certifications or credentials</option>
+        <option value="logistics">Transportation or childcare barriers</option>
+        <option value="other">Other</option>
       </select>
     </label>
   </div>
 
   <div class="form-group">
-    <span class="form-label">Workforce assistance interests</span>
+    <span class="form-label">Workforce development interest</span>
+    <p class="field-help">Check any areas where you would like support from Alabama Veteran.</p>
     <div class="check-grid">
       <label
-        ><input name="workforceInterests" type="checkbox" value="resume" /> Resume and applications</label
+        ><input name="workforceInterests" type="checkbox" value="resume" /> Resume writing and job application
+        assistance</label
       >
       <label
-        ><input name="workforceInterests" type="checkbox" value="interview" /> Interview coaching</label
+        ><input name="workforceInterests" type="checkbox" value="interview" /> Interview preparation and
+        coaching</label
       >
       <label
         ><input name="workforceInterests" type="checkbox" value="career-placement" /> Career counseling
-        and placement</label
+        and job placement</label
       >
       <label
-        ><input name="workforceInterests" type="checkbox" value="training" /> Skills training or certification</label
+        ><input name="workforceInterests" type="checkbox" value="training" /> Skills training or certifications</label
       >
       <label
-        ><input name="workforceInterests" type="checkbox" value="business" /> Small business support</label
+        ><input name="workforceInterests" type="checkbox" value="business" /> Small business development
+        or entrepreneurship</label
       >
       <label
         ><input name="workforceInterests" type="checkbox" value="education-benefits" /> Education benefits
-        guidance</label
+        guidance (GI Bill, Pell Grant, etc.)</label
       >
       <label
-        ><input name="workforceInterests" type="checkbox" value="financial-literacy" /> Financial literacy</label
+        ><input name="workforceInterests" type="checkbox" value="financial-literacy" /> Financial literacy
+        and budgeting</label
+      >
+      <label
+        ><input name="workforceInterests" type="checkbox" value="none" /> No workforce assistance needed
+        at this time</label
       >
     </div>
   </div>
   <label class="form-field"
-    >Employment or workforce goal notes
+    >Additional notes about your employment or workforce goals
     <textarea name="workforceNotes" rows="4" maxlength="1000"></textarea>
   </label>
 </fieldset>

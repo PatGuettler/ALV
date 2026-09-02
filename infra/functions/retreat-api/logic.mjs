@@ -20,7 +20,15 @@ const MILITARY_BRANCHES = new Set([
   'coast-guard',
   'national-guard',
 ]);
-const MILITARY_STATUSES = new Set(['veteran', 'active-duty', 'guard-reserve', 'retired']);
+const MILITARY_STATUSES = new Set([
+  'veteran',
+  'active-duty',
+  'guard-reserve',
+  'national-guard',
+  'reserve',
+  'medically-discharged',
+  'retired',
+]);
 const RESPONDER_TYPES = new Set([
   'law-enforcement',
   'fire',
@@ -65,6 +73,7 @@ const WORKFORCE_INTERESTS = new Set([
   'business',
   'education-benefits',
   'financial-literacy',
+  'none',
 ]);
 const PREVIOUS_RETREATS = new Set(['mens', 'womens', 'marriage', 'endurance']);
 
@@ -163,6 +172,7 @@ export function parseApplication(payload) {
   const applicantType = cleanEnum(payload.retreat?.applicantType, APPLICANT_TYPES);
   const retreatType = cleanEnum(payload.retreat?.retreatType, RETREAT_TYPES);
   const timingPreference = cleanEnum(payload.retreat?.timingPreference, TIMING_PREFERENCES);
+  const enduranceEligible = cleanText(payload.retreat?.enduranceEligible, 10);
   const firstName = cleanText(payload.applicant?.firstName, 60);
   const lastName = cleanText(payload.applicant?.lastName, 60);
   const email = cleanText(payload.applicant?.email, 254).toLowerCase();
@@ -180,6 +190,7 @@ export function parseApplication(payload) {
     !applicantType ||
     !retreatType ||
     !timingPreference ||
+    (retreatType === 'endurance' && enduranceEligible === 'no') ||
     !firstName ||
     !lastName ||
     !validEmail(email) ||
@@ -198,6 +209,8 @@ export function parseApplication(payload) {
       lastName: cleanText(payload.applicant?.spouse?.lastName, 60),
       email: cleanText(payload.applicant?.spouse?.email, 254).toLowerCase(),
       phone: cleanText(payload.applicant?.spouse?.phone, 40),
+      dateOfBirth: cleanText(payload.applicant?.spouse?.dateOfBirth, 10),
+      gender: cleanText(payload.applicant?.spouse?.gender, 40),
     };
     if (!spouse.firstName || !spouse.lastName || (spouse.email && !validEmail(spouse.email))) {
       return { ok: false, error: 'invalid_spouse' };
@@ -225,7 +238,15 @@ export function parseApplication(payload) {
       status,
       years,
       rank: cleanText(payload.service?.rank, 40),
+      mos: cleanText(payload.service?.mos, 40),
+      enteredService: cleanText(payload.service?.enteredService, 10),
+      separatedService: cleanText(payload.service?.separatedService, 10),
+      dischargeType: cleanText(payload.service?.dischargeType, 40),
+      component: cleanText(payload.service?.component, 40),
+      vaRating: cleanText(payload.service?.vaRating, 20),
+      vaCare: cleanText(payload.service?.vaCare, 40),
       combatDeployment,
+      combatTheaters: cleanText(payload.service?.combatTheaters, 120),
       verificationStatus: 'staff-follow-up',
     };
   } else {
@@ -251,7 +272,9 @@ export function parseApplication(payload) {
       status,
       years,
       rank: cleanText(payload.service?.rank, 60),
+      agencyLocation: cleanText(payload.service?.agencyLocation, 120),
       criticalIncident,
+      departmentSupport: cleanText(payload.service?.departmentSupport, 40),
       verificationStatus: 'staff-follow-up',
     };
   }
@@ -311,10 +334,17 @@ export function parseApplication(payload) {
       phone,
       applicantType,
       retreatType,
-      retreat: { applicantType, retreatType, timingPreference },
+      retreat: { applicantType, retreatType, timingPreference, enduranceEligible },
       applicant: {
         firstName,
         lastName,
+        dateOfBirth: cleanText(payload.applicant?.dateOfBirth, 10),
+        gender: cleanText(payload.applicant?.gender, 40),
+        maritalStatus: cleanText(payload.applicant?.maritalStatus, 40),
+        dependents: cleanText(payload.applicant?.dependents, 20),
+        raceEthnicity: cleanText(payload.applicant?.raceEthnicity, 40),
+        householdIncome: cleanText(payload.applicant?.householdIncome, 40),
+        educationLevel: cleanText(payload.applicant?.educationLevel, 40),
         email,
         phone,
         address: { street, city, state, postalCode, county },
@@ -326,9 +356,38 @@ export function parseApplication(payload) {
         employmentStatus,
         employer: cleanText(payload.workforce?.employer, 120),
         jobTitle: cleanText(payload.workforce?.jobTitle, 100),
+        industry: cleanText(payload.workforce?.industry, 40),
         satisfaction,
+        challenge: cleanText(payload.workforce?.challenge, 40),
         interests,
         notes: cleanText(payload.workforce?.notes, 1000),
+      },
+      wellbeing: {
+        phqHopeless: cleanText(payload.wellbeing?.phqHopeless, 2),
+        phqInterest: cleanText(payload.wellbeing?.phqInterest, 2),
+        anxietyFrequency: cleanText(payload.wellbeing?.anxietyFrequency, 2),
+        nightmares: cleanText(payload.wellbeing?.nightmares, 40),
+        mentalHealthOverall: cleanText(payload.wellbeing?.mentalHealthOverall, 2),
+        diagnoses: Array.isArray(payload.wellbeing?.diagnoses)
+          ? payload.wellbeing.diagnoses.map((item) => cleanText(item, 40)).slice(0, 12)
+          : [],
+        inCare: cleanText(payload.wellbeing?.inCare, 40),
+        suicideHistory: cleanText(payload.wellbeing?.suicideHistory, 40),
+        crisisStatus: cleanText(payload.wellbeing?.crisisStatus, 40),
+        medicalConditions: cleanText(payload.wellbeing?.medicalConditions, 1500),
+        medications: cleanText(payload.wellbeing?.medications, 1500),
+        allergies: cleanText(payload.wellbeing?.allergies, 1000),
+        mobility: cleanText(payload.wellbeing?.mobility, 200),
+        dietary: cleanText(payload.wellbeing?.dietary, 200),
+        serviceDog: cleanText(payload.wellbeing?.serviceDog, 40),
+        dog: payload.wellbeing?.dog
+          ? {
+              name: cleanText(payload.wellbeing.dog.name, 60),
+              breed: cleanText(payload.wellbeing.dog.breed, 80),
+              certification: cleanText(payload.wellbeing.dog.certification, 80),
+              tasks: cleanText(payload.wellbeing.dog.tasks, 200),
+            }
+          : null,
       },
       finalDetails: {
         emergencyContact,
@@ -390,6 +449,9 @@ export function buildApplicationItem({ id, submittedAt, fields }) {
 }
 
 export function staffSummaryRecord(item) {
+  const previousRetreats = Array.isArray(item.finalDetails?.previousRetreats)
+    ? item.finalDetails.previousRetreats
+    : [];
   return {
     id: item.id,
     fullName: item.fullName,
@@ -397,6 +459,8 @@ export function staffSummaryRecord(item) {
     phone: item.phone,
     applicantType: item.applicantType || item.retreat?.applicantType || '',
     retreatType: item.retreatType || item.retreat?.retreatType || '',
+    timingPreference: item.retreat?.timingPreference || '',
+    previousRetreats,
     status: item.status,
     submittedAt: item.submittedAt,
     version: item.version,
@@ -411,6 +475,7 @@ export function publicStaffRecord(item) {
     applicant: item.applicant,
     service: item.service,
     workforce: item.workforce,
+    wellbeing: item.wellbeing,
     finalDetails: item.finalDetails,
     consent: item.consent,
     note: item.note || '',

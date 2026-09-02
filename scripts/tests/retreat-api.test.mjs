@@ -235,6 +235,8 @@ test('staff summary and detail records hide DynamoDB keys', () => {
   assert.equal(item.pk, `APP#${parsed.id}`);
   const summary = staffSummaryRecord(item);
   assert.equal(summary.retreatType, 'mens');
+  assert.equal(summary.timingPreference, 'next-available');
+  assert.deepEqual(summary.previousRetreats, []);
   assert.equal('applicant' in summary, false);
   const detail = publicStaffRecord(item);
   assert.equal(detail.applicant.address.city, 'Birmingham');
