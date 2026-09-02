@@ -116,6 +116,14 @@ if (!retreatPage.includes('Application service not connected')) {
   failures.push('The retreat service status component is missing.');
 }
 
+const footer = await readFile(resolve(sourceRoot, 'components', 'site', 'Footer.astro'), 'utf8');
+if (!footer.includes('https://va.alabama.gov/service-officer')) {
+  failures.push('Footer Find a VSO must use the current ADVA service-officer URL.');
+}
+if (footer.includes('va.alabama.gov/serviceofficer/')) {
+  failures.push('Footer still points at the retired ADVA serviceofficer URL.');
+}
+
 const sponsors = await readFile(
   resolve(sourceRoot, 'components', 'home', 'Sponsors.astro'),
   'utf8',

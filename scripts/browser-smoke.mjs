@@ -111,6 +111,33 @@ function assertLayout(condition, message, details) {
   }
 }
 
+async function assertCircleCompanies(page, label) {
+  await page.locator('.circle-preview').scrollIntoViewIfNeeded();
+  const logos = page.locator('.cp-companies .circ-co-row img');
+  if ((await logos.count()) < 4) {
+    throw new Error(`${label} AV Circle companies are missing from the homepage.`);
+  }
+  const first = logos.first();
+  await first.waitFor({ state: 'visible' });
+  const size = await first.evaluate((img) => {
+    const style = getComputedStyle(img);
+    return {
+      complete: img.complete,
+      naturalWidth: img.naturalWidth,
+      width: img.getBoundingClientRect().width,
+      height: img.getBoundingClientRect().height,
+      filter: style.filter,
+      opacity: Number(style.opacity),
+    };
+  });
+  if (!size.naturalWidth || size.width < 24 || size.height < 20 || size.opacity < 0.2) {
+    throw new Error(`${label} AV Circle companies are not visible: ${JSON.stringify(size)}`);
+  }
+  if (/invert\(/.test(size.filter)) {
+    throw new Error(`${label} AV Circle logos are inverted onto the white company card.`);
+  }
+}
+
 async function assertSponsorMarquee(page, label) {
   await page.locator('.spon-section').scrollIntoViewIfNeeded();
   const logo = page.locator('.spon-track .spon-item:not([aria-hidden]) img').first();
@@ -532,6 +559,7 @@ async function assertCustomerReportedLayouts(page, label, width, browserErrors) 
   await loadRoute(page, 'home', '', browserErrors);
   await assertNoHorizontalOverflow(page, `${label} home`);
   await assertMissionStrip(page, label);
+  await assertCircleCompanies(page, label);
   await assertSponsorMarquee(page, label);
   await assertCrisisControl(page, label, width);
 

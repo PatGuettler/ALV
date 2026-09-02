@@ -16,7 +16,9 @@ import NewsletterSignup from '../site/NewsletterSignup.astro';
           src={ghl.eventsCalendarEmbed}
           title="Alabama Veteran event calendar"
           loading="lazy"
+          allow="payment"
         />
+        <script is:inline src={`${ghl.locationHost}/js/form_embed.js`}></script>
       </div>
     </section>
   ) : (
