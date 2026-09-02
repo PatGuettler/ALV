@@ -106,7 +106,6 @@ try {
       const results = await new AxeBuilder({ page })
         .withTags(axeTags)
         .exclude('.su-embed')
-        .exclude('.ghl-calendar-embed')
         .analyze();
       axeVersion ??= results.testEngine.version;
       scans.push({

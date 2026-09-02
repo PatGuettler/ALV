@@ -16,10 +16,7 @@ test('ghlWidgets point newsletter, crisis, volunteer, and Topgolf at GHL', () =>
   assert.match(ghlWidgets.volunteer, /oA6BYtFTZ47lbNChjt2h/);
   assert.match(ghlWidgets.topgolfBooking, /widget\/bookings\/top-golf-av-active/);
   assert.equal(ghl.eventsCalendarId, 'zfYlU1tekAs9O3E2xGT8');
-  assert.equal(
-    ghl.eventsCalendarEmbed,
-    'https://app.alabamaveteran.org/widget/booking/zfYlU1tekAs9O3E2xGT8',
-  );
-  assert.match(ghlWidgets.eventsBooking, /widget\/bookings\/av-events-calendar/);
+  assert.equal(ghl.eventsCalendarEmbed, undefined);
+  assert.equal(ghlWidgets.eventsBooking, undefined);
   assert.deepEqual(ghl.fundraiserCalendarIds, []);
 });

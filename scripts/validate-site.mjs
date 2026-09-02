@@ -27,7 +27,7 @@ const sectionCounts = new Map([
   ['about', 4],
   ['active', 6],
   ['topgolf', 2],
-  ['events', 2],
+  ['events', 3],
   ['resources', 5],
 ]);
 
@@ -93,6 +93,7 @@ for (const script of [
   'retreat-application',
   'retreat-staff',
   'featured-fundraiser',
+  'events-calendar',
 ]) {
   const scriptPath = resolve(sourceRoot, 'scripts', `${script}.js`);
   const javascript = await readFile(scriptPath, 'utf8');

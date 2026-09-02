@@ -547,10 +547,23 @@ async function assertRetreatSubmissionTimeout(page) {
   await page.unroute(applicationRoute);
 }
 
+async function assertDisplayEventsCalendar(page, label) {
+  await page.locator('[data-events-calendar]').waitFor({ state: 'visible' });
+  const bookingEmbeds = await page.locator('iframe[src*="widget/booking"]').count();
+  const selectButtons = await page.getByRole('button', { name: /^select$/i }).count();
+  const days = await page.locator('[data-cal-grid] .evp-day').count();
+  if (bookingEmbeds > 0 || selectButtons > 0 || days < 28) {
+    throw new Error(
+      `${label} events page is still a scheduler: ${JSON.stringify({ bookingEmbeds, selectButtons, days })}`,
+    );
+  }
+}
+
 async function assertCustomerReportedLayouts(page, label, width, browserErrors) {
   await loadRoute(page, 'events', 'events/', browserErrors);
   await assertNoHorizontalOverflow(page, `${label} events`);
   await assertEventsHero(page, label);
+  await assertDisplayEventsCalendar(page, label);
 
   await loadRoute(page, 'resources', 'resources/', browserErrors);
   await assertNoHorizontalOverflow(page, `${label} resources`);

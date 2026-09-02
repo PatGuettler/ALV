@@ -1,0 +1,39 @@
+---
+const base = import.meta.env.BASE_URL;
+const feedUrl = `${base}data/events-calendar.json`;
+const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+---
+
+<section class="evp-cal-section" aria-labelledby="events-calendar-title">
+  <div class="container">
+    <div class="evp-cal-header">
+      <div class="eyebrow ctr">All Events</div>
+      <h2 id="events-calendar-title">Event calendar</h2>
+    </div>
+    <div class="evp-cal-wrap" data-events-calendar data-feed-url={feedUrl}>
+      <div class="evp-cal">
+        <div class="evp-cal-nav">
+          <button type="button" data-cal-prev aria-label="Previous month">‹</button>
+          <h3 data-cal-month>Calendar</h3>
+          <button type="button" data-cal-next aria-label="Next month">›</button>
+        </div>
+        <div class="evp-cal-days-header">
+          {weekdays.map((day) => <div class="evp-cal-day-label">{day}</div>)}
+        </div>
+        <div class="evp-cal-grid" data-cal-grid></div>
+      </div>
+      <aside class="evp-detail evp-cal-sidebar" data-cal-detail aria-live="polite">
+        <div class="evp-detail-empty">
+          <p>
+            Public events will appear here as they are published. This calendar shows dates and
+            details only — it does not book meetings.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/events-calendar.js';
+</script>

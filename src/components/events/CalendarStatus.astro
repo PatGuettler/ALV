@@ -1,54 +1,10 @@
 ---
-import { ghl, ghlWidgets } from '../../config/ghl';
+import { ghlWidgets } from '../../config/ghl';
+import EventsCalendar from './EventsCalendar.astro';
 import NewsletterSignup from '../site/NewsletterSignup.astro';
 ---
 
-{
-  ghl.eventsCalendarEmbed ? (
-    <section class="evp-cal-section" aria-labelledby="events-calendar-title">
-      <div class="container">
-        <div class="eyebrow ctr" style="margin-bottom: 14px">
-          All Events
-        </div>
-        <h2 id="events-calendar-title">Event calendar</h2>
-        <iframe
-          class="ghl-calendar-embed"
-          src={ghl.eventsCalendarEmbed}
-          title="Alabama Veteran event calendar"
-          loading="lazy"
-          allow="payment"
-        />
-        <script is:inline src={`${ghl.locationHost}/js/form_embed.js`} />
-      </div>
-    </section>
-  ) : (
-    <section class="integration-section" aria-labelledby="events-status-title">
-      <div class="container">
-        <div class="integration-notice">
-          <h2 id="events-status-title">Public event calendar</h2>
-          <p>
-            Bookings and event invites already run in GoHighLevel. A public month view will appear
-            here after ALV pastes the calendar embed URL from GHL (Calendar Settings → Share →
-            Embed). Topgolf is already on a GHL booking calendar.
-          </p>
-          <p class="events-status-actions">
-            <a
-              class="btn-r"
-              href={ghlWidgets.topgolfBooking}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Book Topgolf
-            </a>
-            <a class="btn-b" href="#subscribe" data-subscribe>
-              Get event invites
-            </a>
-          </p>
-        </div>
-      </div>
-    </section>
-  )
-}
+<EventsCalendar />
 
 <section class="evp-subscribe" id="subscribe">
   <div class="container">
@@ -58,6 +14,11 @@ import NewsletterSignup from '../site/NewsletterSignup.astro';
       <p>
         Click to subscribe for event invites and the quarterly newsletter. The GoHighLevel form
         opens on this page.
+      </p>
+      <p class="events-status-actions">
+        <a class="btn-r" href={ghlWidgets.topgolfBooking} target="_blank" rel="noopener noreferrer">
+          Book Topgolf
+        </a>
       </p>
       <NewsletterSignup
         heading="Event invites and newsletters"

@@ -5,10 +5,8 @@ export const ghl = {
   crisisFormId: 't9pQuFrpT0Yz2lYTwLVj',
   volunteerFormId: 'oA6BYtFTZ47lbNChjt2h',
   topgolfBookingPath: '/widget/bookings/top-golf-av-active',
-  /** AV Events Calendar (GHL). Chris can add public events in this calendar. */
+  /** AV Events Calendar (GHL). Public site shows a display-only month view, not the booking widget. */
   eventsCalendarId: 'zfYlU1tekAs9O3E2xGT8',
-  eventsCalendarSlug: 'av-events-calendar',
-  eventsCalendarEmbed: 'https://app.alabamaveteran.org/widget/booking/zfYlU1tekAs9O3E2xGT8',
   /** Dedicated GHL fundraiser calendar IDs. Empty until ALV pastes the scoped calendar IDs. */
   fundraiserCalendarIds: [],
 };
@@ -29,5 +27,4 @@ export const ghlWidgets = {
   crisis: ghlFormUrl(ghl.crisisFormId),
   volunteer: ghlFormUrl(ghl.volunteerFormId),
   topgolfBooking: `${ghl.locationHost}${ghl.topgolfBookingPath}`,
-  eventsBooking: `${ghl.locationHost}/widget/bookings/${ghl.eventsCalendarSlug}`,
 };
