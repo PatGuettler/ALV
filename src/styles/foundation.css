@@ -755,6 +755,7 @@ h2.st.bl {
 .cp-co img {
   height: 44px;
   width: auto;
+  max-width: none;
   filter: grayscale(0.3);
   opacity: 0.85;
   transition: all 0.2s;
@@ -1015,21 +1016,31 @@ h2.st.bl {
 }
 .spon-section {
   background: var(--off);
+  border-top: 3px solid var(--red);
   padding: 64px 0;
 }
 .spon-head {
   text-align: center;
   margin-bottom: 40px;
 }
+.spon-head h2 {
+  color: var(--blue-dp);
+  font-family: 'League Gothic', sans-serif;
+  font-size: 38px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 .spon-marquee {
   overflow: hidden;
   white-space: nowrap;
 }
 .spon-track {
-  display: inline-flex;
-  gap: 52px;
   align-items: center;
   animation: sponsScroll 32s linear infinite;
+  display: inline-flex;
+  gap: 52px;
+  min-width: max-content;
+  width: max-content;
 }
 .spon-track:hover {
   animation-play-state: paused;
@@ -1042,11 +1053,17 @@ h2.st.bl {
     transform: translateX(-50%);
   }
 }
+.spon-item {
+  flex: 0 0 auto;
+}
 .spon-item img {
-  height: 42px;
-  width: auto;
+  display: block;
   filter: grayscale(1) opacity(0.55);
+  height: 42px;
+  max-height: 42px;
+  max-width: none;
   transition: filter 0.3s;
+  width: auto;
 }
 .spon-item img:hover {
   filter: none;
@@ -1493,6 +1510,7 @@ h2.st.bl {
 .circ-co-row img {
   height: 36px;
   width: auto;
+  max-width: none;
   filter: brightness(0) invert(1);
   opacity: 0.7;
   transition: opacity 0.2s;

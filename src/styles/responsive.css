@@ -556,4 +556,18 @@ nav [aria-current='page'] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .spon-track {
+    animation: none !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 0;
+    padding: 0 24px;
+    white-space: normal;
+    width: 100%;
+  }
+
+  .spon-track .spon-item[aria-hidden='true'] {
+    display: none;
+  }
 }

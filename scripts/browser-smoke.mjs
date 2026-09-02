@@ -111,6 +111,21 @@ function assertLayout(condition, message, details) {
   }
 }
 
+async function assertSponsorMarquee(page, label) {
+  await page.locator('.spon-section').scrollIntoViewIfNeeded();
+  const logo = page.locator('.spon-track .spon-item:not([aria-hidden]) img').first();
+  await logo.waitFor({ state: 'visible' });
+  const size = await logo.evaluate((img) => ({
+    complete: img.complete,
+    naturalWidth: img.naturalWidth,
+    width: img.getBoundingClientRect().width,
+    height: img.getBoundingClientRect().height,
+  }));
+  if (!size.naturalWidth || size.width < 24 || size.height < 20) {
+    throw new Error(`${label} sponsor logos are not visible: ${JSON.stringify(size)}`);
+  }
+}
+
 async function assertEventsHero(page, label) {
   const layout = await page.evaluate(() => {
     const hero = document.querySelector('.evp-hero');
@@ -397,6 +412,7 @@ async function assertCustomerReportedLayouts(page, label, width, browserErrors) 
   await loadRoute(page, 'home', '', browserErrors);
   await assertNoHorizontalOverflow(page, `${label} home`);
   await assertMissionStrip(page, label);
+  await assertSponsorMarquee(page, label);
   await assertCrisisControl(page, label, width);
 
   await assertRetreatStatus(page, label);
