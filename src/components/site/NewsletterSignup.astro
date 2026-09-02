@@ -1,0 +1,34 @@
+---
+import { ghlWidgets } from '../../config/ghl';
+
+interface Props {
+  heading?: string;
+  lede?: string;
+}
+
+const {
+  heading = 'Get Resources & Updates',
+  lede = 'Benefits news, event invites, and the latest from AV News. This is the live GoHighLevel signup, including consent and unsubscribe.',
+} = Astro.props;
+---
+
+<section class="av-signup av-signup--ghl">
+  <div class="su-text">
+    <div class="su-eyebrow">Stay Connected</div>
+    <h3>{heading}</h3>
+    <p>{lede}</p>
+  </div>
+  <div class="su-form">
+    <iframe
+      class="su-embed"
+      src={ghlWidgets.newsletter}
+      title="Alabama Veteran newsletter signup"
+      loading="lazy"></iframe>
+    <p class="su-note">
+      Submits to GoHighLevel. If the form does not load,
+      <a href={ghlWidgets.newsletter} target="_blank" rel="noopener noreferrer"
+        >open it in a new tab</a
+      >.
+    </p>
+  </div>
+</section>

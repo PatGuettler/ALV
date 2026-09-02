@@ -1,18 +1,13 @@
 ---
+import NewsletterSignup from './NewsletterSignup.astro';
+
 const base = import.meta.env.BASE_URL;
 ---
 
 <footer>
   <div class="container">
-    <div style="margin-bottom: 44px">
-      <div class="integration-notice integration-notice--dark">
-        <h3>Quarterly newsletter coming soon</h3>
-        <p>
-          ALV is preparing an opt-in newsletter featuring veterans served, program updates, photos,
-          and documentary stories. Signup will open after consent, preferences, and unsubscribe
-          controls are connected.
-        </p>
-      </div>
+    <div class="foot-signup" id="footer-signup">
+      <NewsletterSignup />
     </div>
     <div class="foot-grid">
       <div>

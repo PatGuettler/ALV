@@ -1164,15 +1164,24 @@ body:has(.retreat-status) {
   background: rgba(255, 255, 255, 0.3);
 }
 
+.admin-actions [hidden] {
+  display: none;
+}
+
 .retreat-staff-security {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-wrap: wrap;
   gap: 10px 24px;
   margin: 0 0 22px;
+  padding: 14px 20px;
 }
 
 .retreat-staff-security span {
-  color: var(--text-muted);
+  color: var(--navy-deep);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.4px;
@@ -1180,7 +1189,7 @@ body:has(.retreat-status) {
 }
 
 .retreat-staff-security span::before {
-  color: var(--royal-red);
+  color: var(--red-deep);
   content: '✓';
   margin-right: 7px;
 }

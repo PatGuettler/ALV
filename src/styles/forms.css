@@ -10,6 +10,10 @@
   flex-wrap: wrap;
   border-radius: 2px;
 }
+.av-signup--ghl {
+  align-items: stretch;
+  flex-direction: column;
+}
 .av-signup .su-eyebrow {
   font-size: 10px;
   font-weight: 700;
@@ -31,7 +35,7 @@
   font-size: 13.5px;
   color: rgba(255, 255, 255, 0.55);
   line-height: 1.6;
-  max-width: 430px;
+  max-width: 640px;
 }
 .av-signup .su-form {
   display: flex;
@@ -40,6 +44,21 @@
   min-width: 300px;
   flex: 1;
   max-width: 440px;
+}
+.av-signup--ghl .su-form {
+  margin: 0 auto;
+  max-width: 640px;
+  width: 100%;
+}
+.av-signup .su-embed {
+  background: #fff;
+  border: 0;
+  border-radius: 2px;
+  min-height: 420px;
+  width: 100%;
+}
+.av-signup--ghl .su-embed {
+  min-height: 1080px;
 }
 .av-signup .su-fields {
   display: flex;
@@ -81,6 +100,10 @@
 .av-signup .su-note {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.35);
+}
+.av-signup .su-note a {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
 }
 .av-signup .su-ok {
   display: none;

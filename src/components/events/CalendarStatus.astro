@@ -1,11 +1,66 @@
-<section class="integration-section" aria-labelledby="events-status-title">
+---
+import { ghl, ghlWidgets } from '../../config/ghl';
+import NewsletterSignup from '../site/NewsletterSignup.astro';
+---
+
+{
+  ghl.eventsCalendarEmbed ? (
+    <section class="evp-cal-section" aria-labelledby="events-calendar-title">
+      <div class="container">
+        <div class="eyebrow ctr" style="margin-bottom: 14px">
+          All Events
+        </div>
+        <h2 id="events-calendar-title">Event calendar</h2>
+        <iframe
+          class="ghl-calendar-embed"
+          src={ghl.eventsCalendarEmbed}
+          title="Alabama Veteran event calendar"
+          loading="lazy"
+        />
+      </div>
+    </section>
+  ) : (
+    <section class="integration-section" aria-labelledby="events-status-title">
+      <div class="container">
+        <div class="integration-notice">
+          <h2 id="events-status-title">Public event calendar</h2>
+          <p>
+            Bookings and event invites already run in GoHighLevel. A public month view will appear
+            here after ALV pastes the calendar embed URL from GHL (Calendar Settings → Share →
+            Embed). Topgolf is already on a GHL booking calendar.
+          </p>
+          <p class="events-status-actions">
+            <a
+              class="btn-r"
+              href={ghlWidgets.topgolfBooking}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Book Topgolf
+            </a>
+            <a class="btn-b" href="#subscribe">
+              Get event invites
+            </a>
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<section class="evp-subscribe" id="subscribe">
   <div class="container">
-    <div class="integration-notice">
-      <h2 id="events-status-title">Calendar service not connected</h2>
+    <div class="evp-subscribe-inner">
+      <div class="eyebrow ctr" style="margin-bottom: 14px">Never Miss an Event</div>
+      <h2>Stay <span class="red">connected</span></h2>
       <p>
-        No event records are published in staging. Approved events will appear here after the
-        calendar API and staff publishing workflow are deployed.
+        Event invites and the quarterly newsletter use the same GoHighLevel form as the site footer.
+        First name, last name, phone, email, affiliation, and consent stay in GHL.
       </p>
+      <NewsletterSignup
+        heading="Event invites and newsletters"
+        lede="Submit on this page. You do not have to leave Alabama Veteran to join the list."
+      />
     </div>
   </div>
 </section>

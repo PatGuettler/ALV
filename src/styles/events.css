@@ -180,6 +180,15 @@
   background: var(--white);
   padding: 80px 0;
 }
+.evp-cal-section > .container > h2 {
+  color: var(--blue-dp);
+  font-family: 'League Gothic', sans-serif;
+  font-size: 52px;
+  letter-spacing: 1px;
+  margin: 0 0 28px;
+  text-align: center;
+  text-transform: uppercase;
+}
 .evp-cal-header {
   text-align: center;
   margin-bottom: 48px;
@@ -406,9 +415,13 @@
   padding: 64px 0;
 }
 .evp-subscribe-inner {
-  max-width: 720px;
+  max-width: 880px;
   margin: 0 auto;
   text-align: center;
+}
+.evp-subscribe .av-signup {
+  margin-top: 8px;
+  text-align: left;
 }
 .evp-subscribe h2 {
   font-family: 'League Gothic', sans-serif;
@@ -418,12 +431,27 @@
   letter-spacing: 1px;
   margin-bottom: 12px;
 }
+.evp-subscribe h2 .red {
+  color: var(--red-on-dark);
+}
 .evp-subscribe p {
   font-size: 15px;
   color: rgba(255, 255, 255, 0.55);
   max-width: 480px;
   margin: 0 auto 32px;
   line-height: 1.7;
+}
+.events-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px 0 0;
+}
+.ghl-calendar-embed {
+  background: #fff;
+  border: 0;
+  min-height: 720px;
+  width: 100%;
 }
 .evp-sub-btns {
   display: flex;
