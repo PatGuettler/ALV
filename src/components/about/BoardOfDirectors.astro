@@ -1,3 +1,7 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
 <section class="ab-board" id="board">
   <div class="container">
     <div class="ab-board-header">
@@ -107,6 +111,33 @@
       </div>
     </div>
     <div class="ab-board-grid-bottom">
+      <div class="ab-member">
+        <img
+          src={`${base}assets/board/matt-schlagenhauf.webp`}
+          alt="Matt Schlagenhauf"
+          class="ab-member-photo"
+          width="400"
+          height="600"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="ab-member-role">Board Member</div>
+        <div class="ab-member-name">Matt Schlagenhauf</div>
+        <div class="ab-member-title">U.S. Army Veteran · Warrior Retreat Cadre</div>
+        <p class="ab-member-bio">
+          Matt is a U.S. Army and Alabama Army National Guard veteran who serves on the Board of
+          Directors and as a Warrior Retreat Cadre. Born and raised in Decatur, Alabama, he served
+          13 years in support of Operation Iraqi Freedom and Operation Enduring Freedom, with
+          deployments to Iraq and Colombia, before continuing to support the warfighter as an Army
+          civilian contractor specializing in simulation programs and UAS training. Honored by
+          Alabama Veteran in 2017, he helped develop, implement, and grow the Warrior Retreat
+          program so veterans have space to reconnect, heal, and build relationships through Post
+          Traumatic Growth. The program has expanded to include retreats for couples and female
+          veterans. As a board member he fosters collaboration among veteran organizations so no
+          veteran faces their struggles alone. He leads with a simple mission: to create spaces
+          where veterans can find strength, connection, and purpose — together.
+        </p>
+      </div>
       <div
         class="ab-member"
         style="
