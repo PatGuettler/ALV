@@ -318,7 +318,7 @@ async function assertRetreatStatus(page, label) {
       .getByRole('group', { name: 'Your contact information' })
       .waitFor({ state: 'visible' });
     await assertNoHorizontalOverflow(page, `${label} retreat contact step`);
-    await page.getByRole('button', { name: 'Previous' }).click();
+    await page.getByRole('button', { name: 'Back' }).click();
   }
 
   const layout = await page.evaluate((live) => {

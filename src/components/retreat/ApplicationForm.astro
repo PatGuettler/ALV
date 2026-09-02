@@ -11,105 +11,159 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <main class="retreat-application-shell">
-  <header class="application-hero">
-    <a class="application-back" href={`${base}warrior-retreat/`}>← Warrior Retreat</a>
-    <div class="eyebrow">Alabama Veteran · Serving those who served</div>
-    <h1>Healing starts<br /><span class="accent">with stepping up</span></h1>
-    <p class="lede">
-      A Warrior Retreat for veterans, servicemembers, and first responders who have carried the
-      weight. No cost. Confidential. Built for those who served.
-    </p>
-    <div class="hero-chips">
-      <div class="hero-chip">Men's Retreat<span>Healing and brotherhood</span></div>
-      <div class="hero-chip">Women's Retreat<span>Heal, connect, grow</span></div>
-      <div class="hero-chip">Marriage Retreat<span>Rebuild together</span></div>
-      <div class="hero-chip">Endurance Retreat<span>Stay connected</span></div>
+  <nav class="site-nav" aria-label="Application">
+    <a class="nav-logo-link" href={`${base}`}
+      ><img
+        class="nav-logo"
+        src={`${base}assets/alv-nav-wordmark.png`}
+        alt="Alabama Veteran"
+        height="42"
+      /></a
+    >
+    <div class="nav-right">
+      <a class="nav-link application-back" href={`${base}warrior-retreat/`}>Warrior Retreat</a>
+      <a class="nav-cta" href="#apply-form">Apply Now</a>
     </div>
-    <p class="hero-disclaimer">
-      Alabama Veteran is a private nonprofit — <strong
-        >not affiliated with the VA or the U.S. military</strong
-      >. Your application is stored in the ALV staff review system.
-    </p>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <img
+        class="hero-logo"
+        src={`${base}assets/warrior-retreat-mark.png`}
+        alt="Warrior Retreat"
+        height="135"
+      />
+      <h1>Healing starts<br /><span class="accent">with stepping up</span></h1>
+      <p class="lede">
+        A Warrior Retreat for veterans, servicemembers, and first responders who have carried the
+        weight. No cost. Confidential. Built for those who served.
+      </p>
+      <div class="hero-tag">Serving Those Who Served</div>
+      <div>
+        <a class="hero-cta" href="#apply-form">Start Your Application ↓</a>
+      </div>
+      <div class="hero-chips">
+        <div class="hero-chip">Men's Retreat<span>Healing &amp; Brotherhood</span></div>
+        <div class="hero-chip">Women's Retreat<span>Heal, Connect, Grow</span></div>
+        <div class="hero-chip">Marriage Retreat<span>Rebuild Together</span></div>
+        <div class="hero-chip">Endurance Retreat<span>Stay Connected</span></div>
+      </div>
+      <div class="hero-disclaimer">
+        Alabama Veteran is a private nonprofit — <strong
+          >not affiliated with the VA or the U.S. military</strong
+        >. Anything you share stays with the ALV cadre.
+      </div>
+    </div>
   </header>
 
-  <div class="form-card">
-    <div class="form-card-header">
-      <h2>Warrior Retreat Application</h2>
-      <p>All information is kept confidential and reviewed only by invited ALV staff.</p>
-    </div>
-
-    <nav class="application-progress" aria-label="Application progress">
-      <ol>
-        {
-          [
-            'Applicant',
-            'Personal',
-            'Service',
-            'Workforce',
-            'Health',
-            'Final details',
-            'Review',
-          ].map((label, index) => (
-            <li data-progress-step={index} aria-current={index === 0 ? 'step' : undefined}>
-              <>
-                <span>{index + 1}</span>
-                <span>{label}</span>
-              </>
-            </li>
-          ))
-        }
-      </ol>
-    </nav>
-
-    <form id="retreat-application-form" class="retreat-form" autocomplete="on">
-      <RetreatSelectionStep />
-      <ApplicantDetailsStep />
-      <ServiceHistoryStep />
-      <WorkforceStep />
-      <HealthWellbeingStep />
-      <FinalDetailsStep />
-
-      <fieldset
-        class="application-step"
-        data-application-step
-        hidden
-        aria-labelledby="review-title"
-      >
-        <legend id="review-title">Review and submit</legend>
-        <p class="step-intro">
-          Check your answers before sending. Use Previous to make changes. Your application is not
-          complete until a reference number appears.
-        </p>
-        <div id="retreat-application-review" class="application-review"></div>
-      </fieldset>
-
-      <div class="application-navigation">
-        <span class="step-counter" id="retreat-step-counter">Step 1 of 7</span>
-        <button id="retreat-previous" class="button-secondary" type="button" hidden>Back</button>
-        <button id="retreat-next" type="button">Next step</button>
-        <button id="retreat-submit" type="submit" hidden>Submit application</button>
+  <div class="form-wrap" id="apply-form">
+    <div class="form-card">
+      <div class="form-header">
+        <h2 class="fh-title">Warrior Retreat Application</h2>
+        <div class="fh-sub">All information is kept confidential</div>
       </div>
-      <p
-        id="retreat-application-status"
-        class="retreat-form-status"
-        role="status"
-        aria-live="polite"
+      <div class="progress-bar-wrap">
+        <nav class="progress-steps application-progress" aria-label="Application progress">
+          <ol>
+            {
+              [
+                'Who is Applying',
+                'Personal Info',
+                'Service History',
+                'Employment',
+                'Health',
+                'Final Details',
+                'Review',
+              ].map((label, index) => (
+                <li
+                  class:list={['p-step', index === 0 && 'current']}
+                  data-progress-step={index}
+                  aria-current={index === 0 ? 'step' : undefined}
+                >
+                  {label}
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+      </div>
+
+      <form id="retreat-application-form" class="retreat-form" autocomplete="on">
+        <div class="form-body">
+          <RetreatSelectionStep />
+          <ApplicantDetailsStep />
+          <ServiceHistoryStep />
+          <WorkforceStep />
+          <HealthWellbeingStep />
+          <FinalDetailsStep />
+
+          <fieldset
+            class="application-step"
+            data-application-step
+            hidden
+            aria-labelledby="review-title"
+          >
+            <legend id="review-title">Review and submit</legend>
+            <p class="step-intro">
+              Check your answers before sending. Use Back to make changes. Your application is not
+              complete until a reference number appears.
+            </p>
+            <div id="retreat-application-review" class="application-review"></div>
+          </fieldset>
+        </div>
+
+        <div class="form-footer application-navigation">
+          <span class="step-counter" id="retreat-step-counter">Step 1 of 7</span>
+          <div class="form-footer-actions">
+            <button id="retreat-previous" class="btn btn-ghost" type="button" hidden>Back</button>
+            <button id="retreat-next" class="btn btn-primary" type="button">Next Step</button>
+            <button id="retreat-submit" class="btn btn-danger" type="submit" hidden>
+              Submit Application
+            </button>
+          </div>
+        </div>
+        <p
+          id="retreat-application-status"
+          class="retreat-form-status"
+          role="status"
+          aria-live="polite"
+        >
+        </p>
+      </form>
+
+      <section
+        id="retreat-application-receipt"
+        class="success-screen application-receipt"
+        hidden
+        tabindex="-1"
       >
-      </p>
-    </form>
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h2>Application submitted</h2>
+        <p>
+          Thank you for applying to the Warrior Retreat. ALV staff will review your application and
+          reach out. Save this reference number for your records:
+        </p>
+        <strong id="retreat-application-reference"></strong>
+        <p>This form is not monitored for emergencies. For immediate crisis support, call 988.</p>
+        <a class="btn btn-primary" href={`${base}warrior-retreat/`}>Return to Warrior Retreat</a>
+      </section>
+    </div>
   </div>
 
-  <section id="retreat-application-receipt" class="application-receipt" hidden tabindex="-1">
-    <div class="eyebrow">Application received</div>
-    <h2>Application submitted</h2>
-    <p>
-      Thank you for applying to the Warrior Retreat. ALV staff will review your application and
-      reach out. Save this reference number for your records:
-    </p>
-    <strong id="retreat-application-reference"></strong>
-    <p>This form is not monitored for emergencies. For immediate crisis support, call 988.</p>
-    <a href={`${base}warrior-retreat/`}>Return to Warrior Retreat</a>
-  </section>
+  <footer class="site-footer">
+    <img src={`${base}assets/warrior-retreat-mark.png`} alt="" height="76" />
+    <div class="ft-name">Alabama Veteran</div>
+    <div class="ft-tag">Serving Those Who Served</div>
+    <div class="ft-links">
+      <a href={`${base}`}>Home</a>
+      <a href={`${base}warrior-retreat/`}>Warrior Retreat</a>
+      <a href={`${base}warrior-retreat-staff/`}>Staff</a>
+    </div>
+    <div class="ft-copy">
+      A private nonprofit — not affiliated with the VA or the U.S. military.
+    </div>
+  </footer>
 </main>
 
 <script is:inline define:vars={{ apiUrl: retreatPublic.apiUrl }}>

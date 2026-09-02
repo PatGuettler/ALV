@@ -368,6 +368,8 @@ if (typeof document !== 'undefined') {
       if (stepIndex === currentStep) item.setAttribute('aria-current', 'step');
       else item.removeAttribute('aria-current');
       item.dataset.complete = String(stepIndex < currentStep);
+      item.classList.toggle('current', stepIndex === currentStep);
+      item.classList.toggle('done', stepIndex < currentStep);
     });
     previousButton.hidden = currentStep === 0;
     nextButton.hidden = currentStep === steps.length - 1;
@@ -485,6 +487,8 @@ if (typeof document !== 'undefined') {
       }
       reference.textContent = applicationReference(result.id);
       form.hidden = true;
+      document.querySelector('.form-header')?.setAttribute('hidden', '');
+      document.querySelector('.progress-bar-wrap')?.setAttribute('hidden', '');
       document.querySelector('.application-progress')?.setAttribute('hidden', '');
       receipt.hidden = false;
       receipt.focus();

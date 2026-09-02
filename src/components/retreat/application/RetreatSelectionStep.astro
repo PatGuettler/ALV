@@ -1,53 +1,52 @@
 <fieldset class="application-step" data-application-step aria-labelledby="retreat-step-title">
   <legend id="retreat-step-title">Who is applying?</legend>
   <p class="step-intro">
-    Select whether you are a veteran, active duty servicemember, or a first responder, then choose
-    your retreat.
+    Select whether you are a veteran, active duty servicemember, or a first responder.
   </p>
 
-  <div class="form-group">
-    <span class="form-label">I am applying as <span aria-hidden="true">*</span></span>
-    <div class="choice-grid">
-      <label class="choice-card">
-        <input name="applicantType" type="radio" value="military" required />
-        <span
-          ><strong>Veteran / military</strong>Active duty, veteran, Guard, Reserve, or military
-          retiree</span
-        >
-      </label>
-      <label class="choice-card">
-        <input name="applicantType" type="radio" value="first-responder" required />
-        <span
-          ><strong>First responder</strong>Law enforcement, fire, EMS, dispatch, or corrections</span
-        >
-      </label>
-    </div>
+  <div class="applicant-type-grid">
+    <label class="type-card">
+      <input name="applicantType" type="radio" value="military" required />
+      <div class="tc-icon" aria-hidden="true">🎖️</div>
+      <div class="tc-name">Veteran / Military</div>
+      <div class="tc-desc">Active duty, veteran, guard, reserve, or military retiree</div>
+    </label>
+    <label class="type-card">
+      <input name="applicantType" type="radio" value="first-responder" required />
+      <div class="tc-icon" aria-hidden="true">🚑</div>
+      <div class="tc-name">First Responder</div>
+      <div class="tc-desc">Law enforcement, fire, EMS, dispatch, or corrections</div>
+    </label>
   </div>
 
-  <div class="form-group">
-    <span class="form-label">Select your retreat <span aria-hidden="true">*</span></span>
-    <p class="field-help">Choose the retreat you are applying for. Staff confirm actual dates.</p>
-    <div class="choice-grid choice-grid-wide">
-      <label class="choice-card">
-        <input name="retreatType" type="radio" value="mens" required />
-        <span><strong>Men's Retreat</strong>Healing, accountability, and brotherhood.</span>
-      </label>
-      <label class="choice-card">
-        <input name="retreatType" type="radio" value="womens" required />
-        <span><strong>Women's Retreat</strong>A safe space to heal, connect, and grow.</span>
-      </label>
-      <label class="choice-card">
-        <input name="retreatType" type="radio" value="marriage" required />
-        <span
-          ><strong>Marriage Retreat</strong>Rebuilding bonds for couples through shared experience.</span
-        >
-      </label>
-      <label class="choice-card">
-        <input name="retreatType" type="radio" value="endurance" required />
-        <span><strong>Endurance Retreat</strong>Building resilience through staying connected.</span
-        >
-      </label>
-    </div>
+  <hr class="section-divider" />
+  <div class="step-title nested">Select your retreat</div>
+  <p class="step-intro">Choose the retreat you are applying for. Staff confirm actual dates.</p>
+  <div class="retreat-grid">
+    <label class="retreat-card">
+      <input name="retreatType" type="radio" value="mens" required />
+      <div class="rc-name">Men's Retreat</div>
+      <div class="rc-desc">Healing, accountability, and brotherhood.</div>
+      <div class="rc-badge">Open</div>
+    </label>
+    <label class="retreat-card">
+      <input name="retreatType" type="radio" value="womens" required />
+      <div class="rc-name">Women's Retreat</div>
+      <div class="rc-desc">A safe space to heal, connect, and grow.</div>
+      <div class="rc-badge">Open</div>
+    </label>
+    <label class="retreat-card">
+      <input name="retreatType" type="radio" value="marriage" required />
+      <div class="rc-name">Marriage Retreat</div>
+      <div class="rc-desc">Rebuilding bonds for couples through shared experience.</div>
+      <div class="rc-badge">Open</div>
+    </label>
+    <label class="retreat-card">
+      <input name="retreatType" type="radio" value="endurance" required />
+      <div class="rc-name">Endurance Retreat</div>
+      <div class="rc-desc">Building resilience through staying connected.</div>
+      <div class="rc-badge">Open</div>
+    </label>
   </div>
 
   <label class="form-field">
@@ -82,7 +81,7 @@
       </div>
     </div>
     <p
-      class="application-notice application-notice-alert"
+      class="alert-box application-notice application-notice-alert"
       data-condition="endurance-ineligible"
       hidden
     >
@@ -92,32 +91,31 @@
     </p>
   </section>
 
-  <div class="form-group">
-    <span class="form-label">How did you hear about this retreat?</span>
-    <div class="radio-stack">
-      <label><input name="referralSource" type="radio" value="social-media" /> Social media</label>
-      <label
-        ><input name="referralSource" type="radio" value="word-of-mouth" /> Word of mouth / fellow veteran
-        or first responder</label
-      >
-      <label
-        ><input name="referralSource" type="radio" value="va-vet-center" /> VA or Vet Center</label
-      >
-      <label
-        ><input name="referralSource" type="radio" value="veteran-service-organization" /> Veteran or
-        first responder organization</label
-      >
-      <label
-        ><input name="referralSource" type="radio" value="healthcare-provider" /> Healthcare provider</label
-      >
-      <label
-        ><input name="referralSource" type="radio" value="faith-community" /> Church or faith community</label
-      >
-      <label
-        ><input name="referralSource" type="radio" value="employer-agency" /> Employer or department</label
-      >
-      <label><input name="referralSource" type="radio" value="other" /> Other</label>
-    </div>
+  <hr class="section-divider" />
+  <div class="section-label">How did you hear about this retreat?</div>
+  <div class="radio-stack">
+    <label><input name="referralSource" type="radio" value="social-media" /> Social media</label>
+    <label
+      ><input name="referralSource" type="radio" value="word-of-mouth" /> Word of mouth / fellow veteran
+      or first responder</label
+    >
+    <label
+      ><input name="referralSource" type="radio" value="va-vet-center" /> VA or Vet Center</label
+    >
+    <label
+      ><input name="referralSource" type="radio" value="veteran-service-organization" /> Veteran or first
+      responder organization</label
+    >
+    <label
+      ><input name="referralSource" type="radio" value="healthcare-provider" /> Healthcare provider</label
+    >
+    <label
+      ><input name="referralSource" type="radio" value="faith-community" /> Church or faith community</label
+    >
+    <label
+      ><input name="referralSource" type="radio" value="employer-agency" /> Employer or department</label
+    >
+    <label><input name="referralSource" type="radio" value="other" /> Other</label>
   </div>
   <label class="form-field" data-condition="word-of-mouth" hidden>
     Who referred you?

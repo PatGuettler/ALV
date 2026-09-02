@@ -410,6 +410,7 @@ if (typeof document !== 'undefined') {
       const actions = document.createElement('td');
       const button = document.createElement('button');
       button.type = 'button';
+      button.className = 'action-btn';
       button.textContent = 'View';
       button.addEventListener('click', () => openApplication(record.id));
       actions.append(button);
