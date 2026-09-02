@@ -1,0 +1,44 @@
+name: Check resource directory links
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 11 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: resource-link-check
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Record resource link flags
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.22.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Probe public resource URLs
+        env:
+          RESOURCE_LINK_CHECK_LIVE: '1'
+        run: node scripts/resource-link-check.mjs
+
+      - name: Upload link-check report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: resource-link-check-report
+          path: artifacts/link-checks/report.json
+          if-no-files-found: error

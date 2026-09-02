@@ -1440,6 +1440,16 @@ function filterType(type, btn) {
   visibleLimit = RESOURCE_PAGE_SIZE;
   updateAllGrid();
 }
+export function publicResourceLinks() {
+  return RESOURCES.filter((resource) => resource.url).map((resource) => ({
+    id: resource.id,
+    name: resource.name,
+    url: resource.url,
+    cat: resource.cat,
+    type: resource.type,
+  }));
+}
+
 export function resourceCardMatches(query, card) {
   const q = String(query || '')
     .toLowerCase()
