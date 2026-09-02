@@ -33,7 +33,16 @@
     </label>
     <label class="form-field"
       >Phone number <span aria-hidden="true">*</span>
-      <input name="phone" type="tel" autocomplete="tel" maxlength="40" required />
+      <input
+        name="phone"
+        type="tel"
+        autocomplete="tel"
+        inputmode="tel"
+        data-format="phone"
+        maxlength="14"
+        placeholder="(205) 555-0100"
+        required
+      />
     </label>
     <label class="form-field"
       >Email address <span aria-hidden="true">*</span>
@@ -62,7 +71,9 @@
         type="text"
         autocomplete="postal-code"
         inputmode="numeric"
+        data-format="zip"
         maxlength="10"
+        placeholder="35203"
         pattern="[0-9]{5}(-[0-9]{4})?"
         required
       />
@@ -150,7 +161,15 @@
       </label>
       <label class="form-field"
         >Spouse phone
-        <input name="spousePhone" type="tel" maxlength="40" disabled />
+        <input
+          name="spousePhone"
+          type="tel"
+          inputmode="tel"
+          data-format="phone"
+          maxlength="14"
+          placeholder="(205) 555-0100"
+          disabled
+        />
       </label>
       <label class="form-field"
         >Spouse email

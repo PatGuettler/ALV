@@ -64,7 +64,14 @@ async function createApplication(event, origin) {
   }
 
   const parsed = parseApplication(payload);
-  if (!parsed.ok) return json(400, { error: parsed.error }, origin, allowedOrigins);
+  if (!parsed.ok) {
+    return json(
+      400,
+      { error: parsed.error, field: parsed.field || '', message: parsed.message || '' },
+      origin,
+      allowedOrigins,
+    );
+  }
 
   const id = parsed.id;
   const submittedAt = new Date().toISOString();

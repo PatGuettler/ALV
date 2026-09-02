@@ -29,6 +29,209 @@ export function signatureMatches(firstName, lastName, signature) {
   );
 }
 
+export function nationalPhoneDigits(value) {
+  let digits = String(value || '').replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
+  return digits;
+}
+
+export function formatPhoneNumber(value) {
+  const digits = nationalPhoneDigits(value).slice(0, 10);
+  if (!digits) return '';
+  if (digits.length < 4) return `(${digits}`;
+  if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+export function isValidPhone(value) {
+  return nationalPhoneDigits(value).length === 10;
+}
+
+export function formatPostalCode(value) {
+  const digits = String(value || '')
+    .replace(/\D/g, '')
+    .slice(0, 9);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
+export function isValidPostalCode(value) {
+  return /^[0-9]{5}(-[0-9]{4})?$/.test(String(value || '').trim());
+}
+
+export function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+}
+
+export function formatYears(value) {
+  return String(value || '')
+    .replace(/\D/g, '')
+    .slice(0, 2);
+}
+
+export function isValidYears(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return true;
+  return /^\d{1,2}$/.test(trimmed) && Number(trimmed) >= 0 && Number(trimmed) <= 60;
+}
+
+export function isValidCalendarDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00`));
+}
+
+function todayStamp() {
+  const now = new Date();
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+export const API_ERROR_MESSAGES = {
+  unsupported_schema: 'This application form is out of date. Refresh the page and try again.',
+  sensitive_fields_not_accepted:
+    'Health details must stay on the approved questions. Refresh and try again.',
+  invalid_json: 'The application could not be read. Check your answers and try again.',
+  invalid_applicant: 'A personal information field is missing or not in the expected format.',
+  invalid_spouse: 'Spouse first and last name are required for the Marriage Retreat.',
+  invalid_service: 'A service history field is missing or not in the expected format.',
+  invalid_workforce: 'Select your employment status before submitting.',
+  invalid_final_details: 'Check your emergency contact, signature, and required agreements.',
+  body_too_large: 'The application is too large to send. Shorten the longer answers and try again.',
+};
+
+export function messageForApiError(result) {
+  const message = String(result?.message || '').trim();
+  if (message) return message;
+  return (
+    API_ERROR_MESSAGES[result?.error] ||
+    'The application contains an invalid answer. Review each step and try again.'
+  );
+}
+
+export function fieldIssue(name, data) {
+  const value = String(data.get(name) || '').trim();
+  const retreatType = String(data.get('retreatType') || '').trim();
+  const applicantType = String(data.get('applicantType') || '').trim();
+
+  switch (name) {
+    case 'applicantType':
+      return ['military', 'first-responder'].includes(value)
+        ? ''
+        : 'Choose veteran / military or first responder.';
+    case 'retreatType':
+      return ['mens', 'womens', 'marriage', 'endurance'].includes(value)
+        ? ''
+        : 'Choose the retreat you are applying for.';
+    case 'timingPreference':
+      return ['next-available', 'future-date', 'staff-contact'].includes(value)
+        ? ''
+        : 'Select a preferred timing.';
+    case 'enduranceEligible':
+      if (retreatType !== 'endurance') return '';
+      if (value === 'no') {
+        return "The Endurance Retreat requires a prior Men's or Women's Retreat. Choose another retreat to continue.";
+      }
+      return value === 'yes'
+        ? ''
+        : "Say whether you have already attended a Men's or Women's Retreat.";
+    case 'firstName':
+      return value ? '' : 'Enter your first name.';
+    case 'lastName':
+      return value ? '' : 'Enter your last name.';
+    case 'dateOfBirth':
+      if (!isValidCalendarDate(value)) return 'Enter your date of birth.';
+      return value < '1920-01-01' || value >= todayStamp()
+        ? 'Enter a date of birth in the past.'
+        : '';
+    case 'email':
+      if (!value) return 'Enter your email address.';
+      return isValidEmail(value) ? '' : 'Enter an email address like name@example.com.';
+    case 'phone':
+      if (!value) return 'Enter your phone number.';
+      return isValidPhone(value) ? '' : 'Enter a 10-digit U.S. phone number, like (205) 555-0100.';
+    case 'city':
+      return value ? '' : 'Enter your city.';
+    case 'state':
+      return value ? '' : 'Select your state.';
+    case 'postalCode':
+      if (!value) return 'Enter your ZIP code.';
+      return isValidPostalCode(value) ? '' : 'Enter a 5-digit ZIP code, or ZIP+4 like 35203-1234.';
+    case 'spouseFirstName':
+      return retreatType === 'marriage' && !value ? "Enter your spouse's first name." : '';
+    case 'spouseLastName':
+      return retreatType === 'marriage' && !value ? "Enter your spouse's last name." : '';
+    case 'spouseEmail':
+      return value && !isValidEmail(value) ? 'Enter a valid spouse email, or leave it blank.' : '';
+    case 'spousePhone':
+      return value && !isValidPhone(value)
+        ? 'Enter a 10-digit spouse phone number, or leave it blank.'
+        : '';
+    case 'militaryStatus':
+      return applicantType === 'military' && !value ? 'Select your current military status.' : '';
+    case 'militaryBranch':
+      return applicantType === 'military' && !value ? 'Select your branch of service.' : '';
+    case 'militaryYears':
+      return value && !isValidYears(value)
+        ? 'Enter years of service as a whole number from 0 to 60.'
+        : '';
+    case 'responderType':
+      return applicantType === 'first-responder' && !value
+        ? 'Select your first responder type.'
+        : '';
+    case 'agency':
+      return applicantType === 'first-responder' && !value
+        ? 'Enter your agency or department.'
+        : '';
+    case 'responderStatus':
+      return applicantType === 'first-responder' && !value ? 'Select your employment status.' : '';
+    case 'responderYears':
+      return value && !isValidYears(value)
+        ? 'Enter years of service as a whole number from 0 to 60.'
+        : '';
+    case 'employmentStatus':
+      return value ? '' : 'Select your employment status.';
+    case 'emergencyName':
+      return value ? '' : 'Enter an emergency contact name.';
+    case 'emergencyRelationship':
+      return value ? '' : 'Enter how the emergency contact is related to you.';
+    case 'emergencyPhone':
+      if (!value) return "Enter the emergency contact's phone number.";
+      return isValidPhone(value) ? '' : 'Enter a 10-digit U.S. phone number, like (205) 555-0100.';
+    case 'emergencySecondaryPhone':
+      return value && !isValidPhone(value)
+        ? 'Enter a 10-digit backup phone number, or leave it blank.'
+        : '';
+    case 'goals':
+      return value ? '' : 'Tell us what you hope to gain from this retreat.';
+    case 'accuracyAgreement':
+      return data.get(name) === 'on' ? '' : 'Confirm that your answers are accurate.';
+    case 'contactConsent':
+      return data.get(name) === 'on'
+        ? ''
+        : 'Consent to ALV storing this application and contacting you.';
+    case 'placementAgreement':
+      return data.get(name) === 'on'
+        ? ''
+        : 'Confirm that applying does not guarantee a retreat place.';
+    case 'policyAgreement':
+      return data.get(name) === 'on'
+        ? ''
+        : 'Agree to follow retreat policies provided by ALV staff.';
+    case 'signature':
+      if (!value) return 'Type your first and last name as your digital signature.';
+      return signatureMatches(data.get('firstName'), data.get('lastName'), value)
+        ? ''
+        : "The digital signature must match the applicant's first and last name.";
+    case 'signatureDate':
+      if (!isValidCalendarDate(value)) return 'Enter a valid signature date.';
+      return value > todayStamp() ? 'Signature date cannot be in the future.' : '';
+    default:
+      return '';
+  }
+}
+
 export function applicationPayloadFromFormData(
   data,
   { submissionId = '', consentTimestamp = '' } = {},
@@ -56,12 +259,12 @@ export function applicationPayloadFromFormData(
       householdIncome: text(data, 'householdIncome'),
       educationLevel: text(data, 'educationLevel'),
       email: text(data, 'email'),
-      phone: text(data, 'phone'),
+      phone: formatPhoneNumber(text(data, 'phone')),
       address: {
         street: text(data, 'street'),
         city: text(data, 'city'),
         state: text(data, 'state'),
-        postalCode: text(data, 'postalCode'),
+        postalCode: formatPostalCode(text(data, 'postalCode')),
         county: text(data, 'county'),
       },
       referral: {
@@ -74,7 +277,7 @@ export function applicationPayloadFromFormData(
               firstName: text(data, 'spouseFirstName'),
               lastName: text(data, 'spouseLastName'),
               email: text(data, 'spouseEmail'),
-              phone: text(data, 'spousePhone'),
+              phone: formatPhoneNumber(text(data, 'spousePhone')),
               dateOfBirth: text(data, 'spouseDateOfBirth'),
               gender: text(data, 'spouseGender'),
             }
@@ -86,7 +289,7 @@ export function applicationPayloadFromFormData(
             kind: 'military',
             branch: text(data, 'militaryBranch'),
             status: text(data, 'militaryStatus'),
-            years: text(data, 'militaryYears'),
+            years: formatYears(text(data, 'militaryYears')),
             rank: text(data, 'militaryRank'),
             mos: text(data, 'militaryMos'),
             enteredService: text(data, 'serviceEntered'),
@@ -105,7 +308,7 @@ export function applicationPayloadFromFormData(
             agency: text(data, 'agency'),
             agencyLocation: text(data, 'agencyLocation'),
             status: text(data, 'responderStatus'),
-            years: text(data, 'responderYears'),
+            years: formatYears(text(data, 'responderYears')),
             rank: text(data, 'responderRank'),
             criticalIncident: text(data, 'criticalIncident'),
             departmentSupport: text(data, 'departmentSupport'),
@@ -151,8 +354,8 @@ export function applicationPayloadFromFormData(
       emergencyContact: {
         name: text(data, 'emergencyName'),
         relationship: text(data, 'emergencyRelationship'),
-        phone: text(data, 'emergencyPhone'),
-        secondaryPhone: text(data, 'emergencySecondaryPhone'),
+        phone: formatPhoneNumber(text(data, 'emergencyPhone')),
+        secondaryPhone: formatPhoneNumber(text(data, 'emergencySecondaryPhone')),
       },
       previousRetreats: values(data, 'previousRetreats'),
       previousRetreatYears: text(data, 'previousRetreatYears'),
@@ -328,6 +531,8 @@ if (typeof document !== 'undefined') {
     throw new Error('Retreat application form is not connected.');
   }
 
+  form.noValidate = true;
+
   let currentStep = 0;
   const submissionId = crypto.randomUUID();
 
@@ -377,8 +582,8 @@ if (typeof document !== 'undefined') {
     if (stepCounter) {
       stepCounter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
     }
-    status.textContent = '';
     if (focusHeading) {
+      setStatus('');
       const heading = steps[currentStep].querySelector('legend');
       if (heading instanceof HTMLElement) {
         heading.tabIndex = -1;
@@ -387,36 +592,131 @@ if (typeof document !== 'undefined') {
     }
   }
 
-  function signatureIsValid() {
-    const data = new FormData(form);
-    const valid = signatureMatches(
-      text(data, 'firstName'),
-      text(data, 'lastName'),
-      text(data, 'signature'),
+  function setStatus(message, isError = false) {
+    status.textContent = message;
+    status.classList.toggle('is-error', Boolean(message) && isError);
+  }
+
+  function namedControl(name) {
+    const named = form.elements.namedItem(name);
+    if (named instanceof RadioNodeList) return named.item(0);
+    return named instanceof HTMLElement ? named : null;
+  }
+
+  function errorHost(control) {
+    return (
+      control.closest(
+        '.form-field, .form-group, .radio-stack, .check-grid, .mh-scale, .applicant-type-grid, .retreat-grid, .agreements, .scale-field',
+      ) || control.parentElement
     );
-    signatureError.hidden = valid;
-    return valid;
+  }
+
+  function errorElementFor(control) {
+    if (control.name === 'signature') return signatureError;
+    const errorId = `${control.name}-error`;
+    const existing = document.getElementById(errorId);
+    if (existing) return existing;
+    const message = document.createElement('p');
+    message.className = 'field-error';
+    message.id = errorId;
+    message.hidden = true;
+    message.setAttribute('role', 'alert');
+    errorHost(control)?.append(message);
+    return message;
+  }
+
+  function setFieldError(control, message) {
+    if (!(control instanceof HTMLElement)) return;
+    const group = [...form.elements].filter(
+      (element) => element instanceof HTMLElement && element.name === control.name,
+    );
+    const error = errorElementFor(control);
+    error.textContent = message;
+    error.hidden = !message;
+    const describedBy = new Set(
+      String(control.getAttribute('aria-describedby') || '')
+        .split(/\s+/)
+        .filter(Boolean),
+    );
+    if (message) describedBy.add(error.id);
+    else describedBy.delete(error.id);
+    for (const element of group) {
+      element.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (describedBy.size) element.setAttribute('aria-describedby', [...describedBy].join(' '));
+      else element.removeAttribute('aria-describedby');
+    }
+  }
+
+  function applyFormat(control) {
+    if (!(control instanceof HTMLInputElement) || control.disabled) return;
+    const format = control.getAttribute('data-format') || (control.type === 'tel' ? 'phone' : '');
+    if (format === 'phone') control.value = formatPhoneNumber(control.value);
+    if (format === 'zip') control.value = formatPostalCode(control.value);
+    if (format === 'years') control.value = formatYears(control.value);
+  }
+
+  function validateControl(control) {
+    if (!(control instanceof HTMLElement) || !control.name || control.disabled) return true;
+    const message = fieldIssue(control.name, new FormData(form));
+    setFieldError(control, message);
+    if (control.name === 'signature') signatureError.hidden = !message;
+    return !message;
+  }
+
+  function stepControls(step) {
+    const seen = new Set();
+    const controls = [];
+    for (const control of step.querySelectorAll('input, select, textarea')) {
+      if (control.disabled || !control.name || seen.has(control.name)) continue;
+      seen.add(control.name);
+      controls.push(control);
+    }
+    return controls;
+  }
+
+  function validateStep(stepIndex, { show = true } = {}) {
+    syncConditionalFields();
+    const step = steps[stepIndex];
+    let firstInvalid = null;
+    let firstMessage = '';
+    for (const control of stepControls(step)) {
+      const message = fieldIssue(control.name, new FormData(form));
+      if (show) setFieldError(control, message);
+      if (message && !firstInvalid) {
+        firstInvalid = control;
+        firstMessage = message;
+      }
+    }
+    if (firstInvalid && show) {
+      firstInvalid.focus();
+      setStatus(firstMessage, true);
+      return false;
+    }
+    return !firstInvalid;
   }
 
   function validateCurrentStep() {
-    syncConditionalFields();
-    const invalid = steps[currentStep].querySelector(':invalid');
-    if (invalid instanceof HTMLElement) {
-      invalid.focus();
-      if ('reportValidity' in invalid) invalid.reportValidity();
-      status.textContent = 'Complete the required fields before continuing.';
-      return false;
+    return validateStep(currentStep);
+  }
+
+  function revealField(name, message) {
+    const control = namedControl(name);
+    if (!control) {
+      setStatus(message, true);
+      return;
     }
-    const data = new FormData(form);
-    if (text(data, 'retreatType') === 'endurance' && text(data, 'enduranceEligible') === 'no') {
-      status.textContent =
-        "The Endurance Retreat requires a prior Men's or Women's Retreat. Choose another retreat to continue.";
-      return false;
-    }
-    if (currentStep === steps.length - 2 && !signatureIsValid()) {
-      const signature = form.elements.namedItem('signature');
-      if (signature instanceof HTMLElement) signature.focus();
-      status.textContent = 'Correct the digital signature before continuing.';
+    const step = control.closest('[data-application-step]');
+    const index = steps.indexOf(step);
+    if (index >= 0) showStep(index, false);
+    setFieldError(control, message);
+    control.focus();
+    control.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    setStatus(message, true);
+  }
+
+  function validateAllSteps() {
+    for (let index = 0; index < steps.length - 1; index += 1) {
+      if (validateStep(index)) continue;
       return false;
     }
     return true;
@@ -443,7 +743,30 @@ if (typeof document !== 'undefined') {
     }
   }
 
-  form.addEventListener('change', syncConditionalFields);
+  form.addEventListener('change', (event) => {
+    syncConditionalFields();
+    const target = event.target;
+    if (target instanceof HTMLElement && target.name) validateControl(target);
+  });
+  form.addEventListener('input', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+    applyFormat(target);
+    if (target.dataset.touched === 'true' || target.getAttribute('aria-invalid') === 'true') {
+      validateControl(target);
+    }
+  });
+  form.addEventListener(
+    'blur',
+    (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement) || !target.name) return;
+      target.dataset.touched = 'true';
+      applyFormat(target);
+      validateControl(target);
+    },
+    true,
+  );
   nextButton.addEventListener('click', () => {
     if (!validateCurrentStep()) return;
     if (currentStep === steps.length - 2) renderReview();
@@ -454,10 +777,7 @@ if (typeof document !== 'undefined') {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     syncConditionalFields();
-    if (!form.checkValidity() || !signatureIsValid()) {
-      status.textContent = 'Return to the earlier steps and correct the highlighted fields.';
-      return;
-    }
+    if (!validateAllSteps()) return;
 
     const payload = applicationPayloadFromFormData(new FormData(form), {
       submissionId,
@@ -468,7 +788,7 @@ if (typeof document !== 'undefined') {
     submitButton.disabled = true;
     previousButton.disabled = true;
     form.setAttribute('aria-busy', 'true');
-    status.textContent = 'Securely sending your application…';
+    setStatus('Securely sending your application…');
 
     try {
       const response = await fetch(`${apiUrl}/v1/applications`, {
@@ -479,10 +799,12 @@ if (typeof document !== 'undefined') {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.id) {
-        status.textContent =
+        const message =
           response.status === 400
-            ? 'The application contains an invalid answer. Review each step and try again.'
+            ? messageForApiError(result)
             : 'The application could not be sent. Your entries are still here; please try again.';
+        if (response.status === 400 && result.field) revealField(result.field, message);
+        else setStatus(message, true);
         return;
       }
       reference.textContent = applicationReference(result.id);
@@ -493,10 +815,12 @@ if (typeof document !== 'undefined') {
       receipt.hidden = false;
       receipt.focus();
     } catch (error) {
-      status.textContent =
+      setStatus(
         error?.name === 'AbortError'
           ? 'The request timed out. Your entries are still here; please try again.'
-          : 'The application service could not be reached. Your entries are still here; please try again.';
+          : 'The application service could not be reached. Your entries are still here; please try again.',
+        true,
+      );
     } finally {
       window.clearTimeout(timeoutId);
       submitButton.disabled = false;

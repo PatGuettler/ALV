@@ -319,6 +319,17 @@ async function assertRetreatStatus(page, label) {
     await page
       .getByRole('group', { name: 'Your contact information' })
       .waitFor({ state: 'visible' });
+    await page.locator('input[name="phone"]').fill('2055550100');
+    await page.locator('input[name="phone"]').blur();
+    const phoneValue = await page.locator('input[name="phone"]').inputValue();
+    if (phoneValue !== '(205) 555-0100') {
+      throw new Error(`Phone did not keep a 10-digit format: ${phoneValue}`);
+    }
+    await page.locator('input[name="email"]').fill('pat@office');
+    await page.locator('input[name="email"]').blur();
+    await page.locator('#email-error').waitFor({ state: 'visible' });
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.locator('#firstName-error').waitFor({ state: 'visible' });
     await assertNoHorizontalOverflow(page, `${label} retreat contact step`);
     await page.getByRole('button', { name: 'Back' }).click();
   }

@@ -15,11 +15,26 @@
       </label>
       <label class="form-field"
         >Primary phone <span aria-hidden="true">*</span>
-        <input name="emergencyPhone" type="tel" maxlength="40" required />
+        <input
+          name="emergencyPhone"
+          type="tel"
+          inputmode="tel"
+          data-format="phone"
+          maxlength="14"
+          placeholder="(205) 555-0100"
+          required
+        />
       </label>
       <label class="form-field"
         >Secondary phone
-        <input name="emergencySecondaryPhone" type="tel" maxlength="40" />
+        <input
+          name="emergencySecondaryPhone"
+          type="tel"
+          inputmode="tel"
+          data-format="phone"
+          maxlength="14"
+          placeholder="(205) 555-0100"
+        />
       </label>
     </div>
   </section>

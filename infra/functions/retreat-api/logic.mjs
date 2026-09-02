@@ -135,8 +135,35 @@ function cleanStringList(value, allowed, maxItems = 12) {
   return result.every((item) => allowed.has(item)) ? result : null;
 }
 
+function fail(error, field, message) {
+  return { ok: false, error, field, message };
+}
+
 function validEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function nationalPhoneDigits(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1);
+  return digits;
+}
+
+function validPhone(value) {
+  return nationalPhoneDigits(value).length === 10;
+}
+
+function formatPhone(value) {
+  const digits = nationalPhoneDigits(value);
+  if (digits.length !== 10) return cleanText(value, 40);
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+function optionalPhone(value) {
+  const trimmed = cleanText(value, 40);
+  if (!trimmed) return { ok: true, value: '' };
+  if (!validPhone(trimmed)) return { ok: false };
+  return { ok: true, value: formatPhone(trimmed) };
 }
 
 function validUuid(value) {
@@ -160,12 +187,24 @@ function validYears(value) {
   return /^\d{1,2}$/.test(String(value)) && Number(value) >= 0 && Number(value) <= 60;
 }
 
+function validPostalCode(value) {
+  return /^[0-9]{5}(-[0-9]{4})?$/.test(value);
+}
+
 export function parseApplication(payload) {
   if (payload?.schemaVersion !== APPLICATION_SCHEMA_VERSION) {
-    return { ok: false, error: 'unsupported_schema' };
+    return fail(
+      'unsupported_schema',
+      '',
+      'This application form is out of date. Refresh the page and try again.',
+    );
   }
   if (payload.health || payload.medical || payload.crisis) {
-    return { ok: false, error: 'sensitive_fields_not_accepted' };
+    return fail(
+      'sensitive_fields_not_accepted',
+      '',
+      'Health details must stay on the approved questions. Refresh and try again.',
+    );
   }
 
   const submissionId = cleanText(payload.submissionId, 64);
@@ -185,35 +224,86 @@ export function parseApplication(payload) {
   const referralSource = cleanText(payload.applicant?.referral?.source, 80);
   const referredBy = cleanText(payload.applicant?.referral?.referredBy, 120);
 
-  if (
-    !validUuid(submissionId) ||
-    !applicantType ||
-    !retreatType ||
-    !timingPreference ||
-    (retreatType === 'endurance' && enduranceEligible === 'no') ||
-    !firstName ||
-    !lastName ||
-    !validEmail(email) ||
-    !phone ||
-    !city ||
-    !state ||
-    !/^[0-9]{5}(-[0-9]{4})?$/.test(postalCode)
-  ) {
-    return { ok: false, error: 'invalid_applicant' };
+  if (!validUuid(submissionId)) {
+    return fail('invalid_applicant', '', 'Refresh the page and start the application again.');
+  }
+  if (!applicantType) {
+    return fail(
+      'invalid_applicant',
+      'applicantType',
+      'Choose veteran / military or first responder.',
+    );
+  }
+  if (!retreatType) {
+    return fail('invalid_applicant', 'retreatType', 'Choose the retreat you are applying for.');
+  }
+  if (!timingPreference) {
+    return fail('invalid_applicant', 'timingPreference', 'Select a preferred timing.');
+  }
+  if (retreatType === 'endurance' && enduranceEligible === 'no') {
+    return fail(
+      'invalid_applicant',
+      'enduranceEligible',
+      "The Endurance Retreat requires a prior Men's or Women's Retreat. Choose another retreat to continue.",
+    );
+  }
+  if (!firstName) return fail('invalid_applicant', 'firstName', 'Enter your first name.');
+  if (!lastName) return fail('invalid_applicant', 'lastName', 'Enter your last name.');
+  if (!email) return fail('invalid_applicant', 'email', 'Enter your email address.');
+  if (!validEmail(email)) {
+    return fail('invalid_applicant', 'email', 'Enter an email address like name@example.com.');
+  }
+  if (!phone) return fail('invalid_applicant', 'phone', 'Enter your phone number.');
+  if (!validPhone(phone)) {
+    return fail(
+      'invalid_applicant',
+      'phone',
+      'Enter a 10-digit U.S. phone number, like (205) 555-0100.',
+    );
+  }
+  const formattedPhone = formatPhone(phone);
+  if (!city) return fail('invalid_applicant', 'city', 'Enter your city.');
+  if (!state) return fail('invalid_applicant', 'state', 'Select your state.');
+  if (!postalCode) return fail('invalid_applicant', 'postalCode', 'Enter your ZIP code.');
+  if (!validPostalCode(postalCode)) {
+    return fail(
+      'invalid_applicant',
+      'postalCode',
+      'Enter a 5-digit ZIP code, or ZIP+4 like 35203-1234.',
+    );
   }
 
   let spouse = null;
   if (retreatType === 'marriage') {
+    const spousePhone = optionalPhone(payload.applicant?.spouse?.phone);
+    const spouseEmail = cleanText(payload.applicant?.spouse?.email, 254).toLowerCase();
     spouse = {
       firstName: cleanText(payload.applicant?.spouse?.firstName, 60),
       lastName: cleanText(payload.applicant?.spouse?.lastName, 60),
-      email: cleanText(payload.applicant?.spouse?.email, 254).toLowerCase(),
-      phone: cleanText(payload.applicant?.spouse?.phone, 40),
+      email: spouseEmail,
+      phone: spousePhone.ok ? spousePhone.value : '',
       dateOfBirth: cleanText(payload.applicant?.spouse?.dateOfBirth, 10),
       gender: cleanText(payload.applicant?.spouse?.gender, 40),
     };
-    if (!spouse.firstName || !spouse.lastName || (spouse.email && !validEmail(spouse.email))) {
-      return { ok: false, error: 'invalid_spouse' };
+    if (!spouse.firstName) {
+      return fail('invalid_spouse', 'spouseFirstName', "Enter your spouse's first name.");
+    }
+    if (!spouse.lastName) {
+      return fail('invalid_spouse', 'spouseLastName', "Enter your spouse's last name.");
+    }
+    if (spouseEmail && !validEmail(spouseEmail)) {
+      return fail(
+        'invalid_spouse',
+        'spouseEmail',
+        'Enter a valid spouse email, or leave it blank.',
+      );
+    }
+    if (!spousePhone.ok) {
+      return fail(
+        'invalid_spouse',
+        'spousePhone',
+        'Enter a 10-digit spouse phone number, or leave it blank.',
+      );
     }
   }
 
@@ -223,14 +313,28 @@ export function parseApplication(payload) {
     const status = cleanEnum(payload.service?.status, MILITARY_STATUSES);
     const years = cleanText(String(payload.service?.years ?? ''), 2);
     const combatDeployment = cleanEnum(payload.service?.combatDeployment ?? '', YES_NO_PRIVATE);
-    if (
-      payload.service?.kind !== 'military' ||
-      !branch ||
-      !status ||
-      !validYears(years) ||
-      combatDeployment === null
-    ) {
-      return { ok: false, error: 'invalid_service' };
+    if (payload.service?.kind !== 'military') {
+      return fail('invalid_service', 'applicantType', 'Select veteran / military service details.');
+    }
+    if (!status) {
+      return fail('invalid_service', 'militaryStatus', 'Select your current military status.');
+    }
+    if (!branch) {
+      return fail('invalid_service', 'militaryBranch', 'Select your branch of service.');
+    }
+    if (!validYears(years)) {
+      return fail(
+        'invalid_service',
+        'militaryYears',
+        'Enter years of service as a whole number from 0 to 60.',
+      );
+    }
+    if (combatDeployment === null) {
+      return fail(
+        'invalid_service',
+        'combatDeployment',
+        'Choose yes, no, or prefer not to answer for combat-zone deployment.',
+      );
     }
     service = {
       kind: 'military',
@@ -255,15 +359,31 @@ export function parseApplication(payload) {
     const years = cleanText(String(payload.service?.years ?? ''), 2);
     const criticalIncident = cleanEnum(payload.service?.criticalIncident ?? '', YES_NO_PRIVATE);
     const agency = cleanText(payload.service?.agency, 120);
-    if (
-      payload.service?.kind !== 'first-responder' ||
-      !type ||
-      !agency ||
-      !status ||
-      !validYears(years) ||
-      criticalIncident === null
-    ) {
-      return { ok: false, error: 'invalid_service' };
+    if (payload.service?.kind !== 'first-responder') {
+      return fail('invalid_service', 'applicantType', 'Select first responder service details.');
+    }
+    if (!type) {
+      return fail('invalid_service', 'responderType', 'Select your first responder type.');
+    }
+    if (!agency) {
+      return fail('invalid_service', 'agency', 'Enter your agency or department.');
+    }
+    if (!status) {
+      return fail('invalid_service', 'responderStatus', 'Select your employment status.');
+    }
+    if (!validYears(years)) {
+      return fail(
+        'invalid_service',
+        'responderYears',
+        'Enter years of service as a whole number from 0 to 60.',
+      );
+    }
+    if (criticalIncident === null) {
+      return fail(
+        'invalid_service',
+        'criticalIncident',
+        'Choose yes, no, or prefer not to answer for critical incidents.',
+      );
     }
     service = {
       kind: 'first-responder',
@@ -282,15 +402,31 @@ export function parseApplication(payload) {
   const employmentStatus = cleanEnum(payload.workforce?.employmentStatus, EMPLOYMENT_STATUSES);
   const satisfaction = cleanEnum(payload.workforce?.satisfaction ?? '', EMPLOYMENT_SATISFACTION);
   const interests = cleanStringList(payload.workforce?.interests ?? [], WORKFORCE_INTERESTS);
-  if (!employmentStatus || satisfaction === null || interests === null) {
-    return { ok: false, error: 'invalid_workforce' };
+  if (!employmentStatus) {
+    return fail('invalid_workforce', 'employmentStatus', 'Select your employment status.');
+  }
+  if (satisfaction === null) {
+    return fail(
+      'invalid_workforce',
+      'employmentSatisfaction',
+      'Select whether you are satisfied with your employment situation.',
+    );
+  }
+  if (interests === null) {
+    return fail(
+      'invalid_workforce',
+      'workforceInterests',
+      'Select workforce interests from the listed options.',
+    );
   }
 
+  const emergencyPhone = optionalPhone(payload.finalDetails?.emergencyContact?.phone);
+  const emergencySecondary = optionalPhone(payload.finalDetails?.emergencyContact?.secondaryPhone);
   const emergencyContact = {
     name: cleanText(payload.finalDetails?.emergencyContact?.name, 120),
     relationship: cleanText(payload.finalDetails?.emergencyContact?.relationship, 60),
-    phone: cleanText(payload.finalDetails?.emergencyContact?.phone, 40),
-    secondaryPhone: cleanText(payload.finalDetails?.emergencyContact?.secondaryPhone, 40),
+    phone: emergencyPhone.ok ? emergencyPhone.value : '',
+    secondaryPhone: emergencySecondary.ok ? emergencySecondary.value : '',
   };
   const previousRetreats = cleanStringList(
     payload.finalDetails?.previousRetreats ?? [],
@@ -304,24 +440,95 @@ export function parseApplication(payload) {
   const consentVersion = cleanText(payload.consent?.version, 40);
   const consentAcceptedAt = cleanText(payload.consent?.acceptedAt, 40);
 
-  if (
-    !emergencyContact.name ||
-    !emergencyContact.relationship ||
-    !emergencyContact.phone ||
-    previousRetreats === null ||
-    !goals ||
-    !Object.values({
-      accuracy: agreements.accuracy === true,
-      contact: agreements.contact === true,
-      placement: agreements.placement === true,
-      policies: agreements.policies === true,
-    }).every(Boolean) ||
-    normalizedName(signature) !== normalizedName(`${firstName} ${lastName}`) ||
-    !validDate(signatureDate) ||
-    consentVersion !== CONSENT_VERSION ||
-    !validTimestamp(consentAcceptedAt)
-  ) {
-    return { ok: false, error: 'invalid_final_details' };
+  if (!emergencyContact.name) {
+    return fail('invalid_final_details', 'emergencyName', 'Enter an emergency contact name.');
+  }
+  if (!emergencyContact.relationship) {
+    return fail(
+      'invalid_final_details',
+      'emergencyRelationship',
+      'Enter how the emergency contact is related to you.',
+    );
+  }
+  if (!payload.finalDetails?.emergencyContact?.phone) {
+    return fail(
+      'invalid_final_details',
+      'emergencyPhone',
+      "Enter the emergency contact's phone number.",
+    );
+  }
+  if (!emergencyPhone.ok) {
+    return fail(
+      'invalid_final_details',
+      'emergencyPhone',
+      'Enter a 10-digit U.S. phone number, like (205) 555-0100.',
+    );
+  }
+  if (!emergencySecondary.ok) {
+    return fail(
+      'invalid_final_details',
+      'emergencySecondaryPhone',
+      'Enter a 10-digit backup phone number, or leave it blank.',
+    );
+  }
+  if (previousRetreats === null) {
+    return fail(
+      'invalid_final_details',
+      'previousRetreats',
+      'Select previous ALV retreats from the listed options.',
+    );
+  }
+  if (!goals) {
+    return fail(
+      'invalid_final_details',
+      'goals',
+      'Tell us what you hope to gain from this retreat.',
+    );
+  }
+  if (agreements.accuracy !== true) {
+    return fail(
+      'invalid_final_details',
+      'accuracyAgreement',
+      'Confirm that your answers are accurate.',
+    );
+  }
+  if (agreements.contact !== true) {
+    return fail(
+      'invalid_final_details',
+      'contactConsent',
+      'Consent to ALV storing this application and contacting you.',
+    );
+  }
+  if (agreements.placement !== true) {
+    return fail(
+      'invalid_final_details',
+      'placementAgreement',
+      'Confirm that applying does not guarantee a retreat place.',
+    );
+  }
+  if (agreements.policies !== true) {
+    return fail(
+      'invalid_final_details',
+      'policyAgreement',
+      'Agree to follow retreat policies provided by ALV staff.',
+    );
+  }
+  if (normalizedName(signature) !== normalizedName(`${firstName} ${lastName}`)) {
+    return fail(
+      'invalid_final_details',
+      'signature',
+      "The digital signature must match the applicant's first and last name.",
+    );
+  }
+  if (!validDate(signatureDate)) {
+    return fail('invalid_final_details', 'signatureDate', 'Enter a valid signature date.');
+  }
+  if (consentVersion !== CONSENT_VERSION || !validTimestamp(consentAcceptedAt)) {
+    return fail(
+      'invalid_final_details',
+      'contactConsent',
+      'Refresh the page and accept the current application agreement.',
+    );
   }
 
   return {
@@ -331,7 +538,7 @@ export function parseApplication(payload) {
       schemaVersion: APPLICATION_SCHEMA_VERSION,
       fullName: `${firstName} ${lastName}`,
       email,
-      phone,
+      phone: formattedPhone,
       applicantType,
       retreatType,
       retreat: { applicantType, retreatType, timingPreference, enduranceEligible },
@@ -346,7 +553,7 @@ export function parseApplication(payload) {
         householdIncome: cleanText(payload.applicant?.householdIncome, 40),
         educationLevel: cleanText(payload.applicant?.educationLevel, 40),
         email,
-        phone,
+        phone: formattedPhone,
         address: { street, city, state, postalCode, county },
         referral: { source: referralSource, referredBy },
         spouse,

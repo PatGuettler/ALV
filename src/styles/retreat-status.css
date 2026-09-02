@@ -453,6 +453,10 @@ body:has(.retreat-status) {
   padding: 0 38px 18px;
 }
 
+.retreat-form-status.is-error {
+  color: #9b1c1c;
+}
+
 .application-step {
   border: 0;
   margin: 0;
@@ -558,6 +562,12 @@ body:has(.retreat-status) {
   border-color: var(--brave-blue);
   box-shadow: 0 0 0 4px rgba(72, 83, 106, 0.12);
   outline: none;
+}
+
+.retreat-application-shell input[aria-invalid='true'],
+.retreat-application-shell select[aria-invalid='true'],
+.retreat-application-shell textarea[aria-invalid='true'] {
+  border-color: #9b1c1c;
 }
 
 .retreat-application-shell input:focus-visible,

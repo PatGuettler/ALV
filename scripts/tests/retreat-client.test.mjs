@@ -5,6 +5,13 @@ import {
   applicationPayloadFromFormData,
   applicationReference,
   applicationReviewSections,
+  fieldIssue,
+  formatPhoneNumber,
+  formatPostalCode,
+  isValidEmail,
+  isValidPhone,
+  isValidPostalCode,
+  messageForApiError,
   signatureMatches,
 } from '../../src/scripts/retreat-application.js';
 import {
@@ -26,7 +33,7 @@ function applicationFormData() {
     lastName: 'Guettler',
     dateOfBirth: '1985-01-15',
     email: 'pat@example.com',
-    phone: '555-0100',
+    phone: '2055550100',
     city: 'Birmingham',
     state: 'AL',
     postalCode: '35203',
@@ -35,7 +42,7 @@ function applicationFormData() {
     employmentStatus: 'full-time',
     emergencyName: 'Casey Guettler',
     emergencyRelationship: 'Spouse',
-    emergencyPhone: '555-0101',
+    emergencyPhone: '(205) 555-0101',
     goals: 'Build community.',
     signature: 'Pat Guettler',
     signatureDate: '2026-09-01',
@@ -65,6 +72,8 @@ test('applicationPayloadFromFormData creates the versioned nested payload', () =
   assert.deepEqual(payload.workforce.interests, ['resume', 'training']);
   assert.equal(payload.finalDetails.agreements.contact, true);
   assert.equal(payload.consent.version, '2026-09-01');
+  assert.equal(payload.applicant.phone, '(205) 555-0100');
+  assert.equal(payload.finalDetails.emergencyContact.phone, '(205) 555-0101');
 });
 
 test('applicationPayloadFromFormData includes spouse and responder conditions only when selected', () => {
@@ -84,6 +93,44 @@ test('applicationPayloadFromFormData includes spouse and responder conditions on
 test('signatureMatches normalizes case and whitespace', () => {
   assert.equal(signatureMatches('Pat', 'Guettler', '  PAT   guettler '), true);
   assert.equal(signatureMatches('Pat', 'Guettler', 'Someone Else'), false);
+});
+
+test('phone and ZIP helpers format as the applicant types and reject incomplete values', () => {
+  assert.equal(formatPhoneNumber('2055550100'), '(205) 555-0100');
+  assert.equal(formatPhoneNumber('1 (205) 555-0100'), '(205) 555-0100');
+  assert.equal(formatPhoneNumber('205555'), '(205) 555');
+  assert.equal(isValidPhone('(205) 555-0100'), true);
+  assert.equal(isValidPhone('555-0100'), false);
+  assert.equal(formatPostalCode('352031234'), '35203-1234');
+  assert.equal(isValidPostalCode('35203'), true);
+  assert.equal(isValidPostalCode('3520'), false);
+  assert.equal(isValidEmail('pat@example.com'), true);
+  assert.equal(isValidEmail('pat@example'), false);
+});
+
+test('fieldIssue names the exact problem for required and formatted fields', () => {
+  const data = applicationFormData();
+  assert.equal(fieldIssue('phone', data), '');
+  data.set('phone', '555-0100');
+  assert.match(fieldIssue('phone', data), /10-digit/);
+  data.set('email', 'pat@office');
+  assert.match(fieldIssue('email', data), /name@example.com/);
+  data.set('postalCode', '3520');
+  assert.match(fieldIssue('postalCode', data), /ZIP/);
+  data.set('signature', 'Someone Else');
+  assert.match(fieldIssue('signature', data), /first and last name/);
+});
+
+test('messageForApiError prefers the server field message', () => {
+  assert.equal(
+    messageForApiError({
+      error: 'invalid_applicant',
+      field: 'phone',
+      message: 'Enter a 10-digit U.S. phone number, like (205) 555-0100.',
+    }),
+    'Enter a 10-digit U.S. phone number, like (205) 555-0100.',
+  );
+  assert.match(messageForApiError({ error: 'invalid_applicant' }), /personal information/);
 });
 
 test('review helpers produce safe display sections and receipt references', () => {

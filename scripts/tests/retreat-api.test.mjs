@@ -33,7 +33,7 @@ function validApplication(overrides = {}) {
       firstName: ' Pat ',
       lastName: ' Guettler ',
       email: 'Pat@Example.com',
-      phone: '555-0100',
+      phone: '(205) 555-0100',
       address: {
         street: '100 Main Street',
         city: 'Birmingham',
@@ -65,7 +65,7 @@ function validApplication(overrides = {}) {
       emergencyContact: {
         name: 'Casey Guettler',
         relationship: 'Spouse',
-        phone: '555-0101',
+        phone: '(205) 555-0101',
         secondaryPhone: '',
       },
       previousRetreats: [],
@@ -133,6 +133,7 @@ test('parseApplication accepts and normalizes the versioned applicant schema', (
   assert.equal(parsed.id, '01991f38-7165-7cc8-a1bb-5ba46bc444b8');
   assert.equal(parsed.fields.fullName, 'Pat Guettler');
   assert.equal(parsed.fields.email, 'pat@example.com');
+  assert.equal(parsed.fields.phone, '(205) 555-0100');
   assert.equal(parsed.fields.service.branch, 'army');
   assert.deepEqual(parsed.fields.workforce.interests, ['resume', 'training']);
 });
@@ -146,6 +147,8 @@ test('parseApplication enforces conditional spouse and service fields', () => {
     },
   });
   assert.equal(parseApplication(marriage).error, 'invalid_spouse');
+  assert.equal(parseApplication(marriage).field, 'spouseFirstName');
+  assert.match(parseApplication(marriage).message, /spouse/);
 
   const responder = validApplication({
     retreat: {
@@ -178,9 +181,32 @@ test('parseApplication rejects missing consent, mismatched signatures, and sensi
   const badSignature = validApplication();
   badSignature.finalDetails.signature = 'Someone Else';
   assert.equal(parseApplication(badSignature).error, 'invalid_final_details');
+  assert.equal(parseApplication(badSignature).field, 'signature');
   const noConsent = validApplication();
   noConsent.finalDetails.agreements.contact = false;
   assert.equal(parseApplication(noConsent).error, 'invalid_final_details');
+  assert.equal(parseApplication(noConsent).field, 'contactConsent');
+});
+
+test('parseApplication names the invalid phone, email, and ZIP fields', () => {
+  const shortPhone = validApplication();
+  shortPhone.applicant.phone = '555-0100';
+  assert.equal(parseApplication(shortPhone).ok, false);
+  assert.equal(parseApplication(shortPhone).field, 'phone');
+  assert.match(parseApplication(shortPhone).message, /10-digit/);
+
+  const digits = validApplication();
+  digits.applicant.phone = '2055550100';
+  assert.equal(parseApplication(digits).ok, true);
+  assert.equal(parseApplication(digits).fields.phone, '(205) 555-0100');
+
+  const badZip = validApplication();
+  badZip.applicant.address.postalCode = '3520';
+  assert.equal(parseApplication(badZip).field, 'postalCode');
+
+  const badEmail = validApplication();
+  badEmail.applicant.email = 'pat@office';
+  assert.equal(parseApplication(badEmail).field, 'email');
 });
 
 test('parseApplication truncates approved optional notes', () => {
