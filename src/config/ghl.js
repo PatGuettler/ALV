@@ -7,6 +7,8 @@ export const ghl = {
   topgolfBookingPath: '/widget/bookings/top-golf-av-active',
   /** Public events calendar embed URL from GHL Calendar Settings → Share → Embed. */
   eventsCalendarEmbed: '',
+  /** Dedicated GHL fundraiser calendar IDs. Empty until ALV pastes the scoped calendar IDs. */
+  fundraiserCalendarIds: [],
 };
 
 export function ghlFormUrl(formId, { notrack = true } = {}) {

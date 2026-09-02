@@ -16,4 +16,5 @@ test('ghlWidgets point newsletter, crisis, volunteer, and Topgolf at GHL', () =>
   assert.match(ghlWidgets.volunteer, /oA6BYtFTZ47lbNChjt2h/);
   assert.match(ghlWidgets.topgolfBooking, /widget\/bookings\/top-golf-av-active/);
   assert.equal(ghl.eventsCalendarEmbed, '');
+  assert.deepEqual(ghl.fundraiserCalendarIds, []);
 });

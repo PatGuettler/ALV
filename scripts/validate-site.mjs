@@ -92,6 +92,7 @@ for (const script of [
   'resources',
   'retreat-application',
   'retreat-staff',
+  'featured-fundraiser',
 ]) {
   const scriptPath = resolve(sourceRoot, 'scripts', `${script}.js`);
   const javascript = await readFile(scriptPath, 'utf8');

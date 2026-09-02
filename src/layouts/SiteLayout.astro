@@ -5,6 +5,7 @@ import Navigation from '../components/site/Navigation.astro';
 import Footer from '../components/site/Footer.astro';
 import ContactModal from '../components/site/ContactModal.astro';
 import NewsletterModal from '../components/site/NewsletterModal.astro';
+import FeaturedFundraiser from '../components/site/FeaturedFundraiser.astro';
 
 import '../styles/foundation.css';
 import '../styles/navigation.css';
@@ -12,6 +13,7 @@ import '../styles/forms.css';
 import '../styles/status.css';
 import '../styles/responsive.css';
 import '../styles/contrast.css';
+import '../styles/featured-fundraiser.css';
 
 interface Props {
   pageId: string;
@@ -112,6 +114,7 @@ const structuredData = {
     <a class="skip-link" href="#main-content">Skip to content</a>
     <CrisisBar />
     <Navigation />
+    <FeaturedFundraiser />
     <main id="main-content">
       <slot />
     </main>

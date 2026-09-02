@@ -538,6 +538,60 @@ async function assertCustomerReportedLayouts(page, label, width, browserErrors) 
   await assertRetreatStatus(page, label);
 }
 
+async function assertFeaturedFundraiser(page, browserErrors) {
+  await page.route('**/data/featured-fundraiser.json', (route) =>
+    route.fulfill({ status: 404, body: '' }),
+  );
+  await loadRoute(page, 'home', '', browserErrors);
+  const hiddenBanner = page.locator('[data-featured-fundraiser]');
+  await hiddenBanner.waitFor({ state: 'attached' });
+  if (await hiddenBanner.isVisible()) {
+    throw new Error('Featured fundraiser banner rendered without a qualifying public event.');
+  }
+  await page.unroute('**/data/featured-fundraiser.json');
+
+  await page.route('**/data/featured-fundraiser.json', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        version: 1,
+        generatedAt: new Date().toISOString(),
+        events: [
+          {
+            id: 'browser-fundraiser',
+            title:
+              'War on the Greens — A deliberately long fundraiser title that must wrap without overflowing',
+            startAt: new Date(Date.now() + 86_400_000).toISOString(),
+            endAt: new Date(Date.now() + 90_000_000).toISOString(),
+            venue: 'Inverness Country Club, Birmingham, AL',
+            summary: 'Browser-only event fixture',
+            url: 'https://alabamaveteran.org/events/war-on-the-greens',
+            category: 'fundraiser',
+            status: 'published',
+            updatedAt: new Date().toISOString(),
+          },
+        ],
+      }),
+    }),
+  );
+  await loadRoute(page, 'home', '', browserErrors);
+  const banner = page.locator('[data-featured-fundraiser]');
+  await banner.waitFor({ state: 'visible' });
+  await assertNoHorizontalOverflow(page, 'featured fundraiser mobile');
+  const details = await banner.evaluate((element) => ({
+    title: element.querySelector('[data-featured-title]')?.textContent,
+    href: element.querySelector('[data-featured-link]')?.href,
+  }));
+  assertLayout(
+    details.title?.includes('War on the Greens') && details.href?.startsWith('https://'),
+    'Featured fundraiser did not render its validated public fields',
+    details,
+  );
+  await banner.getByRole('link', { name: /more info/i }).focus();
+  await page.unroute('**/data/featured-fundraiser.json');
+}
+
 try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
   const desktopErrors = [];
@@ -636,6 +690,7 @@ try {
     await assertRetreatSubmissionFailuresAndRetry(mobile);
     await assertRetreatSubmissionTimeout(mobile);
   }
+  await assertFeaturedFundraiser(mobile, mobileErrors);
 
   await mobileContext.close();
   await desktop.close();
