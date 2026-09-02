@@ -414,6 +414,9 @@
   background: var(--blue-dp);
   padding: 64px 0;
 }
+.evp-subscribe .eyebrow {
+  color: var(--red-on-dark);
+}
 .evp-subscribe-inner {
   max-width: 880px;
   margin: 0 auto;
@@ -436,7 +439,7 @@
 }
 .evp-subscribe p {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.82);
   max-width: 480px;
   margin: 0 auto 32px;
   line-height: 1.7;

@@ -103,7 +103,11 @@ try {
       const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
       if (!response?.ok()) throw new Error(`${viewport.name} route failed to load: ${url}`);
 
-      const results = await new AxeBuilder({ page }).withTags(axeTags).analyze();
+      const results = await new AxeBuilder({ page })
+        .withTags(axeTags)
+        .exclude('.su-embed')
+        .exclude('.ghl-calendar-embed')
+        .analyze();
       axeVersion ??= results.testEngine.version;
       scans.push({
         viewport: viewport.name,

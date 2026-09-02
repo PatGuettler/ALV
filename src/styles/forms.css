@@ -19,7 +19,7 @@
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: #b21f24;
+  color: var(--red-on-dark, #ff8a8e);
   margin-bottom: 8px;
 }
 .av-signup h3 {
@@ -99,10 +99,10 @@
 }
 .av-signup .su-note {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.78);
 }
 .av-signup .su-note a {
-  color: rgba(255, 255, 255, 0.7);
+  color: #ffd4d6;
   font-weight: 700;
 }
 .av-signup .su-ok {
