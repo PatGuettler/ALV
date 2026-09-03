@@ -5,14 +5,15 @@ import { ghl } from '../src/config/ghl.js';
 import {
   buildPublicEventsFeed,
   fetchGhlPublicCalendarRecords,
+  normalizeGhlSecret,
   publicEventsLookEqual,
 } from './lib/ghl-events-sync.mjs';
 
 const projectRoot = resolve(import.meta.dirname, '..');
 const feedPath = resolve(projectRoot, 'public/data/events-calendar.json');
-const token = process.env.GHL_PRIVATE_INTEGRATION_TOKEN || '';
-const locationId = process.env.GHL_LOCATION_ID || ghl.locationId;
-const calendarId = process.env.GHL_EVENTS_CALENDAR_ID || ghl.eventsCalendarId;
+const token = normalizeGhlSecret(process.env.GHL_PRIVATE_INTEGRATION_TOKEN);
+const locationId = normalizeGhlSecret(process.env.GHL_LOCATION_ID) || ghl.locationId;
+const calendarId = normalizeGhlSecret(process.env.GHL_EVENTS_CALENDAR_ID) || ghl.eventsCalendarId;
 const now = Date.now();
 const startTime = now - 7 * 24 * 60 * 60 * 1000;
 const endTime = now + 365 * 24 * 60 * 60 * 1000;

@@ -33,6 +33,7 @@ jobs:
         run: npm ci
 
       - name: Refresh events calendar from GHL
+        continue-on-error: true
         env:
           GHL_PRIVATE_INTEGRATION_TOKEN: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN }}
         run: |

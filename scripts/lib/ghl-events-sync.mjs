@@ -12,6 +12,22 @@ export function publicEventsLookEqual(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
+export function normalizeGhlSecret(value) {
+  return String(value || '')
+    .trim()
+    .replace(/^['"]|['"]$/g, '');
+}
+
+async function ghlFailureDetail(response) {
+  try {
+    const body = await response.json();
+    const message = String(body?.message || body?.error || '').trim();
+    return message && message.length <= 180 ? message : '';
+  } catch {
+    return '';
+  }
+}
+
 function mergeCalendarRecords(recordLists) {
   const byId = new Map();
   for (const records of recordLists) {
@@ -52,19 +68,22 @@ async function fetchGhlCalendarCollection({
   source,
   requireCalendarId = true,
 } = {}) {
-  if (!token) throw new Error('A GHL private integration token is required.');
-  if (!locationId) throw new Error('A GHL location ID is required.');
-  if (!calendarId) throw new Error('A GHL events calendar ID is required.');
+  const accessToken = normalizeGhlSecret(token);
+  const scopedLocationId = String(locationId || '').trim();
+  const scopedCalendarId = String(calendarId || '').trim();
+  if (!accessToken) throw new Error('A GHL private integration token is required.');
+  if (!scopedLocationId) throw new Error('A GHL location ID is required.');
+  if (!scopedCalendarId) throw new Error('A GHL events calendar ID is required.');
 
   const url = new URL(endpoint);
-  url.searchParams.set('locationId', locationId);
-  url.searchParams.set('calendarId', calendarId);
+  url.searchParams.set('locationId', scopedLocationId);
+  url.searchParams.set('calendarId', scopedCalendarId);
   url.searchParams.set('startTime', String(startTime));
   url.searchParams.set('endTime', String(endTime));
 
   const response = await fetchImpl(url, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
       Version: GHL_API_VERSION,
       Accept: 'application/json',
       'User-Agent': GHL_SYNC_USER_AGENT,
@@ -72,7 +91,8 @@ async function fetchGhlCalendarCollection({
   });
 
   if (!response.ok) {
-    throw new Error(`${failureLabel} (${response.status}).`);
+    const detail = await ghlFailureDetail(response);
+    throw new Error(`${failureLabel} (${response.status}${detail ? `: ${detail}` : ''}).`);
   }
 
   const payload = await response.json();
@@ -80,12 +100,12 @@ async function fetchGhlCalendarCollection({
   return events
     .filter((record) => {
       const recordCalendarId = String(record?.calendarId || '').trim();
-      if (requireCalendarId) return recordCalendarId === calendarId;
-      return !recordCalendarId || recordCalendarId === calendarId;
+      if (requireCalendarId) return recordCalendarId === scopedCalendarId;
+      return !recordCalendarId || recordCalendarId === scopedCalendarId;
     })
     .map((record) => {
       const tagged = source ? { ...record, source } : { ...record };
-      if (!String(tagged.calendarId || '').trim()) tagged.calendarId = calendarId;
+      if (!String(tagged.calendarId || '').trim()) tagged.calendarId = scopedCalendarId;
       return tagged;
     });
 }

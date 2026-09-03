@@ -7,7 +7,13 @@ import {
   fetchGhlBlockedSlots,
   fetchGhlCalendarEvents,
   fetchGhlPublicCalendarRecords,
+  normalizeGhlSecret,
 } from '../lib/ghl-events-sync.mjs';
+
+test('strips quotes and whitespace from GHL secrets', () => {
+  assert.equal(normalizeGhlSecret('  pit-test  \n'), 'pit-test');
+  assert.equal(normalizeGhlSecret('"pit-test"'), 'pit-test');
+});
 
 test('maps only the AV Events Calendar and strips private GHL fields', () => {
   const feed = buildPublicEventsFeed(
@@ -103,9 +109,13 @@ test('fetchGhlCalendarEvents queries only the requested calendar and rejects HTT
         calendarId: ghl.eventsCalendarId,
         startTime: 1,
         endTime: 2,
-        fetchImpl: async () => ({ ok: false, status: 401, json: async () => ({}) }),
+        fetchImpl: async () => ({
+          ok: false,
+          status: 401,
+          json: async () => ({ message: 'Invalid token: access token is invalid' }),
+        }),
       }),
-    /failed \(401\)/,
+    /failed \(401: Invalid token: access token is invalid\)/,
   );
 });
 
@@ -141,8 +151,14 @@ test('fetchGhlPublicCalendarRecords merges appointments and blocked slots', asyn
     fetchImpl,
   });
 
-  assert.equal(calls.some((href) => href.includes('/calendars/events')), true);
-  assert.equal(calls.some((href) => href.includes('/calendars/blocked-slots')), true);
+  assert.equal(
+    calls.some((href) => href.includes('/calendars/events')),
+    true,
+  );
+  assert.equal(
+    calls.some((href) => href.includes('/calendars/blocked-slots')),
+    true,
+  );
   assert.equal(records.length, 2);
   assert.equal(records.find((record) => record.id === 'block-1')?.source, 'blocked-slot');
   assert.equal(records.find((record) => record.id === 'block-1')?.calendarId, ghl.eventsCalendarId);
