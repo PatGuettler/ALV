@@ -110,7 +110,9 @@ export function publicEventFromCalendarRecord(record, { eventsCalendarId = '' } 
   if (status && !PUBLISHABLE_STATUSES.has(status)) return null;
   const title =
     String(record.title || '').trim() ||
-    (blocked ? String(record.notes || record.description || '').trim() || 'Alabama Veteran event' : '');
+    (blocked
+      ? String(record.notes || record.description || '').trim() || 'Alabama Veteran event'
+      : '');
   return normalizePublicEvent({
     id: record.id,
     title,
