@@ -15,7 +15,7 @@ test('ghlWidgets point newsletter, crisis, volunteer, and Topgolf at GHL', () =>
   assert.match(ghlWidgets.crisis, /t9pQuFrpT0Yz2lYTwLVj/);
   assert.match(ghlWidgets.volunteer, /oA6BYtFTZ47lbNChjt2h/);
   assert.match(ghlWidgets.topgolfBooking, /widget\/bookings\/top-golf-av-active/);
-  assert.equal(ghl.locationId, 'jphzkfKyYJW7cGNPHeP5');
+  assert.equal(ghl.locationId, 'jpHzkfKyYJW7cGNPHePS');
   assert.equal(ghl.eventsCalendarId, 'zfYlU1tekAs9O3E2xGT8');
   assert.equal(ghl.eventsCalendarEmbed, undefined);
   assert.equal(ghlWidgets.eventsBooking, undefined);
