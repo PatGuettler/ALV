@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { ghl } from '../../src/config/ghl.js';
-import { buildPublicEventsFeed, fetchGhlCalendarEvents } from '../lib/ghl-events-sync.mjs';
+import {
+  buildPublicEventsFeed,
+  fetchGhlBlockedSlots,
+  fetchGhlCalendarEvents,
+  fetchGhlPublicCalendarRecords,
+} from '../lib/ghl-events-sync.mjs';
 
 test('maps only the AV Events Calendar and strips private GHL fields', () => {
   const feed = buildPublicEventsFeed(
@@ -37,6 +42,27 @@ test('maps only the AV Events Calendar and strips private GHL fields', () => {
   assert.equal(feed.events[0].title, 'Board breakfast');
   assert.equal(JSON.stringify(feed).includes('ct-secret'), false);
   assert.equal(JSON.stringify(feed).includes('vet@example.com'), false);
+});
+
+test('includes blocked-off time from the AV Events Calendar', () => {
+  const feed = buildPublicEventsFeed(
+    [
+      {
+        id: 'block-1',
+        calendarId: ghl.eventsCalendarId,
+        source: 'blocked-slot',
+        title: 'Community breakfast',
+        startTime: '2026-09-03T21:30:00Z',
+        endTime: '2026-09-03T22:00:00Z',
+        assignedUserId: 'user-secret',
+      },
+    ],
+    { calendarId: ghl.eventsCalendarId, generatedAt: new Date('2026-09-03T12:00:00Z') },
+  );
+
+  assert.equal(feed.events.length, 1);
+  assert.equal(feed.events[0].title, 'Community breakfast');
+  assert.equal(JSON.stringify(feed).includes('user-secret'), false);
 });
 
 test('fetchGhlCalendarEvents queries only the requested calendar and rejects HTTP errors', async () => {
@@ -81,4 +107,53 @@ test('fetchGhlCalendarEvents queries only the requested calendar and rejects HTT
       }),
     /failed \(401\)/,
   );
+});
+
+test('fetchGhlPublicCalendarRecords merges appointments and blocked slots', async () => {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    const href = String(url);
+    calls.push(href);
+    const blocked = href.includes('/blocked-slots');
+    return {
+      ok: true,
+      json: async () => ({
+        events: blocked
+          ? [
+              {
+                id: 'block-1',
+                title: 'Reserved',
+                startTime: '2026-09-03T21:30:00Z',
+                endTime: '2026-09-03T22:00:00Z',
+              },
+            ]
+          : [{ id: 'appt-1', calendarId: ghl.eventsCalendarId, title: 'Kept' }],
+      }),
+    };
+  };
+
+  const records = await fetchGhlPublicCalendarRecords({
+    token: 'pit-test',
+    locationId: ghl.locationId,
+    calendarId: ghl.eventsCalendarId,
+    startTime: 1,
+    endTime: 2,
+    fetchImpl,
+  });
+
+  assert.equal(calls.some((href) => href.includes('/calendars/events')), true);
+  assert.equal(calls.some((href) => href.includes('/calendars/blocked-slots')), true);
+  assert.equal(records.length, 2);
+  assert.equal(records.find((record) => record.id === 'block-1')?.source, 'blocked-slot');
+  assert.equal(records.find((record) => record.id === 'block-1')?.calendarId, ghl.eventsCalendarId);
+
+  const blockedOnly = await fetchGhlBlockedSlots({
+    token: 'pit-test',
+    locationId: ghl.locationId,
+    calendarId: ghl.eventsCalendarId,
+    startTime: 1,
+    endTime: 2,
+    fetchImpl,
+  });
+  assert.equal(blockedOnly[0].source, 'blocked-slot');
 });

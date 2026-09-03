@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { ghl } from '../src/config/ghl.js';
 import {
   buildPublicEventsFeed,
-  fetchGhlCalendarEvents,
+  fetchGhlPublicCalendarRecords,
   publicEventsLookEqual,
 } from './lib/ghl-events-sync.mjs';
 
@@ -17,7 +17,7 @@ const now = Date.now();
 const startTime = now - 7 * 24 * 60 * 60 * 1000;
 const endTime = now + 365 * 24 * 60 * 60 * 1000;
 
-const records = await fetchGhlCalendarEvents({
+const records = await fetchGhlPublicCalendarRecords({
   token,
   locationId,
   calendarId,

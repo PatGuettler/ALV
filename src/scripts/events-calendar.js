@@ -93,20 +93,31 @@ export function normalizePublicEvent(value) {
   };
 }
 
+const PUBLISHABLE_STATUSES = new Set(['confirmed', 'published', 'scheduled', 'blocked']);
+
+export function isBlockedCalendarRecord(record) {
+  if (!record || typeof record !== 'object') return false;
+  const source = String(record.source || record.eventType || record.type || '').toLowerCase();
+  const status = String(record.appointmentStatus || record.status || '').toLowerCase();
+  return source.includes('block') || status === 'blocked';
+}
+
 export function publicEventFromCalendarRecord(record, { eventsCalendarId = '' } = {}) {
   if (!record || typeof record !== 'object' || !eventsCalendarId) return null;
   if (String(record.calendarId || '').trim() !== eventsCalendarId) return null;
   const status = String(record.appointmentStatus || record.status || '').toLowerCase();
-  if (status && status !== 'confirmed' && status !== 'published' && status !== 'scheduled') {
-    return null;
-  }
+  const blocked = isBlockedCalendarRecord(record);
+  if (status && !PUBLISHABLE_STATUSES.has(status)) return null;
+  const title =
+    String(record.title || '').trim() ||
+    (blocked ? String(record.notes || record.description || '').trim() || 'Alabama Veteran event' : '');
   return normalizePublicEvent({
     id: record.id,
-    title: record.title,
+    title,
     startAt: record.startTime || record.startAt,
     endAt: record.endTime || record.endAt,
     venue: record.address || record.location || record.venue,
-    summary: record.notes || record.summary,
+    summary: record.notes || record.summary || record.description,
     url: record.publicUrl || record.url,
     category: record.category || 'event',
     status: 'published',

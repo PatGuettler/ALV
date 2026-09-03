@@ -53,6 +53,29 @@ test('maps only AV Events Calendar records and ignores other calendars', () => {
   assert.equal(publicEventFromCalendarRecord(record, { eventsCalendarId: 'other-calendar' }), null);
 });
 
+test('maps AV Events Calendar blocked-off time onto the public feed', () => {
+  const blocked = {
+    id: 'block-1',
+    calendarId: ghl.eventsCalendarId,
+    source: 'blocked-slot',
+    title: '',
+    startTime: '2026-09-03T21:30:00Z',
+    endTime: '2026-09-03T22:00:00Z',
+    notes: 'Board breakfast at 4:30',
+  };
+  assert.equal(
+    publicEventFromCalendarRecord(blocked, { eventsCalendarId: ghl.eventsCalendarId })?.title,
+    'Board breakfast at 4:30',
+  );
+  assert.equal(
+    publicEventFromCalendarRecord(
+      { ...blocked, notes: '', description: '' },
+      { eventsCalendarId: ghl.eventsCalendarId },
+    )?.title,
+    'Alabama Veteran event',
+  );
+});
+
 test('groups events onto America/Chicago month days', () => {
   const october = eventsForMonth([event()], 2026, 9);
   assert.equal(october.length, 1);
