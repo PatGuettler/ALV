@@ -5,6 +5,8 @@ export const ghl = {
   crisisFormId: 't9pQuFrpT0Yz2lYTwLVj',
   volunteerFormId: 'oA6BYtFTZ47lbNChjt2h',
   topgolfBookingPath: '/widget/bookings/top-golf-av-active',
+  /** Alabama Veteran GHL sub-account. Not a secret; required to query calendar events. */
+  locationId: 'jphzkfKyYJW7cGNPHeP5',
   /** AV Events Calendar (GHL). Public site shows a display-only month view, not the booking widget. */
   eventsCalendarId: 'zfYlU1tekAs9O3E2xGT8',
   /** Dedicated GHL fundraiser calendar IDs. Empty until ALV pastes the scoped calendar IDs. */

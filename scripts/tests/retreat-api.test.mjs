@@ -61,23 +61,6 @@ function validApplication(overrides = {}) {
       interests: ['resume', 'training'],
       notes: 'Interested in a certification.',
     },
-    wellbeing: {
-      phqHopeless: 1,
-      phqInterest: '2',
-      anxietyFrequency: '3',
-      nightmares: 'occasionally',
-      mentalHealthOverall: '3',
-      diagnoses: ['ptsd'],
-      inCare: 'yes',
-      suicideHistory: 'no',
-      crisisStatus: 'stable',
-      medicalConditions: 'test',
-      medications: 'none',
-      allergies: 'none',
-      mobility: 'none',
-      dietary: 'none',
-      serviceDog: 'none',
-    },
     finalDetails: {
       emergencyContact: {
         name: 'Casey Guettler',
@@ -195,6 +178,10 @@ test('parseApplication rejects missing consent, mismatched signatures, and sensi
     parseApplication(validApplication({ health: { phq2: 5 } })).error,
     'sensitive_fields_not_accepted',
   );
+  assert.equal(
+    parseApplication(validApplication({ wellbeing: { crisisStatus: 'stable' } })).error,
+    'sensitive_fields_not_accepted',
+  );
   const badSignature = validApplication();
   badSignature.finalDetails.signature = 'Someone Else';
   assert.equal(parseApplication(badSignature).error, 'invalid_final_details');
@@ -283,9 +270,7 @@ test('staff summary and detail records hide DynamoDB keys', () => {
   assert.equal('applicant' in summary, false);
   const detail = publicStaffRecord(item);
   assert.equal(detail.applicant.address.city, 'Birmingham');
-  assert.equal(detail.wellbeing.medicalConditions, 'test');
-  assert.equal(detail.wellbeing.crisisStatus, 'stable');
-  assert.equal(detail.wellbeing.phqHopeless, '1');
+  assert.equal('wellbeing' in detail, false);
   assert.equal('pk' in detail, false);
   assert.equal('sk' in detail, false);
 });

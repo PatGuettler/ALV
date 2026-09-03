@@ -6,4 +6,6 @@ artifacts/
 .DS_Store
 *.log
 *.7z
+.env
+.env.*
 WarriorRetreat_ApplicationSystem.7z

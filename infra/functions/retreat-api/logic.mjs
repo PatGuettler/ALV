@@ -124,11 +124,6 @@ export function cleanText(value, max) {
   return value.trim().slice(0, max);
 }
 
-function cleanScale(value) {
-  if (typeof value === 'number' && Number.isInteger(value)) value = String(value);
-  return cleanText(value, 2);
-}
-
 function cleanEnum(value, allowed) {
   const result = cleanText(value, 80);
   return allowed.has(result) ? result : null;
@@ -204,7 +199,7 @@ export function parseApplication(payload) {
       'This application form is out of date. Refresh the page and try again.',
     );
   }
-  if (payload.health || payload.medical || payload.crisis) {
+  if (payload.health || payload.medical || payload.crisis || payload.wellbeing) {
     return fail(
       'sensitive_fields_not_accepted',
       '',
@@ -399,7 +394,6 @@ export function parseApplication(payload) {
       rank: cleanText(payload.service?.rank, 60),
       agencyLocation: cleanText(payload.service?.agencyLocation, 120),
       criticalIncident,
-      departmentSupport: cleanText(payload.service?.departmentSupport, 40),
       verificationStatus: 'staff-follow-up',
     };
   }
@@ -574,33 +568,6 @@ export function parseApplication(payload) {
         interests,
         notes: cleanText(payload.workforce?.notes, 1000),
       },
-      wellbeing: {
-        phqHopeless: cleanScale(payload.wellbeing?.phqHopeless),
-        phqInterest: cleanScale(payload.wellbeing?.phqInterest),
-        anxietyFrequency: cleanScale(payload.wellbeing?.anxietyFrequency),
-        nightmares: cleanText(payload.wellbeing?.nightmares, 40),
-        mentalHealthOverall: cleanScale(payload.wellbeing?.mentalHealthOverall),
-        diagnoses: Array.isArray(payload.wellbeing?.diagnoses)
-          ? payload.wellbeing.diagnoses.map((item) => cleanText(item, 40)).slice(0, 12)
-          : [],
-        inCare: cleanText(payload.wellbeing?.inCare, 40),
-        suicideHistory: cleanText(payload.wellbeing?.suicideHistory, 40),
-        crisisStatus: cleanText(payload.wellbeing?.crisisStatus, 40),
-        medicalConditions: cleanText(payload.wellbeing?.medicalConditions, 1500),
-        medications: cleanText(payload.wellbeing?.medications, 1500),
-        allergies: cleanText(payload.wellbeing?.allergies, 1000),
-        mobility: cleanText(payload.wellbeing?.mobility, 200),
-        dietary: cleanText(payload.wellbeing?.dietary, 200),
-        serviceDog: cleanText(payload.wellbeing?.serviceDog, 40),
-        dog: payload.wellbeing?.dog
-          ? {
-              name: cleanText(payload.wellbeing.dog.name, 60),
-              breed: cleanText(payload.wellbeing.dog.breed, 80),
-              certification: cleanText(payload.wellbeing.dog.certification, 80),
-              tasks: cleanText(payload.wellbeing.dog.tasks, 200),
-            }
-          : undefined,
-      },
       finalDetails: {
         emergencyContact,
         previousRetreats,
@@ -687,7 +654,6 @@ export function publicStaffRecord(item) {
     applicant: item.applicant,
     service: item.service,
     workforce: item.workforce,
-    wellbeing: item.wellbeing,
     finalDetails: item.finalDetails,
     consent: item.consent,
     note: item.note || '',

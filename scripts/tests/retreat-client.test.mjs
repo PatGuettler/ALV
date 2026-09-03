@@ -42,20 +42,6 @@ function applicationFormData() {
     militaryBranch: 'army',
     militaryStatus: 'veteran',
     employmentStatus: 'full-time',
-    phqHopeless: '1',
-    phqInterest: '2',
-    anxietyFrequency: '3',
-    nightmares: 'occasionally',
-    mentalHealthOverall: '3',
-    inCare: 'yes',
-    suicideHistory: 'no',
-    crisisStatus: 'stable',
-    medicalConditions: 'test',
-    medications: 'none',
-    allergies: 'none',
-    mobility: 'none',
-    dietary: 'none',
-    serviceDog: 'none',
     emergencyName: 'Casey Guettler',
     emergencyRelationship: 'Spouse',
     emergencyPhone: '(205) 555-0101',
@@ -64,8 +50,6 @@ function applicationFormData() {
     signatureDate: '2026-09-01',
   };
   for (const [name, value] of Object.entries(fields)) data.set(name, value);
-  data.append('diagnoses', 'ptsd');
-  data.append('diagnoses', 'anxiety');
   for (const name of [
     'accuracyAgreement',
     'contactConsent',
@@ -156,12 +140,10 @@ test('review helpers produce safe display sections and receipt references', () =
   const sections = applicationReviewSections(payload);
   assert.deepEqual(
     sections.map((section) => section.title),
-    ['Retreat', 'Applicant', 'Service', 'Workforce', 'Health and wellbeing', 'Final details'],
+    ['Retreat', 'Applicant', 'Service', 'Workforce', 'Final details'],
   );
   assert.equal(applicationReference('abc-123'), 'ABC-123');
-  assert.equal(payload.wellbeing.medicalConditions, 'test');
-  assert.equal(payload.wellbeing.crisisStatus, 'stable');
-  assert.deepEqual(payload.wellbeing.diagnoses, ['ptsd', 'anxiety']);
+  assert.equal('wellbeing' in payload, false);
 });
 
 test('staffRedirectUri keeps the GitHub Pages repo path', () => {
@@ -200,7 +182,6 @@ test('staffDetailSections exposes approved applicant fields without internal key
     submittedAt: '2026-09-01T12:00:00.000Z',
     ...payload,
   });
-  const health = sections.find((section) => section.title === 'Health and wellbeing');
   const application = sections.find((section) => section.title === 'Application');
   assert.equal(
     sections.some((section) => section.title === 'Service history'),
@@ -210,9 +191,10 @@ test('staffDetailSections exposes approved applicant fields without internal key
     application.rows.find(([label]) => label === 'Reference number')[1],
     '6191D7D7-3D64-4537-91DB-42F676652150',
   );
-  assert.equal(health.rows.find(([label]) => label === 'Medical conditions')[1], 'Test');
-  assert.equal(health.rows.find(([label]) => label === 'Crisis status')[1], 'Stable');
-  assert.match(health.rows.find(([label]) => label === 'PHQ hopeless')[1], /Several days/);
+  assert.equal(
+    sections.some((section) => section.title === 'Health and wellbeing'),
+    true,
+  );
   assert.equal(JSON.stringify(sections).includes('APP#'), false);
 });
 

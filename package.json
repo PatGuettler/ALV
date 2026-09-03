@@ -14,7 +14,8 @@
     "test": "npm run test:site && npm run test:rollup",
     "test:browser": "npm run build && node scripts/browser-smoke.mjs",
     "test:rollup": "node --test \"scripts/tests/**/*.test.mjs\"",
-    "test:site": "node scripts/validate-site.mjs"
+    "test:site": "node scripts/validate-site.mjs",
+    "sync:events": "node scripts/sync-events-calendar.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",

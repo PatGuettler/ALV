@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Refresh events calendar from GHL
+        if: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN != '' }}
+        env:
+          GHL_PRIVATE_INTEGRATION_TOKEN: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN }}
+        run: node scripts/sync-events-calendar.mjs
+
       - name: Validate source
         run: |
           npm run format:check

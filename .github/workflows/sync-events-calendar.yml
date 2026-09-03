@@ -1,0 +1,49 @@
+name: Sync public events calendar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '12,42 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-events-calendar
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Refresh events feed from GHL
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN != '' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.22.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Pull AV Events Calendar
+        env:
+          GHL_PRIVATE_INTEGRATION_TOKEN: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN }}
+        run: node scripts/sync-events-calendar.mjs
+
+      - name: Publish feed if events changed
+        run: |
+          git add public/data/events-calendar.json
+          if git diff --cached --quiet; then
+            echo 'No public event changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Refresh public events calendar feed from GHL.'
+          git push

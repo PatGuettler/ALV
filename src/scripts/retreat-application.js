@@ -323,7 +323,6 @@ export function applicationPayloadFromFormData(
             years: formatYears(text(data, 'responderYears')),
             rank: text(data, 'responderRank'),
             criticalIncident: text(data, 'criticalIncident'),
-            departmentSupport: text(data, 'departmentSupport'),
             verificationStatus: 'staff-follow-up',
           },
     workforce: {
@@ -335,32 +334,6 @@ export function applicationPayloadFromFormData(
       challenge: text(data, 'employmentChallenge'),
       interests: values(data, 'workforceInterests'),
       notes: text(data, 'workforceNotes'),
-    },
-    wellbeing: {
-      phqHopeless: text(data, 'phqHopeless'),
-      phqInterest: text(data, 'phqInterest'),
-      anxietyFrequency: text(data, 'anxietyFrequency'),
-      nightmares: text(data, 'nightmares'),
-      mentalHealthOverall: text(data, 'mentalHealthOverall'),
-      diagnoses: values(data, 'diagnoses'),
-      inCare: text(data, 'inCare'),
-      suicideHistory: text(data, 'suicideHistory'),
-      crisisStatus: text(data, 'crisisStatus'),
-      medicalConditions: text(data, 'medicalConditions'),
-      medications: text(data, 'medications'),
-      allergies: text(data, 'allergies'),
-      mobility: text(data, 'mobility'),
-      dietary: text(data, 'dietary'),
-      serviceDog: text(data, 'serviceDog'),
-      dog:
-        text(data, 'serviceDog') === 'bringing'
-          ? {
-              name: text(data, 'dogName'),
-              breed: text(data, 'dogBreed'),
-              certification: text(data, 'dogCertification'),
-              tasks: text(data, 'dogTasks'),
-            }
-          : null,
     },
     finalDetails: {
       emergencyContact: {
@@ -471,21 +444,6 @@ export function applicationReviewSections(payload) {
         ['Satisfaction', humanize(payload.workforce?.satisfaction)],
         ['Assistance interests', humanize(payload.workforce?.interests)],
         ['Goal notes', payload.workforce?.notes],
-      ],
-    },
-    {
-      title: 'Health and wellbeing',
-      rows: [
-        ['PHQ hopeless', payload.wellbeing?.phqHopeless],
-        ['PHQ interest', payload.wellbeing?.phqInterest],
-        ['Anxiety', payload.wellbeing?.anxietyFrequency],
-        ['Nightmares / flashbacks', humanize(payload.wellbeing?.nightmares)],
-        ['Overall mental health', payload.wellbeing?.mentalHealthOverall],
-        ['Diagnoses', humanize(payload.wellbeing?.diagnoses)],
-        ['In care', humanize(payload.wellbeing?.inCare)],
-        ['Crisis status', humanize(payload.wellbeing?.crisisStatus)],
-        ['Dietary', payload.wellbeing?.dietary],
-        ['Service dog', humanize(payload.wellbeing?.serviceDog)],
       ],
     },
     {

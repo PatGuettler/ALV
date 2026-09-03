@@ -69,10 +69,15 @@ test('builds a Sunday-start month grid with event markers', () => {
   assert.equal(today?.isToday, true);
 });
 
-test('the shipped events feed stays empty until public events are published', async () => {
+test('the shipped events feed only contains normalized public records', async () => {
   const feed = JSON.parse(
     await readFile(new URL('../../public/data/events-calendar.json', import.meta.url), 'utf8'),
   );
   assert.equal(feed.version, 1);
-  assert.deepEqual(feed.events, []);
+  assert.equal(Array.isArray(feed.events), true);
+  for (const record of feed.events) {
+    const event = normalizePublicEvent(record);
+    assert.equal(event?.id, record.id);
+    assert.equal(String(JSON.stringify(event)).includes('/widget/booking'), false);
+  }
 });
