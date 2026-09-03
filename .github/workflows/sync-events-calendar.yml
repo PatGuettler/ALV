@@ -17,7 +17,6 @@ jobs:
     name: Refresh events feed from GHL
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN != '' }}
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -34,7 +33,12 @@ jobs:
       - name: Pull AV Events Calendar
         env:
           GHL_PRIVATE_INTEGRATION_TOKEN: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN }}
-        run: node scripts/sync-events-calendar.mjs
+        run: |
+          if [ -z "$GHL_PRIVATE_INTEGRATION_TOKEN" ]; then
+            echo 'Skipping GHL events sync; GHL_PRIVATE_INTEGRATION_TOKEN is not set.'
+            exit 0
+          fi
+          node scripts/sync-events-calendar.mjs
 
       - name: Publish feed if events changed
         run: |

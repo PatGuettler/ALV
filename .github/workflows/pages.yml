@@ -33,10 +33,14 @@ jobs:
         run: npm ci
 
       - name: Refresh events calendar from GHL
-        if: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN != '' }}
         env:
           GHL_PRIVATE_INTEGRATION_TOKEN: ${{ secrets.GHL_PRIVATE_INTEGRATION_TOKEN }}
-        run: node scripts/sync-events-calendar.mjs
+        run: |
+          if [ -z "$GHL_PRIVATE_INTEGRATION_TOKEN" ]; then
+            echo 'Skipping GHL events sync; GHL_PRIVATE_INTEGRATION_TOKEN is not set.'
+            exit 0
+          fi
+          node scripts/sync-events-calendar.mjs
 
       - name: Validate source
         run: |
