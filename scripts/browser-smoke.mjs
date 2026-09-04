@@ -549,6 +549,7 @@ async function assertRetreatSubmissionTimeout(page) {
 
 async function assertDisplayEventsCalendar(page, label) {
   await page.locator('[data-events-calendar]').waitFor({ state: 'visible' });
+  await page.locator('[data-cal-grid] .evp-day').first().waitFor({ state: 'visible' });
   const bookingEmbeds = await page.locator('iframe[src*="widget/booking"]').count();
   const selectButtons = await page.getByRole('button', { name: /^select$/i }).count();
   const days = await page.locator('[data-cal-grid] .evp-day').count();

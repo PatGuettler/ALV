@@ -365,7 +365,6 @@ async function loadEventsCalendar(root) {
     selectedKey: '',
   };
   const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
-  await refreshPublicEvents(state, feedUrls);
 
   root.querySelector('[data-cal-prev]')?.addEventListener('click', () => {
     state.month -= 1;
@@ -386,6 +385,8 @@ async function loadEventsCalendar(root) {
     paintCalendar(root, state);
   });
   paintCalendar(root, state);
+  const changed = await refreshPublicEvents(state, feedUrls);
+  if (changed) paintCalendar(root, state);
   window.setInterval(async () => {
     const changed = await refreshPublicEvents(state, feedUrls);
     if (changed) paintCalendar(root, state);
