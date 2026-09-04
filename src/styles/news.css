@@ -44,7 +44,7 @@
   font-weight: 700;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--red-on-dark);
+  color: var(--red);
   margin-bottom: 18px;
 }
 #page-news .nc-inner h1 {
@@ -57,7 +57,7 @@
   margin-bottom: 22px;
 }
 #page-news .nc-inner h1 .red {
-  color: var(--red-on-dark);
+  color: var(--red);
 }
 #page-news .nc-inner p {
   font-size: 16px;

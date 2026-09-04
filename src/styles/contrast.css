@@ -5,43 +5,13 @@
   --mg: #5c5854;
 }
 
-.hero-title .red,
 .hs-num,
 .nav-nine,
-.fund-section .eyebrow,
-.fund-eyebrow,
-.wr-hero .eyebrow,
-.wr-hero-content h1 .red,
-.ava-app-left .eyebrow,
-.ava-app-left h2 .red,
-.wr-cta h2 .red,
-.circ-hero h1 .red,
-.ab-hero .eyebrow,
-.ab-hero h1 .red,
-.ab-board .eyebrow,
-.ab-board-header h2 .red,
-.ab-board-header h2 span,
-.prog-card.dark .pc-eyebrow,
-.prog-full.dark .pc-eyebrow,
 footer .foot-col-head,
-#page-circle .hero h1 .red,
 #page-circle .bstep-num,
 #page-about .ab-member-role,
-#page-news .nc-eyebrow,
-#page-news .nc-inner h1 .red,
 #page-topgolf .tg-day,
-#page-topgolf .tg-step-num,
-.tgp-hero h1 .red,
-.tgp-hero .eyebrow,
-.tgp-body .eyebrow,
-.ava-hero h1 .red,
-.evp-hero h1 .red,
-.evp-hero .eyebrow,
-.evp-fund-header h2 .red,
-.res-hero .eyebrow,
-.res-hero-inner h1 .red,
-#page-resources .eyebrow,
-.major-gifts-note a {
+#page-topgolf .tg-step-num {
   color: var(--red-on-dark);
 }
 
@@ -116,12 +86,12 @@ footer .foot-col-head,
   border-color: rgba(255, 255, 255, 0.55);
 }
 
-.badge-sec .sec-label {
-  color: #ffb8ba;
+#page-circle .badge-sec .sec-label {
+  color: var(--red);
 }
 
-.badge-sec .sec-desc {
-  color: var(--muted-on-dark);
+#page-circle .badge-sec .sec-desc {
+  color: var(--white);
 }
 
 .ava-hero .btn-ow-redline {

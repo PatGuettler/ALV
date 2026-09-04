@@ -1,29 +1,5 @@
 ---
-import { ghlWidgets } from '../../config/ghl';
 import EventsCalendar from './EventsCalendar.astro';
-import NewsletterSignup from '../site/NewsletterSignup.astro';
 ---
 
 <EventsCalendar />
-
-<section class="evp-subscribe" id="subscribe">
-  <div class="container">
-    <div class="evp-subscribe-inner">
-      <div class="eyebrow ctr" style="margin-bottom: 14px">Never Miss an Event</div>
-      <h2>Stay <span class="red">connected</span></h2>
-      <p>
-        Click to subscribe for event invites and the quarterly newsletter. The GoHighLevel form
-        opens on this page.
-      </p>
-      <p class="events-status-actions">
-        <a class="btn-r" href={ghlWidgets.topgolfBooking} target="_blank" rel="noopener noreferrer">
-          Book Topgolf
-        </a>
-      </p>
-      <NewsletterSignup
-        heading="Event invites and newsletters"
-        lede="Stay on this page. The signup form opens in a window over the calendar."
-      />
-    </div>
-  </div>
-</section>
