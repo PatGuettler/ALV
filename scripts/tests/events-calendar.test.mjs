@@ -3,8 +3,10 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 
 import {
+  EVENTS_CALENDAR_LIVE_FEED_URL,
   buildMonthCells,
   eventsForMonth,
+  eventsFromFeedPayload,
   eventsOnChicagoDate,
   normalizePublicEvent,
   publicEventFromCalendarRecord,
@@ -111,6 +113,16 @@ test('builds a Sunday-start month grid with event markers', () => {
   assert.equal(fifth?.hasEvent, true);
   const today = cells.find((cell) => cell.day === 2 && cell.inMonth);
   assert.equal(today?.isToday, true);
+});
+
+test('reads the live GitHub feed payload used for frequent refresh', () => {
+  assert.match(EVENTS_CALENDAR_LIVE_FEED_URL, /raw\.githubusercontent\.com\/PatGuettler\/ALV/);
+  const events = eventsFromFeedPayload({
+    version: 1,
+    events: [event({ title: 'Join us Saturday morning for Vet to Pet Day' })],
+  });
+  assert.equal(events?.[0]?.title, 'Join us Saturday morning for Vet to Pet Day');
+  assert.equal(eventsFromFeedPayload({ version: 2, events: [event()] }), null);
 });
 
 test('the shipped events feed only contains normalized public records', async () => {
