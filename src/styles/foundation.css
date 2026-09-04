@@ -362,7 +362,7 @@ h2.st.bl {
   margin-bottom: 32px;
 }
 .hero-title .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .hero-sub {
   font-size: 18px;
@@ -1189,7 +1189,7 @@ h2.st.bl {
   margin-bottom: 20px;
 }
 .wr-hero-content h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .wr-hero-content p {
   font-size: 18px;
@@ -1416,7 +1416,7 @@ h2.st.bl {
   margin-bottom: 20px;
 }
 .wr-cta h2 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .wr-cta p {
   font-size: 16px;
@@ -1473,7 +1473,7 @@ h2.st.bl {
   margin-bottom: 20px;
 }
 .circ-hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .circ-hero p {
   font-size: 18px;
@@ -1843,7 +1843,7 @@ h2.st.bl {
   letter-spacing: 1px;
 }
 .ab-hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .ab-hero p {
   font-size: 17px;
@@ -2162,7 +2162,7 @@ footer {
   margin-bottom: 0.75rem;
 }
 #page-circle .hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 #page-circle .hero-sub {
   font-size: clamp(1rem, 1.8vw, 1.2rem);
@@ -3206,7 +3206,7 @@ footer {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--red-on-dark);
   margin-bottom: 0.5rem;
   opacity: 0.9;
 }
@@ -3235,10 +3235,10 @@ footer {
   align-items: center;
 }
 .ava-app-left .eyebrow {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .ava-app-left h2 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .ava-app-left h2 {
   font-family: 'League Gothic', sans-serif;

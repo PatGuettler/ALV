@@ -7,11 +7,41 @@
 
 .hs-num,
 .nav-nine,
+.fund-section .eyebrow,
+.fund-eyebrow,
+.prog-card.dark .pc-eyebrow,
+.prog-full.dark .pc-eyebrow,
 footer .foot-col-head,
+#page-home .hero-title .red,
+#page-warrior .wr-hero .eyebrow,
+#page-warrior .wr-hero-content h1 .red,
+#page-warrior .wr-cta h2 .red,
+#page-circle .hero h1 .red,
+#page-circle .circle-trust-hook,
 #page-circle .bstep-num,
-#page-about .ab-member-role,
+#page-circle .badge-sec .sec-label,
+#page-about .ab-hero .eyebrow,
+#page-about .ab-hero h1 .red,
+#page-about .ab-board .eyebrow,
+#page-about .ab-board-header h2 .red,
+#page-about .ab-member .ab-member-role,
+#page-news .nc-eyebrow,
+#page-news .nc-inner h1 .red,
 #page-topgolf .tg-day,
-#page-topgolf .tg-step-num {
+#page-topgolf .tg-step-num,
+#page-topgolf .tgp-hero h1 .red,
+#page-topgolf .tgp-hero .eyebrow,
+#page-topgolf .tgp-body .eyebrow,
+#page-active .ava-hero h1 .red,
+#page-active .ava-badge-txt,
+#page-active .ava-app-left .eyebrow,
+#page-active .ava-app-left h2 .red,
+#page-events .evp-hero h1 .red,
+#page-events .evp-hero .eyebrow,
+#page-resources .res-hero .eyebrow,
+#page-resources .res-hero-inner h1 .red,
+#page-resources .eyebrow,
+.major-gifts-note a {
   color: var(--red-on-dark);
 }
 
@@ -87,7 +117,7 @@ footer .foot-col-head,
 }
 
 #page-circle .badge-sec .sec-label {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 
 #page-circle .badge-sec .sec-desc {

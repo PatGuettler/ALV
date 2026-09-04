@@ -39,7 +39,7 @@
   margin-bottom: 18px;
 }
 .tgp-hero h1 .red {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .tgp-hero-sub {
   font-size: 17px;
@@ -92,7 +92,7 @@
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--red-on-dark);
   margin-bottom: 10px;
 }
 #page-topgolf .tg-time {
@@ -140,7 +140,7 @@
 #page-topgolf .tg-step-num {
   font-family: 'League Gothic', sans-serif;
   font-size: 52px;
-  color: var(--red);
+  color: var(--red-on-dark);
   opacity: 0.4;
   line-height: 1;
   margin-bottom: 10px;
