@@ -92,6 +92,22 @@ variable "staff_invite_email" {
   default     = "patguettler@gmail.com"
 }
 
+variable "super_admin_emails" {
+  description = "Emails that can invite and revoke retreat staff. All other staff can only review applications."
+  type        = list(string)
+  default = [
+    "patguettler@gmail.com",
+    "c.montz@alabamaveteran.org",
+  ]
+
+  validation {
+    condition = length(var.super_admin_emails) >= 1 && alltrue([
+      for email in var.super_admin_emails : can(regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", email))
+    ])
+    error_message = "super_admin_emails must contain at least one valid email address."
+  }
+}
+
 variable "data_classification" {
   description = "Highest data classification permitted in this environment root."
   type        = string

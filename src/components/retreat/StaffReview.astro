@@ -26,7 +26,8 @@ const base = import.meta.env.BASE_URL;
     </div>
     <p id="retreat-staff-copy">
       Review submitted Warrior Retreat applications from the ALV production queue. Sign in with the
-      Cognito account issued to you by the ALV administrator; this is not the AWS access portal.
+      Cognito account issued to you; this is not the AWS access portal. Super admins can invite
+      reviewers from this page.
     </p>
   </header>
 
@@ -121,6 +122,52 @@ const base = import.meta.env.BASE_URL;
         <tbody id="retreat-staff-items"></tbody>
       </table>
     </div>
+
+    <section id="retreat-staff-users" class="staff-users" hidden>
+      <div class="staff-users-copy">
+        <h2>Staff access</h2>
+        <p>
+          Invite reviewers by email. They sign in with a temporary password, then must set a new
+          password and authenticator MFA before they can review applications. Only the two super
+          admins can add or remove staff, and those accounts cannot be changed from this page.
+        </p>
+      </div>
+      <form id="retreat-staff-invite-form" class="filters staff-users-invite">
+        <span class="filter-label">Invite reviewer</span>
+        <label class="retreat-filter">
+          Email
+          <input
+            id="retreat-staff-invite-email"
+            type="email"
+            autocomplete="off"
+            maxlength="254"
+            required
+            placeholder="name@example.com"
+          />
+        </label>
+        <button id="retreat-staff-invite" class="action-btn" type="submit">Send invite</button>
+      </form>
+      <p
+        id="retreat-staff-users-status"
+        class="retreat-form-status"
+        role="status"
+        aria-live="polite"
+      >
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff member</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="retreat-staff-user-items"></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <dialog id="retreat-staff-dialog" class="retreat-staff-dialog">

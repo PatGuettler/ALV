@@ -2,7 +2,7 @@ data "archive_file" "retreat_api" {
   type        = "zip"
   source_dir  = "${path.module}/../../../functions/retreat-api"
   output_path = "${path.module}/../../../functions/retreat-api/retreat-api.zip"
-  excludes    = ["*.zip"]
+  excludes    = ["*.zip", "node_modules", "package.json", "package-lock.json"]
 }
 
 data "aws_iam_policy_document" "retreat_assume" {
@@ -59,6 +59,21 @@ data "aws_iam_policy_document" "retreat_api" {
     ]
     resources = [aws_kms_key.retreat.arn]
   }
+
+  statement {
+    sid    = "ManageRetreatStaff"
+    effect = "Allow"
+    actions = [
+      "cognito-idp:AdminAddUserToGroup",
+      "cognito-idp:AdminCreateUser",
+      "cognito-idp:AdminDeleteUser",
+      "cognito-idp:AdminDisableUser",
+      "cognito-idp:AdminEnableUser",
+      "cognito-idp:AdminGetUser",
+      "cognito-idp:ListUsers",
+    ]
+    resources = [aws_cognito_user_pool.staff.arn]
+  }
 }
 
 resource "aws_iam_role" "retreat_api" {
@@ -91,15 +106,18 @@ resource "aws_lambda_function" "retreat_api" {
   role             = aws_iam_role.retreat_api.arn
   handler          = "index.handler"
   runtime          = "nodejs22.x"
-  timeout          = 10
+  timeout          = 15
   memory_size      = 256
   architectures    = ["x86_64"]
 
   environment {
     variables = {
-      TABLE_NAME       = aws_dynamodb_table.applications.name
-      AUDIT_TABLE_NAME = aws_dynamodb_table.application_audit.name
-      ALLOWED_ORIGINS  = join(",", var.retreat_allowed_origins)
+      TABLE_NAME          = aws_dynamodb_table.applications.name
+      AUDIT_TABLE_NAME    = aws_dynamodb_table.application_audit.name
+      ALLOWED_ORIGINS     = join(",", var.retreat_allowed_origins)
+      USER_POOL_ID        = aws_cognito_user_pool.staff.id
+      REVIEWER_GROUP_NAME = aws_cognito_user_group.reviewer.name
+      SUPER_ADMIN_EMAILS  = join(",", [for email in var.super_admin_emails : lower(email)])
     }
   }
 

@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import {
   EVENTS_CALENDAR_LIVE_FEED_URL,
   EVENTS_CALENDAR_REFRESH_MS,
+  EVENTS_CALENDAR_STAGING_FEED_URL,
   buildMonthCells,
   eventsForMonth,
   eventsFromFeedPayload,
@@ -119,6 +120,7 @@ test('builds a Sunday-start month grid with event markers', () => {
 test('reads the live GitHub feed payload used for frequent refresh', async () => {
   assert.equal(EVENTS_CALENDAR_REFRESH_MS, 30_000);
   assert.match(EVENTS_CALENDAR_LIVE_FEED_URL, /raw\.githubusercontent\.com\/PatGuettler\/ALV/);
+  assert.match(EVENTS_CALENDAR_STAGING_FEED_URL, /cloudfront\.net\/data\/events-calendar\.json/);
   const calendar = await readFile(
     new URL('../../src/components/events/EventsCalendar.astro', import.meta.url),
     'utf8',

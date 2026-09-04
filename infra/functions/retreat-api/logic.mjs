@@ -89,7 +89,7 @@ export function corsHeaders(origin, allowedOrigins) {
   return {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Headers': 'authorization,content-type',
-    'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PATCH,DELETE,OPTIONS',
     'Access-Control-Allow-Credentials': 'true',
   };
 }
@@ -613,6 +613,11 @@ export function parseApplication(payload) {
 export function matchRoute(method, path) {
   if (method === 'OPTIONS') return 'options';
   if (method === 'POST' && path.endsWith('/v1/applications')) return 'create';
+  if (method === 'GET' && path.endsWith('/v1/staff/me')) return 'me';
+  if (method === 'GET' && path.endsWith('/v1/staff/users')) return 'users';
+  if (method === 'POST' && path.endsWith('/v1/staff/users')) return 'invite';
+  if (method === 'PATCH' && /\/v1\/staff\/users\/[^/]+$/.test(path)) return 'user_patch';
+  if (method === 'DELETE' && /\/v1\/staff\/users\/[^/]+$/.test(path)) return 'user_delete';
   if (method === 'GET' && /\/v1\/staff\/applications\/[^/]+$/.test(path)) return 'get';
   if (method === 'GET' && path.endsWith('/v1/staff/applications')) return 'list';
   if (method === 'PATCH' && /\/v1\/staff\/applications\/[^/]+$/.test(path)) return 'patch';
@@ -623,6 +628,66 @@ export function applicationIdFrom(event) {
   const path = event.rawPath || event.path || '';
   const parts = path.split('/');
   return parts[parts.length - 1];
+}
+
+export function staffUserKeyFrom(event) {
+  return decodeURIComponent(applicationIdFrom(event));
+}
+
+export function parseSuperAdminEmails(raw) {
+  return new Set(
+    String(raw || '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+export function isSuperAdminEmail(email, superAdminEmails) {
+  return superAdminEmails.has(String(email || '').trim().toLowerCase());
+}
+
+export function parseInviteEmail(payload) {
+  const email = cleanText(payload?.email, 254).toLowerCase();
+  if (!email || !validEmail(email)) return { ok: false, error: 'invalid_email' };
+  return { ok: true, email };
+}
+
+export function parseStaffUserPatch(payload) {
+  if (typeof payload?.enabled !== 'boolean') return { ok: false, error: 'invalid_enabled' };
+  return { ok: true, enabled: payload.enabled };
+}
+
+export function assertCanManageStaffUser(email, superAdminEmails) {
+  if (isSuperAdminEmail(email, superAdminEmails)) {
+    return { ok: false, error: 'protected_user' };
+  }
+  return { ok: true };
+}
+
+export function canResendStaffInvite(status) {
+  return status === 'FORCE_CHANGE_PASSWORD';
+}
+
+export function cognitoAttr(user, name) {
+  const list = user?.Attributes || user?.UserAttributes || [];
+  const found = list.find((item) => item.Name === name);
+  return found ? String(found.Value || '') : '';
+}
+
+export function publicStaffUser(user, superAdminEmails) {
+  const email = cognitoAttr(user, 'email').toLowerCase();
+  const role = isSuperAdminEmail(email, superAdminEmails) ? 'super-admin' : 'reviewer';
+  const createdAt = user?.UserCreateDate ? new Date(user.UserCreateDate).toISOString() : '';
+  return {
+    username: user?.Username || '',
+    email,
+    role,
+    enabled: user?.Enabled !== false,
+    status: user?.UserStatus || '',
+    createdAt,
+    protected: role === 'super-admin',
+  };
 }
 
 export function parseListStatus(queryStatus) {

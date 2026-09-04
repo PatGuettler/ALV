@@ -10,6 +10,7 @@ modules/**/.terraform.lock.hcl
 !**/*.tfvars.example
 !**/*.tfbackend.example
 functions/**/*.zip
+functions/**/node_modules/
 crash.log
 override.tf
 override.tf.json

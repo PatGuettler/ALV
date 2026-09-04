@@ -35,7 +35,7 @@ resource "aws_apigatewayv2_api" "retreat" {
   cors_configuration {
     allow_credentials = true
     allow_headers     = ["authorization", "content-type"]
-    allow_methods     = ["GET", "POST", "PATCH", "OPTIONS"]
+    allow_methods     = ["GET", "POST", "PATCH", "DELETE", "OPTIONS"]
     allow_origins     = var.retreat_allowed_origins
     max_age           = 3600
   }
@@ -88,6 +88,46 @@ resource "aws_apigatewayv2_route" "staff_get" {
 resource "aws_apigatewayv2_route" "staff_patch" {
   api_id             = aws_apigatewayv2_api.retreat.id
   route_key          = "PATCH /v1/staff/applications/{id}"
+  target             = "integrations/${aws_apigatewayv2_integration.retreat.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.staff.id
+}
+
+resource "aws_apigatewayv2_route" "staff_me" {
+  api_id             = aws_apigatewayv2_api.retreat.id
+  route_key          = "GET /v1/staff/me"
+  target             = "integrations/${aws_apigatewayv2_integration.retreat.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.staff.id
+}
+
+resource "aws_apigatewayv2_route" "staff_users" {
+  api_id             = aws_apigatewayv2_api.retreat.id
+  route_key          = "GET /v1/staff/users"
+  target             = "integrations/${aws_apigatewayv2_integration.retreat.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.staff.id
+}
+
+resource "aws_apigatewayv2_route" "staff_invite" {
+  api_id             = aws_apigatewayv2_api.retreat.id
+  route_key          = "POST /v1/staff/users"
+  target             = "integrations/${aws_apigatewayv2_integration.retreat.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.staff.id
+}
+
+resource "aws_apigatewayv2_route" "staff_user_patch" {
+  api_id             = aws_apigatewayv2_api.retreat.id
+  route_key          = "PATCH /v1/staff/users/{username}"
+  target             = "integrations/${aws_apigatewayv2_integration.retreat.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.staff.id
+}
+
+resource "aws_apigatewayv2_route" "staff_user_delete" {
+  api_id             = aws_apigatewayv2_api.retreat.id
+  route_key          = "DELETE /v1/staff/users/{username}"
   target             = "integrations/${aws_apigatewayv2_integration.retreat.id}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.staff.id

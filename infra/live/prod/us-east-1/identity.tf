@@ -9,6 +9,12 @@ resource "aws_cognito_user_pool" "staff" {
 
   admin_create_user_config {
     allow_admin_create_user_only = true
+
+    invite_message_template {
+      email_subject = "Alabama Veteran staff portal invite"
+      email_message = "You were invited to the Warrior Retreat staff portal. Username: {username}. Temporary password: {####}. Sign in at https://patguettler.github.io/ALV/warrior-retreat-staff/ On first login you must set a new password and enroll authenticator MFA before you can continue."
+      sms_message   = "ALV staff invite. Username: {username} Temporary password: {####}"
+    }
   }
 
   software_token_mfa_configuration {
@@ -63,6 +69,18 @@ resource "aws_cognito_user_pool_client" "staff" {
   refresh_token_validity = 7
 }
 
+resource "aws_cognito_user_group" "super_admin" {
+  name         = "super-admin"
+  user_pool_id = aws_cognito_user_pool.staff.id
+  description  = "Invite and revoke retreat staff"
+}
+
+resource "aws_cognito_user_group" "reviewer" {
+  name         = "reviewer"
+  user_pool_id = aws_cognito_user_pool.staff.id
+  description  = "Review retreat applications"
+}
+
 resource "aws_cognito_user" "staff" {
   user_pool_id             = aws_cognito_user_pool.staff.id
   username                 = var.staff_invite_email
@@ -75,4 +93,35 @@ resource "aws_cognito_user" "staff" {
   lifecycle {
     ignore_changes = [attributes]
   }
+}
+
+resource "aws_cognito_user" "super_admin" {
+  for_each = toset([
+    for email in var.super_admin_emails : lower(email) if lower(email) != lower(var.staff_invite_email)
+  ])
+
+  user_pool_id             = aws_cognito_user_pool.staff.id
+  username                 = each.value
+  desired_delivery_mediums = ["EMAIL"]
+  attributes = {
+    email          = each.value
+    email_verified = "true"
+  }
+
+  lifecycle {
+    ignore_changes = [attributes]
+  }
+}
+
+resource "aws_cognito_user_in_group" "staff_super_admin" {
+  user_pool_id = aws_cognito_user_pool.staff.id
+  group_name   = aws_cognito_user_group.super_admin.name
+  username     = aws_cognito_user.staff.username
+}
+
+resource "aws_cognito_user_in_group" "super_admin" {
+  for_each     = aws_cognito_user.super_admin
+  user_pool_id = aws_cognito_user_pool.staff.id
+  group_name   = aws_cognito_user_group.super_admin.name
+  username     = each.value.username
 }

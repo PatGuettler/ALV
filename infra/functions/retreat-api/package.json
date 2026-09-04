@@ -1,0 +1,10 @@
+{
+  "name": "alv-retreat-api",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.899.0",
+    "@aws-sdk/client-dynamodb": "^3.899.0",
+    "@aws-sdk/util-dynamodb": "^3.899.0"
+  }
+}

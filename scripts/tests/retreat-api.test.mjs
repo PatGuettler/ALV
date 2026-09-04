@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   applicationIdFrom,
+  assertCanManageStaffUser,
   buildApplicationItem,
   cleanText,
   corsHeaders,
@@ -11,12 +12,19 @@ import {
   originOf,
   parseAllowedOrigins,
   parseApplication,
+  parseInviteEmail,
   parseListStatus,
   parseStaffPatch,
+  parseStaffUserPatch,
+  parseSuperAdminEmails,
   publicStaffRecord,
+  publicStaffUser,
   readBody,
   staffSummaryRecord,
+  staffUserKeyFrom,
   containsRestrictedIdentifier,
+  canResendStaffInvite,
+  isSuperAdminEmail,
 } from '../../infra/functions/retreat-api/logic.mjs';
 
 const allowed = ['http://127.0.0.1:4321', 'https://patguettler.github.io'];
@@ -237,6 +245,11 @@ test('matchRoute identifies public, staff, options, and unknown paths', () => {
   assert.equal(matchRoute('GET', '/v1/staff/applications'), 'list');
   assert.equal(matchRoute('GET', '/v1/staff/applications/abc-123'), 'get');
   assert.equal(matchRoute('PATCH', '/v1/staff/applications/abc-123'), 'patch');
+  assert.equal(matchRoute('GET', '/v1/staff/me'), 'me');
+  assert.equal(matchRoute('GET', '/v1/staff/users'), 'users');
+  assert.equal(matchRoute('POST', '/v1/staff/users'), 'invite');
+  assert.equal(matchRoute('PATCH', '/v1/staff/users/abc-123'), 'user_patch');
+  assert.equal(matchRoute('DELETE', '/v1/staff/users/abc-123'), 'user_delete');
   assert.equal(matchRoute('GET', '/v1/staff/applications/abc-123/notes'), 'not_found');
 });
 
@@ -282,4 +295,55 @@ test('staff summary and detail records hide DynamoDB keys', () => {
   assert.equal('wellbeing' in detail, false);
   assert.equal('pk' in detail, false);
   assert.equal('sk' in detail, false);
+});
+
+test('CORS allows staff user delete preflight', () => {
+  assert.match(
+    corsHeaders('http://127.0.0.1:4321', allowed)['Access-Control-Allow-Methods'],
+    /DELETE/,
+  );
+});
+
+test('super admin emails are parsed and protected from invite or revoke', () => {
+  const emails = parseSuperAdminEmails('patguettler@gmail.com, C.Montz@alabamaveteran.org');
+  assert.equal(isSuperAdminEmail('patguettler@gmail.com', emails), true);
+  assert.equal(isSuperAdminEmail('reviewer@example.com', emails), false);
+  assert.equal(
+    assertCanManageStaffUser('c.montz@alabamaveteran.org', emails).error,
+    'protected_user',
+  );
+  assert.equal(assertCanManageStaffUser('reviewer@example.com', emails).ok, true);
+});
+
+test('parseInviteEmail and parseStaffUserPatch validate staff management payloads', () => {
+  assert.deepEqual(parseInviteEmail({ email: ' Reviewer@Example.com ' }), {
+    ok: true,
+    email: 'reviewer@example.com',
+  });
+  assert.equal(parseInviteEmail({ email: 'not-an-email' }).error, 'invalid_email');
+  assert.deepEqual(parseStaffUserPatch({ enabled: false }), { ok: true, enabled: false });
+  assert.equal(parseStaffUserPatch({ enabled: 'no' }).error, 'invalid_enabled');
+});
+
+test('staff user records mark the two super admins as protected', () => {
+  const emails = parseSuperAdminEmails('patguettler@gmail.com,c.montz@alabamaveteran.org');
+  const record = publicStaffUser(
+    {
+      Username: 'abc-123',
+      Enabled: true,
+      UserStatus: 'CONFIRMED',
+      UserCreateDate: '2026-09-01T12:00:00.000Z',
+      Attributes: [{ Name: 'email', Value: 'patguettler@gmail.com' }],
+    },
+    emails,
+  );
+  assert.equal(record.role, 'super-admin');
+  assert.equal(record.protected, true);
+  assert.equal(staffUserKeyFrom({ rawPath: '/v1/staff/users/abc-123' }), 'abc-123');
+});
+
+test('staff invites can be resent only while a temporary password is still required', () => {
+  assert.equal(canResendStaffInvite('FORCE_CHANGE_PASSWORD'), true);
+  assert.equal(canResendStaffInvite('CONFIRMED'), false);
+  assert.equal(canResendStaffInvite('RESET_REQUIRED'), false);
 });

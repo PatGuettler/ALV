@@ -232,6 +232,12 @@ if (typeof document !== 'undefined') {
   const saveButton = document.getElementById('retreat-staff-save');
   const closeButton = document.getElementById('retreat-staff-close');
   const dialogStatus = document.getElementById('retreat-staff-dialog-status');
+  const usersPanel = document.getElementById('retreat-staff-users');
+  const usersStatus = document.getElementById('retreat-staff-users-status');
+  const userItems = document.getElementById('retreat-staff-user-items');
+  const inviteForm = document.getElementById('retreat-staff-invite-form');
+  const inviteEmail = document.getElementById('retreat-staff-invite-email');
+  const inviteButton = document.getElementById('retreat-staff-invite');
 
   if (
     !config?.apiUrl ||
@@ -256,7 +262,13 @@ if (typeof document !== 'undefined') {
     !(note instanceof HTMLTextAreaElement) ||
     !(saveButton instanceof HTMLButtonElement) ||
     !(closeButton instanceof HTMLButtonElement) ||
-    !(dialogStatus instanceof HTMLElement)
+    !(dialogStatus instanceof HTMLElement) ||
+    !(usersPanel instanceof HTMLElement) ||
+    !(usersStatus instanceof HTMLElement) ||
+    !(userItems instanceof HTMLElement) ||
+    !(inviteForm instanceof HTMLFormElement) ||
+    !(inviteEmail instanceof HTMLInputElement) ||
+    !(inviteButton instanceof HTMLButtonElement)
   ) {
     throw new Error('Retreat staff page is not connected.');
   }
@@ -362,16 +374,18 @@ if (typeof document !== 'undefined') {
         ...(options.headers || {}),
       },
     });
+    const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
       clearSession();
       throw new Error('signed_out');
     }
     if (!response.ok) {
-      const error = new Error(response.status === 409 ? 'version_conflict' : 'api_error');
+      const code = body.error || (response.status === 409 ? 'version_conflict' : 'api_error');
+      const error = new Error(code);
       error.status = response.status;
       throw error;
     }
-    return response.json();
+    return body;
   }
 
   function currentFilters() {
@@ -533,6 +547,188 @@ if (typeof document !== 'undefined') {
     }
   }
 
+  function staffAccessLabel(user) {
+    if (!user.enabled) return 'Revoked';
+    if (user.status === 'FORCE_CHANGE_PASSWORD' || user.status === 'RESET_REQUIRED') {
+      return 'Invite sent';
+    }
+    return 'Active';
+  }
+
+  function staffAccessBadgeClass(user) {
+    if (!user.enabled) return 'badge-denied';
+    if (user.status === 'FORCE_CHANGE_PASSWORD' || user.status === 'RESET_REQUIRED') {
+      return 'badge-pending';
+    }
+    return 'badge-approved';
+  }
+
+  function userActionMessage(code) {
+    return (
+      {
+        invalid_email: 'Enter a valid email address.',
+        user_exists: 'That email already has a staff account.',
+        protected_user: 'Super admin accounts cannot be changed here.',
+        forbidden: 'Only super admins can manage staff access.',
+        signed_out: 'Session expired. Sign in again.',
+      }[code] || 'Staff access could not be updated. Try again.'
+    );
+  }
+
+  function renderUsers(users) {
+    userItems.replaceChildren();
+    if (!users.length) {
+      const empty = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 4;
+      cell.textContent = 'No staff accounts yet.';
+      empty.append(cell);
+      userItems.append(empty);
+      return;
+    }
+    for (const user of users) {
+      const row = document.createElement('tr');
+      const member = document.createElement('td');
+      const email = document.createElement('strong');
+      email.textContent = user.email || user.username || 'Unknown user';
+      member.append(email);
+
+      const role = document.createElement('td');
+      const roleBadge = document.createElement('span');
+      roleBadge.className = `badge ${user.protected ? 'badge-waitlist' : 'badge-fr'}`;
+      roleBadge.textContent = user.protected ? 'Super admin' : 'Reviewer';
+      role.append(roleBadge);
+
+      const access = document.createElement('td');
+      const accessBadge = document.createElement('span');
+      accessBadge.className = `badge ${staffAccessBadgeClass(user)}`;
+      accessBadge.textContent = staffAccessLabel(user);
+      access.append(accessBadge);
+
+      const actions = document.createElement('td');
+      if (user.protected) {
+        const locked = document.createElement('span');
+        locked.className = 'table-sub';
+        locked.textContent = 'Protected';
+        actions.append(locked);
+      } else {
+        const group = document.createElement('div');
+        group.className = 'staff-user-actions';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'action-btn';
+        toggle.textContent = user.enabled ? 'Revoke' : 'Restore';
+        toggle.addEventListener('click', () => {
+          setUserEnabled(user, !user.enabled);
+        });
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'action-btn action-btn-danger';
+        remove.textContent = 'Delete';
+        remove.addEventListener('click', () => {
+          deleteUser(user);
+        });
+        group.append(toggle, remove);
+        actions.append(group);
+      }
+
+      row.append(member, role, access, actions);
+      userItems.append(row);
+    }
+  }
+
+  async function loadUsers() {
+    usersStatus.textContent = 'Loading staff accounts…';
+    const payload = await api('/v1/staff/users');
+    renderUsers(payload.items || []);
+    usersStatus.textContent = '';
+  }
+
+  async function loadMe() {
+    try {
+      return await api('/v1/staff/me');
+    } catch (error) {
+      if (error.status === 404) return { role: 'reviewer' };
+      throw error;
+    }
+  }
+
+  async function afterSignIn() {
+    showSignedIn();
+    const me = await loadMe();
+    usersPanel.hidden = me.role !== 'super-admin';
+    await loadList();
+    if (me.role === 'super-admin') {
+      try {
+        await loadUsers();
+      } catch (error) {
+        usersStatus.textContent = userActionMessage(error.message);
+      }
+    }
+  }
+
+  async function inviteUser(event) {
+    event.preventDefault();
+    inviteButton.disabled = true;
+    usersStatus.textContent = 'Sending invite…';
+    try {
+      const created = await api('/v1/staff/users', {
+        method: 'POST',
+        body: JSON.stringify({ email: inviteEmail.value.trim() }),
+      });
+      inviteForm.reset();
+      usersStatus.textContent = created.resent
+        ? 'Invite resent. They will set a password and enroll MFA on first sign-in.'
+        : 'Invite sent. They will set a password and enroll MFA on first sign-in.';
+      await loadUsers();
+    } catch (error) {
+      usersStatus.textContent = userActionMessage(error.message);
+      if (error.message === 'signed_out') showSignedOut('Session expired. Sign in again.');
+    } finally {
+      inviteButton.disabled = false;
+    }
+  }
+
+  async function setUserEnabled(user, enabled) {
+    if (
+      !enabled &&
+      !window.confirm(`Revoke access for ${user.email}? They will not be able to sign in.`)
+    ) {
+      return;
+    }
+    usersStatus.textContent = enabled ? 'Restoring access…' : 'Revoking access…';
+    try {
+      await api(`/v1/staff/users/${encodeURIComponent(user.username)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ enabled }),
+      });
+      usersStatus.textContent = enabled ? 'Access restored.' : 'Access revoked.';
+      await loadUsers();
+    } catch (error) {
+      usersStatus.textContent = userActionMessage(error.message);
+      if (error.message === 'signed_out') showSignedOut('Session expired. Sign in again.');
+    }
+  }
+
+  async function deleteUser(user) {
+    if (
+      !window.confirm(
+        `Delete ${user.email} from the staff portal? They will need a new invite to sign in again.`,
+      )
+    ) {
+      return;
+    }
+    usersStatus.textContent = 'Removing staff account…';
+    try {
+      await api(`/v1/staff/users/${encodeURIComponent(user.username)}`, { method: 'DELETE' });
+      usersStatus.textContent = 'Staff account removed.';
+      await loadUsers();
+    } catch (error) {
+      usersStatus.textContent = userActionMessage(error.message);
+      if (error.message === 'signed_out') showSignedOut('Session expired. Sign in again.');
+    }
+  }
+
   function showSignedIn() {
     signInButton.hidden = true;
     signOutButton.hidden = false;
@@ -543,6 +739,7 @@ if (typeof document !== 'undefined') {
     signInButton.hidden = false;
     signOutButton.hidden = true;
     list.hidden = true;
+    usersPanel.hidden = true;
     status.textContent = message;
   }
 
@@ -558,6 +755,7 @@ if (typeof document !== 'undefined') {
   search.addEventListener('input', renderItems);
   saveButton.addEventListener('click', saveDecision);
   closeButton.addEventListener('click', () => dialog.close());
+  inviteForm.addEventListener('submit', inviteUser);
 
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
@@ -567,14 +765,10 @@ if (typeof document !== 'undefined') {
     showSignedOut('Sign-in was cancelled or failed.');
   } else if (code) {
     exchangeCode(code)
-      .then(() => {
-        showSignedIn();
-        return loadList();
-      })
+      .then(() => afterSignIn())
       .catch(() => showSignedOut('Sign-in could not be completed. Try again.'));
   } else if (readTokens()?.access_token) {
-    showSignedIn();
-    loadList().catch(() => showSignedOut('Session expired. Sign in again.'));
+    afterSignIn().catch(() => showSignedOut('Session expired. Sign in again.'));
   } else {
     showSignedOut('');
   }

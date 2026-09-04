@@ -1414,6 +1414,56 @@ body:has(.retreat-status) {
   border-color: var(--brave-blue);
 }
 
+.staff-users {
+  margin-top: 36px;
+}
+
+.staff-users-copy h2 {
+  color: var(--navy-deep);
+  font-family: 'League Gothic', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.staff-users-copy p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0 0 18px;
+  max-width: 62ch;
+}
+
+.staff-users-invite {
+  align-items: end;
+}
+
+.staff-users-invite .action-btn {
+  background: var(--brave-blue);
+  border-color: var(--brave-blue);
+  color: #fff;
+}
+
+.staff-users-invite .action-btn:hover {
+  background: var(--navy-deep);
+  border-color: var(--navy-deep);
+  color: #fff;
+}
+
+.staff-user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-btn-danger:hover,
+.table-wrap .action-btn-danger:hover {
+  background: #fde8e8;
+  border-color: #9b1c1c;
+  color: #9b1c1c;
+}
+
 .retreat-form-status {
   color: var(--brave-blue);
 }

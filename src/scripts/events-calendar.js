@@ -1,6 +1,8 @@
 export const EVENTS_CALENDAR_FEED_VERSION = 1;
 export const EVENTS_CALENDAR_LIVE_FEED_URL =
   'https://raw.githubusercontent.com/PatGuettler/ALV/main/public/data/events-calendar.json';
+export const EVENTS_CALENDAR_STAGING_FEED_URL =
+  'https://d2liq44qankj57.cloudfront.net/data/events-calendar.json';
 export const EVENTS_CALENDAR_REFRESH_MS = 30_000;
 export const PUBLIC_EVENT_CATEGORIES = ['event', 'community', 'fundraiser', 'program'];
 export const PUBLIC_EVENT_FIELDS = [
