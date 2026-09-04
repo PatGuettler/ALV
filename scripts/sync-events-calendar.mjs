@@ -26,6 +26,12 @@ const records = await fetchGhlPublicCalendarRecords({
   endTime,
 });
 const feed = buildPublicEventsFeed(records, { calendarId, generatedAt: new Date(now) });
+console.log(
+  `Mapped ${feed.events.length} public events from ${records.length} GHL records on ${calendarId}.`,
+);
+for (const event of feed.events) {
+  console.log(`- ${event.startAt} ${event.title}`);
+}
 
 let previousEvents = [];
 try {

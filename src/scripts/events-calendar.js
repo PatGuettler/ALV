@@ -8,9 +8,13 @@ export const PUBLIC_EVENT_FIELDS = [
   'venue',
   'summary',
   'url',
+  'imageUrl',
   'category',
   'status',
 ];
+
+const EVENT_IMAGE_IN_TEXT =
+  /https:\/\/[^\s<>"']+\.(?:jpe?g|png|webp|gif)(?:\?[^\s<>"']*)?|https:\/\/(?:assets\.cdn\.)?filesafe\.space\/[^\s<>"']+/gi;
 
 function validDate(value) {
   const date = new Date(value);
@@ -26,6 +30,28 @@ function safePublicUrl(value) {
   } catch {
     return '';
   }
+}
+
+function safeEventImageUrl(value) {
+  const href = safePublicUrl(value);
+  if (!href) return '';
+  if (/\.(jpe?g|png|webp|gif)(\?|$)/i.test(href)) return href;
+  if (/(?:assets\.cdn\.)?filesafe\.space\//i.test(href)) return href;
+  return '';
+}
+
+export function extractEventImage(record) {
+  if (!record || typeof record !== 'object') return { imageUrl: '', summary: '' };
+  const explicit = safeEventImageUrl(
+    record.imageUrl || record.photoUrl || record.image || record.photo,
+  );
+  const notes = String(record.notes || record.summary || record.description || '');
+  const match = notes.match(EVENT_IMAGE_IN_TEXT)?.[0] || '';
+  const fromNotes = safeEventImageUrl(match);
+  return {
+    imageUrl: explicit || fromNotes,
+    summary: fromNotes ? notes.replace(fromNotes, '').replace(/\s+/g, ' ').trim() : notes.trim(),
+  };
 }
 
 function escapeHtml(value) {
@@ -86,14 +112,15 @@ export function normalizePublicEvent(value) {
       .slice(0, 160),
     summary: String(value.summary || '')
       .trim()
-      .slice(0, 240),
+      .slice(0, 400),
     url: safePublicUrl(value.url),
+    imageUrl: safeEventImageUrl(value.imageUrl),
     category,
     status: 'published',
   };
 }
 
-const PUBLISHABLE_STATUSES = new Set(['confirmed', 'published', 'scheduled', 'blocked']);
+const PUBLISHABLE_STATUSES = new Set(['confirmed', 'published', 'scheduled', 'blocked', 'new']);
 
 export function isBlockedCalendarRecord(record) {
   if (!record || typeof record !== 'object') return false;
@@ -108,19 +135,19 @@ export function publicEventFromCalendarRecord(record, { eventsCalendarId = '' } 
   const status = String(record.appointmentStatus || record.status || '').toLowerCase();
   const blocked = isBlockedCalendarRecord(record);
   if (status && !PUBLISHABLE_STATUSES.has(status)) return null;
+  const extracted = extractEventImage(record);
   const title =
     String(record.title || '').trim() ||
-    (blocked
-      ? String(record.notes || record.description || '').trim() || 'Alabama Veteran event'
-      : '');
+    (blocked ? extracted.summary || 'Alabama Veteran event' : '');
   return normalizePublicEvent({
     id: record.id,
     title,
     startAt: record.startTime || record.startAt,
     endAt: record.endTime || record.endAt,
     venue: record.address || record.location || record.venue,
-    summary: record.notes || record.summary || record.description,
+    summary: extracted.summary,
     url: record.publicUrl || record.url,
+    imageUrl: extracted.imageUrl,
     category: record.category || 'event',
     status: 'published',
   });
@@ -206,7 +233,11 @@ function renderDetail(root, events, heading) {
       const link = event.url
         ? `<a class="evp-detail-link btn-r" href="${escapeHtml(event.url)}" target="_blank" rel="noopener noreferrer">Event details</a>`
         : '';
+      const photo = event.imageUrl
+        ? `<div class="evp-detail-photo"><img src="${escapeHtml(event.imageUrl)}" alt="${escapeHtml(event.title)}" width="640" height="400" loading="lazy" /></div>`
+        : '';
       return `<article class="evp-detail-event">
+        ${photo}
         <div class="evp-detail-date">${escapeHtml(formatEventDate(event.startAt))}</div>
         <h3 class="evp-detail-title">${escapeHtml(event.title)}</h3>
         ${event.venue ? `<p class="evp-detail-loc">${escapeHtml(event.venue)}</p>` : ''}

@@ -36,6 +36,27 @@ test('normalizes published public events and drops booking-widget links', () => 
   assert.equal(normalizePublicEvent(event({ url: 'http://insecure.example/x' }))?.url, '');
 });
 
+test('keeps invitational titles and pulls a public photo URL out of GHL notes', () => {
+  const mapped = publicEventFromCalendarRecord(
+    {
+      id: 'ghl-pet',
+      calendarId: ghl.eventsCalendarId,
+      title: 'Join us Saturday morning for Vet to Pet Day',
+      startTime: '2026-09-12T14:00:00Z',
+      endTime: '2026-09-12T16:00:00Z',
+      address: 'Birmingham Animal Shelter',
+      notes:
+        'Meet adoptable pets and fellow veterans. https://cdn.example.com/pets.webp More dogs arrive at 10.',
+      appointmentStatus: 'confirmed',
+    },
+    { eventsCalendarId: ghl.eventsCalendarId },
+  );
+  assert.equal(mapped?.title, 'Join us Saturday morning for Vet to Pet Day');
+  assert.equal(mapped?.imageUrl, 'https://cdn.example.com/pets.webp');
+  assert.equal(mapped?.summary.includes('https://'), false);
+  assert.equal(mapped?.venue, 'Birmingham Animal Shelter');
+});
+
 test('maps only AV Events Calendar records and ignores other calendars', () => {
   const record = {
     id: 'ghl-1',
