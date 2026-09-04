@@ -1,0 +1,64 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+  pageId="privacy"
+  title="Privacy | Alabama Veteran"
+  description="How Alabama Veteran collects, stores, and shares personal information on this website."
+>
+  <div id="page-privacy" class="page active">
+    <section class="ab-hero">
+      <div class="container">
+        <div class="eyebrow ctr">Alabama Veteran</div>
+        <h1>How we handle <span class="red">personal information</span></h1>
+        <p>
+          This page describes the data this website collects. It is not a HIPAA certification and is
+          not legal advice.
+        </p>
+      </div>
+    </section>
+    <section class="ab-mission">
+      <div class="container" style="max-width: 720px">
+        <h2 class="st bl">Warrior Retreat applications</h2>
+        <p>
+          The production application at <code>/warrior-retreat-application/</code> stores name, contact
+          details, address, service history, employment answers, emergency contact, retreat goals, and
+          consent in Alabama Veteran’s AWS account (encrypted DynamoDB). Invited staff review applications
+          after signing in with Cognito. Staging and GitHub Pages do not accept applications.
+        </p>
+        <p>
+          This website does not collect diagnoses, medications, crisis details, or other health
+          information on the application. Do not enter Social Security numbers or payment card
+          numbers in any field. Health and accessibility planning happens through a private
+          follow-up after staff review.
+        </p>
+        <h2 class="st bl">Newsletter, volunteer, and 9 Line forms</h2>
+        <p>
+          Newsletter signup, volunteer interest, and the AV 9 Line form are hosted by GoHighLevel
+          (white-label <code>app.alabamaveteran.org</code>). Those submissions leave this website
+          and are not stored in the AWS application tables. Do not use those forms for emergencies.
+          Call or text <a href="tel:988">988</a> and press 1 for the Veterans Crisis Line.
+        </p>
+        <h2 class="st bl">Contact</h2>
+        <p>
+          The site contact control opens your email app to <a href="mailto:info@alabamaveteran.org"
+            >info@alabamaveteran.org</a
+          >. Alabama Veteran does not store that message on this website.
+        </p>
+        <h2 class="st bl">Fonts and analytics</h2>
+        <p>
+          Brand fonts are served from this website. The public site does not load Google Fonts.
+          Calendar listings may be read from a public JSON feed on GitHub; that feed does not
+          include application records.
+        </p>
+        <h2 class="st bl">Requests</h2>
+        <p>
+          To ask a question about an application or request a correction, email
+          <a href="mailto:info@alabamaveteran.org">info@alabamaveteran.org</a> with your reference number
+          if you have one.
+        </p>
+      </div>
+    </section>
+  </div>
+</SiteLayout>

@@ -16,6 +16,7 @@ import {
   publicStaffRecord,
   readBody,
   staffSummaryRecord,
+  containsRestrictedIdentifier,
 } from '../../infra/functions/retreat-api/logic.mjs';
 
 const allowed = ['http://127.0.0.1:4321', 'https://patguettler.github.io'];
@@ -211,6 +212,14 @@ test('parseApplication names the invalid phone, email, and ZIP fields', () => {
   const badEmail = validApplication();
   badEmail.applicant.email = 'pat@office';
   assert.equal(parseApplication(badEmail).field, 'email');
+});
+
+test('parseApplication rejects Social Security numbers in free text', () => {
+  const payload = validApplication();
+  payload.finalDetails.goals = 'Please call 123-45-6789';
+  assert.equal(parseApplication(payload).error, 'restricted_identifier');
+  assert.equal(parseApplication(payload).field, 'goals');
+  assert.equal(containsRestrictedIdentifier('Reconnect with a peer community.'), false);
 });
 
 test('parseApplication truncates approved optional notes', () => {

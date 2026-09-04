@@ -10,17 +10,18 @@ import { ghlWidgets } from '../../config/ghl';
     <div class="cm-eyebrow">Stay Connected</div>
     <h3 id="su-title">Subscribe</h3>
     <p class="cm-sub">
-      Name, phone, email, affiliation, and consent stay in GoHighLevel. Close this window to return
-      to the page.
+      Name, phone, email, affiliation, and consent are collected by GoHighLevel, a third-party
+      service, not by the Warrior Retreat AWS application. Close this window to return to the page.
     </p>
     <iframe
       id="subscribe-embed"
       class="su-embed"
       data-src={ghlWidgets.newsletter}
-      title="Alabama Veteran newsletter signup"></iframe>
+      title="Alabama Veteran newsletter signup"
+      referrerpolicy="no-referrer"></iframe>
     <p class="su-modal-note">
       If the form does not load,
-      <a href={ghlWidgets.newsletter} target="_blank" rel="noopener noreferrer"
+      <a href={ghlWidgets.newsletter} target="_blank" rel="noopener noreferrer no-referrer"
         >open it in a new tab</a
       >.
     </p>

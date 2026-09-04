@@ -1,0 +1,55 @@
+@font-face {
+  font-family: 'League Gothic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('../assets/fonts/league-gothic-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('../assets/fonts/libre-franklin-latin-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('../assets/fonts/libre-franklin-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url('../assets/fonts/libre-franklin-latin-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url('../assets/fonts/libre-franklin-latin-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 800;
+  font-display: optional;
+  src: url('../assets/fonts/libre-franklin-latin-800.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 900;
+  font-display: optional;
+  src: url('../assets/fonts/libre-franklin-latin-900.woff2') format('woff2');
+}

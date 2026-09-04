@@ -7,6 +7,7 @@ import ContactModal from '../components/site/ContactModal.astro';
 import NewsletterModal from '../components/site/NewsletterModal.astro';
 import FeaturedFundraiser from '../components/site/FeaturedFundraiser.astro';
 
+import '../styles/fonts.css';
 import '../styles/foundation.css';
 import '../styles/navigation.css';
 import '../styles/forms.css';
@@ -33,6 +34,7 @@ const canonicalRoutes: Record<string, string> = {
   topgolf: 'topgolf/',
   events: 'events/',
   resources: 'resources/',
+  privacy: 'privacy/',
 };
 const canonical = new URL(canonicalRoutes[pageId] ?? '', 'https://alabamaveteran.org/');
 const isProduction = import.meta.env.SITE_ENV === 'production';
@@ -101,12 +103,6 @@ const structuredData = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Libre+Franklin:wght@400;500;600;700;800;900&display=optional"
-      rel="stylesheet"
-    />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
     <title>{title}</title>
   </head>

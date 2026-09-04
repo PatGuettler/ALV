@@ -124,6 +124,15 @@ export function cleanText(value, max) {
   return value.trim().slice(0, max);
 }
 
+export function containsRestrictedIdentifier(value) {
+  const text = String(value || '');
+  if (!text) return false;
+  if (/\b\d{3}[-\s]\d{2}[-\s]\d{4}\b/.test(text)) return true;
+  if (/\b(?:ssn|social security number)\b/i.test(text) && /\d{3,}/.test(text)) return true;
+  const digits = text.replace(/\D/g, '');
+  return /\b(?:\d[ -]*){15,16}\b/.test(text) && (digits.length === 15 || digits.length === 16);
+}
+
 function cleanEnum(value, allowed) {
   const result = cleanText(value, 80);
   return allowed.has(result) ? result : null;
@@ -528,6 +537,24 @@ export function parseApplication(payload) {
       'contactConsent',
       'Refresh the page and accept the current application agreement.',
     );
+  }
+
+  const restrictedFields = [
+    [goals, 'goals', 'retreat goals'],
+    [cleanText(payload.finalDetails?.additionalNotes, 1500), 'additionalNotes', 'additional notes'],
+    [cleanText(payload.workforce?.notes, 1000), 'workforceNotes', 'workforce notes'],
+    [street, 'street', 'street address'],
+    [referredBy, 'referredBy', 'referral notes'],
+    [cleanText(payload.service?.combatTheaters, 120), 'combatTheaters', 'combat theaters'],
+  ];
+  for (const [value, field, label] of restrictedFields) {
+    if (containsRestrictedIdentifier(value)) {
+      return fail(
+        'restricted_identifier',
+        field,
+        `Do not enter Social Security numbers or payment card numbers in ${label}.`,
+      );
+    }
   }
 
   return {

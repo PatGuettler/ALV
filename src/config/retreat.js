@@ -4,6 +4,19 @@ export const retreatPublic = {
   clientId: '37tsmb3p4du202e1vmstblsrui',
 };
 
+function siteEnvironment() {
+  try {
+    const fromVite = import.meta.env?.SITE_ENV;
+    if (fromVite) return String(fromVite);
+  } catch {
+    // Node tests and scripts do not inject Vite env.
+  }
+  return typeof process !== 'undefined' && process.env.SITE_ENV ? process.env.SITE_ENV : '';
+}
+
 export const retreatLive = Boolean(
-  retreatPublic.apiUrl && retreatPublic.cognitoDomain && retreatPublic.clientId,
+  siteEnvironment() === 'production' &&
+  retreatPublic.apiUrl &&
+  retreatPublic.cognitoDomain &&
+  retreatPublic.clientId,
 );

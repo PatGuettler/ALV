@@ -98,30 +98,8 @@ export function staffDetailSections(record) {
   const address = applicant.address || {};
   const service = record.service || {};
   const workforce = record.workforce || {};
-  const wellbeing = record.wellbeing || {};
-  const dog = wellbeing.dog || {};
   const finalDetails = record.finalDetails || {};
   const emergency = finalDetails.emergencyContact || {};
-  const phqDays = {
-    0: '0 — Not at all',
-    1: '1 — Several days',
-    2: '2 — More than half the days',
-    3: '3 — Nearly every day',
-  };
-  const anxiety = {
-    0: '0 — Never',
-    1: '1 — Rarely',
-    2: '2 — Sometimes',
-    3: '3 — Often',
-    4: '4 — Always',
-  };
-  const overall = {
-    1: '1 — Very poor',
-    2: '2 — Poor',
-    3: '3 — Fair',
-    4: '4 — Good',
-    5: '5 — Excellent',
-  };
   return [
     {
       title: 'Application',
@@ -206,36 +184,6 @@ export function staffDetailSections(record) {
         ['Employment challenge', workforce.challenge],
         ['Assistance interests', workforce.interests],
         ['Notes', workforce.notes],
-      ],
-    },
-    {
-      title: 'Health and wellbeing',
-      rows: [
-        ['PHQ hopeless', phqDays[String(wellbeing.phqHopeless ?? '')] || wellbeing.phqHopeless],
-        ['PHQ interest', phqDays[String(wellbeing.phqInterest ?? '')] || wellbeing.phqInterest],
-        [
-          'Anxiety',
-          anxiety[String(wellbeing.anxietyFrequency ?? '')] || wellbeing.anxietyFrequency,
-        ],
-        ['Nightmares / flashbacks', wellbeing.nightmares],
-        [
-          'Overall mental health',
-          overall[String(wellbeing.mentalHealthOverall ?? '')] || wellbeing.mentalHealthOverall,
-        ],
-        ['Diagnoses', wellbeing.diagnoses],
-        ['In care', wellbeing.inCare],
-        ['Suicide history', wellbeing.suicideHistory],
-        ['Crisis status', wellbeing.crisisStatus],
-        ['Medical conditions', wellbeing.medicalConditions],
-        ['Medications', wellbeing.medications],
-        ['Allergies', wellbeing.allergies],
-        ['Mobility', wellbeing.mobility],
-        ['Dietary', wellbeing.dietary],
-        ['Service dog', wellbeing.serviceDog],
-        ['Dog name', dog.name],
-        ['Dog breed', dog.breed],
-        ['Dog certification', dog.certification],
-        ['Dog tasks', dog.tasks],
       ],
     },
     {
@@ -337,14 +285,22 @@ if (typeof document !== 'undefined') {
 
   function readTokens() {
     try {
-      return JSON.parse(sessionStorage.getItem(tokenKey) || 'null');
+      const tokens = JSON.parse(sessionStorage.getItem(tokenKey) || 'null');
+      if (!tokens?.access_token) return null;
+      const lifetimeMs = Number(tokens.expires_in || 3600) * 1000;
+      const storedAt = Number(tokens.storedAt || 0);
+      if (storedAt && Date.now() > storedAt + lifetimeMs) {
+        clearSession();
+        return null;
+      }
+      return tokens;
     } catch {
       return null;
     }
   }
 
   function writeTokens(tokens) {
-    sessionStorage.setItem(tokenKey, JSON.stringify(tokens));
+    sessionStorage.setItem(tokenKey, JSON.stringify({ ...tokens, storedAt: Date.now() }));
   }
 
   function clearSession() {

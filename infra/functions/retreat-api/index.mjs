@@ -28,6 +28,25 @@ const tableName = process.env.TABLE_NAME;
 const auditTableName = process.env.AUDIT_TABLE_NAME;
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
 
+function auditActor(event) {
+  return String(event.requestContext?.authorizer?.jwt?.claims?.email || 'public').slice(0, 254);
+}
+
+async function writeAudit(item) {
+  if (!auditTableName) return;
+  try {
+    await ddb.send(
+      new PutItemCommand({
+        TableName: auditTableName,
+        Item: marshall(item, { removeUndefinedValues: true }),
+        ConditionExpression: 'attribute_not_exists(pk)',
+      }),
+    );
+  } catch (error) {
+    console.error('retreat_audit_error', error?.name || 'Error');
+  }
+}
+
 export async function handler(event) {
   const origin = originOf(event);
   const method = event.requestContext?.http?.method || event.httpMethod;
@@ -77,16 +96,37 @@ async function createApplication(event, origin) {
   const submittedAt = new Date().toISOString();
   const item = buildApplicationItem({ id, submittedAt, fields: parsed.fields });
 
+  const occurredAt = submittedAt;
   try {
     await ddb.send(
-      new PutItemCommand({
-        TableName: tableName,
-        Item: marshall(item, { removeUndefinedValues: true }),
-        ConditionExpression: 'attribute_not_exists(pk)',
+      new TransactWriteItemsCommand({
+        TransactItems: [
+          {
+            Put: {
+              TableName: tableName,
+              Item: marshall(item, { removeUndefinedValues: true }),
+              ConditionExpression: 'attribute_not_exists(pk)',
+            },
+          },
+          {
+            Put: {
+              TableName: auditTableName,
+              Item: marshall({
+                pk: `APP#${id}`,
+                sk: `EVENT#${occurredAt}#${randomUUID()}`,
+                applicationId: id,
+                eventType: 'APPLICATION_SUBMITTED',
+                actor: 'public',
+                occurredAt,
+              }),
+              ConditionExpression: 'attribute_not_exists(pk)',
+            },
+          },
+        ],
       }),
     );
   } catch (error) {
-    if (error?.name !== 'ConditionalCheckFailedException') throw error;
+    if (error?.name !== 'TransactionCanceledException') throw error;
     const existing = await ddb.send(
       new GetItemCommand({
         TableName: tableName,
@@ -117,6 +157,15 @@ async function getApplication(event, origin) {
     }),
   );
   if (!result.Item) return json(404, { error: 'not_found' }, origin, allowedOrigins);
+  const viewedAt = new Date().toISOString();
+  await writeAudit({
+    pk: `APP#${id}`,
+    sk: `EVENT#${viewedAt}#${randomUUID()}`,
+    applicationId: id,
+    eventType: 'APPLICATION_VIEWED',
+    actor: auditActor(event),
+    occurredAt: viewedAt,
+  });
   return json(200, publicStaffRecord(unmarshall(result.Item)), origin, allowedOrigins);
 }
 
@@ -134,12 +183,18 @@ async function listApplications(event, origin) {
       Limit: 50,
     }),
   );
-  return json(
-    200,
-    { items: (result.Items || []).map((item) => staffSummaryRecord(unmarshall(item))) },
-    origin,
-    allowedOrigins,
-  );
+  const items = (result.Items || []).map((item) => staffSummaryRecord(unmarshall(item)));
+  const listedAt = new Date().toISOString();
+  await writeAudit({
+    pk: `STAFF#${auditActor(event)}`,
+    sk: `EVENT#${listedAt}#${randomUUID()}`,
+    eventType: 'APPLICATION_LISTED',
+    actor: auditActor(event),
+    status: parsed.status,
+    itemCount: items.length,
+    occurredAt: listedAt,
+  });
+  return json(200, { items }, origin, allowedOrigins);
 }
 
 async function patchApplication(event, origin) {

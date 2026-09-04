@@ -98,8 +98,27 @@ export const API_ERROR_MESSAGES = {
   invalid_service: 'A service history field is missing or not in the expected format.',
   invalid_workforce: 'Select your employment status before submitting.',
   invalid_final_details: 'Check your emergency contact, signature, and required agreements.',
+  restricted_identifier: 'Do not enter Social Security numbers or payment card numbers.',
   body_too_large: 'The application is too large to send. Shorten the longer answers and try again.',
 };
+
+const IDENTIFIER_FIELDS = new Set([
+  'goals',
+  'additionalNotes',
+  'workforceNotes',
+  'street',
+  'referredBy',
+  'combatTheaters',
+]);
+
+export function containsRestrictedIdentifier(value) {
+  const text = String(value || '');
+  if (!text) return false;
+  if (/\b\d{3}[-\s]\d{2}[-\s]\d{4}\b/.test(text)) return true;
+  if (/\b(?:ssn|social security number)\b/i.test(text) && /\d{3,}/.test(text)) return true;
+  const digits = text.replace(/\D/g, '');
+  return /\b(?:\d[ -]*){15,16}\b/.test(text) && (digits.length === 15 || digits.length === 16);
+}
 
 export function messageForApiError(result) {
   const message = String(result?.message || '').trim();
@@ -114,6 +133,9 @@ export function fieldIssue(name, data) {
   const value = String(data.get(name) || '').trim();
   const retreatType = String(data.get('retreatType') || '').trim();
   const applicantType = String(data.get('applicantType') || '').trim();
+  if (IDENTIFIER_FIELDS.has(name) && containsRestrictedIdentifier(value)) {
+    return 'Do not enter Social Security numbers or payment card numbers.';
+  }
 
   switch (name) {
     case 'applicantType':

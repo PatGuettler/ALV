@@ -1,11 +1,11 @@
 resource "aws_cognito_user_pool" "staff" {
-  # checkov:skip=CKV_AWS_345:Cognito Plus threat protection is deferred until the classified-field review; this pool is invite-only with optional MFA.
+  # checkov:skip=CKV_AWS_345:Cognito Plus threat protection is deferred until the classified-field review; this pool is invite-only with required MFA.
   name = "${local.resource_prefix}-retreat-staff"
 
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
   deletion_protection      = "ACTIVE"
-  mfa_configuration        = "OPTIONAL"
+  mfa_configuration        = "ON"
 
   admin_create_user_config {
     allow_admin_create_user_only = true

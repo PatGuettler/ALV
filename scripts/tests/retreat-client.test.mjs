@@ -5,6 +5,7 @@ import {
   applicationPayloadFromFormData,
   applicationReference,
   applicationReviewSections,
+  containsRestrictedIdentifier,
   fieldIssue,
   formatPhoneNumber,
   formatPostalCode,
@@ -193,7 +194,7 @@ test('staffDetailSections exposes approved applicant fields without internal key
   );
   assert.equal(
     sections.some((section) => section.title === 'Health and wellbeing'),
-    true,
+    false,
   );
   assert.equal(JSON.stringify(sections).includes('APP#'), false);
 });
@@ -247,4 +248,12 @@ test('filterStaffRecords applies retreat, status, type, and search filters', () 
   assert.equal(filterStaffRecords(records, { query: '6191d7d7-3d64-4537-91db' }).length, 1);
   assert.equal(statusBadgeClass('submitted'), 'badge-pending');
   assert.equal(statusBadgeClass('declined'), 'badge-denied');
+});
+
+test('application fields reject Social Security and payment card numbers', () => {
+  const data = applicationFormData();
+  data.set('goals', 'My SSN is 123-45-6789');
+  assert.match(fieldIssue('goals', data), /Social Security/);
+  assert.equal(containsRestrictedIdentifier('Call me at (205) 555-0100'), false);
+  assert.equal(containsRestrictedIdentifier('4111 1111 1111 1111'), true);
 });

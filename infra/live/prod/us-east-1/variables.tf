@@ -51,32 +51,35 @@ variable "assume_role_arn" {
 }
 
 variable "retreat_callback_urls" {
-  description = "Cognito hosted UI callback URLs for the staff SPA."
+  description = "Cognito hosted UI callback URLs for the staff SPA. Production and local only; staging Pages must not receive applicant PII."
   type        = list(string)
   default = [
     "http://127.0.0.1:4321/warrior-retreat-staff/",
     "http://localhost:4321/warrior-retreat-staff/",
-    "https://patguettler.github.io/ALV/warrior-retreat-staff/",
+    "https://alabamaveteran.org/warrior-retreat-staff/",
+    "https://www.alabamaveteran.org/warrior-retreat-staff/",
   ]
 }
 
 variable "retreat_logout_urls" {
-  description = "Cognito logout redirect URLs."
+  description = "Cognito logout redirect URLs. Production and local only."
   type        = list(string)
   default = [
     "http://127.0.0.1:4321/warrior-retreat-staff/",
     "http://localhost:4321/warrior-retreat-staff/",
-    "https://patguettler.github.io/ALV/warrior-retreat-staff/",
+    "https://alabamaveteran.org/warrior-retreat-staff/",
+    "https://www.alabamaveteran.org/warrior-retreat-staff/",
   ]
 }
 
 variable "retreat_allowed_origins" {
-  description = "CORS origins allowed to call the retreat API."
+  description = "CORS origins allowed to call the retreat API. Do not include GitHub Pages."
   type        = list(string)
   default = [
     "http://127.0.0.1:4321",
     "http://localhost:4321",
-    "https://patguettler.github.io",
+    "https://alabamaveteran.org",
+    "https://www.alabamaveteran.org",
   ]
 }
 

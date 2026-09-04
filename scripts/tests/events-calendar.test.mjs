@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 import {
   EVENTS_CALENDAR_LIVE_FEED_URL,
+  EVENTS_CALENDAR_REFRESH_MS,
   buildMonthCells,
   eventsForMonth,
   eventsFromFeedPayload,
@@ -116,6 +117,7 @@ test('builds a Sunday-start month grid with event markers', () => {
 });
 
 test('reads the live GitHub feed payload used for frequent refresh', () => {
+  assert.equal(EVENTS_CALENDAR_REFRESH_MS, 30_000);
   assert.match(EVENTS_CALENDAR_LIVE_FEED_URL, /raw\.githubusercontent\.com\/PatGuettler\/ALV/);
   const events = eventsFromFeedPayload({
     version: 1,
