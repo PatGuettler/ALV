@@ -14,8 +14,10 @@ function siteEnvironment() {
   return typeof process !== 'undefined' && process.env.SITE_ENV ? process.env.SITE_ENV : '';
 }
 
+const collectionEnvironments = new Set(['production', 'staging', '']);
+
 export const retreatLive = Boolean(
-  siteEnvironment() === 'production' &&
+  collectionEnvironments.has(siteEnvironment()) &&
   retreatPublic.apiUrl &&
   retreatPublic.cognitoDomain &&
   retreatPublic.clientId,

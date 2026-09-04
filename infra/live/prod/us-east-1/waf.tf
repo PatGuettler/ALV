@@ -1,6 +1,6 @@
 resource "aws_wafv2_web_acl" "retreat" {
   name        = "${local.resource_prefix}-retreat"
-  description = "Rate limit and managed rules in front of the Warrior Retreat HTTP API."
+  description = "Staff Cognito WAF for Warrior Retreat"
   scope       = "REGIONAL"
 
   default_action {
@@ -111,6 +111,6 @@ resource "aws_wafv2_web_acl" "retreat" {
 }
 
 resource "aws_wafv2_web_acl_association" "retreat" {
-  resource_arn = aws_apigatewayv2_stage.default.arn
+  resource_arn = aws_cognito_user_pool.staff.arn
   web_acl_arn  = aws_wafv2_web_acl.retreat.arn
 }

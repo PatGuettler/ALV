@@ -53,6 +53,7 @@ jobs:
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
           SITE_ENV: staging
+          PUBLIC_EVENTS_FEED_URL: ${{ vars.PUBLIC_EVENTS_FEED_URL }}
         run: npm run build
 
       - name: Validate build

@@ -1,5 +1,5 @@
-bucket       = "customer-approved-terraform-state-bucket"
-key          = "alabama-veteran/nonprod/us-east-1/terraform.tfstate"
+bucket       = "keytrain-org-tfstate"
+key          = "alv/nonprod/us-east-1/terraform.tfstate"
 region       = "us-east-1"
 encrypt      = true
 use_lockfile = true

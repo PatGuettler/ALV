@@ -39,6 +39,39 @@ variable "cost_center" {
   }
 }
 
+variable "assume_role_arn" {
+  description = "Optional OrganizationAccountAccessRole in the ALV account. Empty means credentials already belong to aws_account_id."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.assume_role_arn == "" || can(regex("^arn:aws:iam::[0-9]{12}:role/.+", var.assume_role_arn))
+    error_message = "assume_role_arn must be empty or an IAM role ARN."
+  }
+}
+
+variable "ghl_location_id" {
+  description = "Public GoHighLevel location ID used by the events calendar sync. Not a secret."
+  type        = string
+  default     = "jpHzkfKyYJW7cGNPHePS"
+}
+
+variable "ghl_events_calendar_id" {
+  description = "Public AV Events Calendar ID used by the events calendar sync. Not a secret."
+  type        = string
+  default     = "zfYlU1tekAs9O3E2xGT8"
+}
+
+variable "events_feed_allowed_origins" {
+  description = "Browser origins permitted to read the public events JSON feed. Includes GitHub Pages staging."
+  type        = list(string)
+  default = [
+    "http://127.0.0.1:4321",
+    "http://localhost:4321",
+    "https://patguettler.github.io",
+  ]
+}
+
 variable "data_classification" {
   description = "Highest data classification permitted in this environment root."
   type        = string

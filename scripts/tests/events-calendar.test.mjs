@@ -116,9 +116,14 @@ test('builds a Sunday-start month grid with event markers', () => {
   assert.equal(today?.isToday, true);
 });
 
-test('reads the live GitHub feed payload used for frequent refresh', () => {
+test('reads the live GitHub feed payload used for frequent refresh', async () => {
   assert.equal(EVENTS_CALENDAR_REFRESH_MS, 30_000);
   assert.match(EVENTS_CALENDAR_LIVE_FEED_URL, /raw\.githubusercontent\.com\/PatGuettler\/ALV/);
+  const calendar = await readFile(
+    new URL('../../src/components/events/EventsCalendar.astro', import.meta.url),
+    'utf8',
+  );
+  assert.match(calendar, /PUBLIC_EVENTS_FEED_URL/);
   const events = eventsFromFeedPayload({
     version: 1,
     events: [event({ title: 'Join us Saturday morning for Vet to Pet Day' })],

@@ -12,4 +12,13 @@ locals {
   }
 }
 
-# Workload modules remain deliberately unwired until their focused resource issues are implemented.
+module "events_feed" {
+  source = "../../../modules/events-feed"
+
+  name                   = local.resource_prefix
+  aws_account_id         = var.aws_account_id
+  ghl_location_id        = var.ghl_location_id
+  ghl_events_calendar_id = var.ghl_events_calendar_id
+  allowed_origins        = var.events_feed_allowed_origins
+  tags                   = local.required_tags
+}
