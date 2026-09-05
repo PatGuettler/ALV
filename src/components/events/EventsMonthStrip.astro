@@ -1,35 +1,6 @@
----
-import { publishedEventsFeed } from '../../data/published-events.js';
-import {
-  eventsFromFeedPayload,
-  eventsGroupedByChicagoMonth,
-} from '../../scripts/events-calendar.js';
-
-const groups = eventsGroupedByChicagoMonth(eventsFromFeedPayload(publishedEventsFeed) || []);
----
-
 <section class="evp-month-strip-section">
   <div class="container">
     <div class="evp-month-strip-title">What's Happening</div>
-    <div class="evp-month-strip" data-month-strip>
-      {
-        groups.map((group) => (
-          <button
-            class="evp-month-card"
-            type="button"
-            aria-label={`${group.label} events`}
-            data-month-year={group.year}
-            data-month-index={group.month}
-          >
-            <div class="evp-month-card-month">{group.label}</div>
-            <ul class="evp-month-card-events">
-              {group.events.slice(0, 3).map((event: { title: string }) => (
-                <li>{event.title}</li>
-              ))}
-            </ul>
-          </button>
-        ))
-      }
-    </div>
+    <div class="evp-month-strip" data-month-strip></div>
   </div>
 </section>

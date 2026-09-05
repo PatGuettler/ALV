@@ -1,5 +1,3 @@
-import { publishedEventsFeed } from '../data/published-events.js';
-
 export const EVENTS_CALENDAR_FEED_VERSION = 1;
 export const EVENTS_CALENDAR_LIVE_FEED_URL =
   'https://raw.githubusercontent.com/PatGuettler/ALV/main/public/data/events-calendar.json';
@@ -331,7 +329,6 @@ function paintMonthStrip(calendarRoot, state) {
   if (!(strip instanceof HTMLElement)) return;
   const groups = eventsGroupedByChicagoMonth(state.events);
   if (!groups.length) {
-    if (strip.querySelector('.evp-month-card')) return;
     strip.replaceChildren();
     const empty = document.createElement('p');
     empty.className = 'evp-month-strip-empty';
@@ -481,11 +478,8 @@ async function readPublicEvents(url) {
 
 async function refreshPublicEvents(state, urls) {
   const batches = await Promise.all(urls.map((url) => readPublicEvents(url)));
-  const merged = mergePublicEvents(
-    eventsFromFeedPayload(publishedEventsFeed) || [],
-    ...batches.filter(Boolean),
-  );
-  if (!merged.length) return false;
+  const merged = mergePublicEvents(...batches.filter(Boolean));
+  if (!merged.length && !batches.some(Boolean)) return false;
   const next = JSON.stringify(merged);
   const changed = next !== JSON.stringify(state.events);
   if (changed) state.events = merged;
@@ -497,7 +491,7 @@ async function loadEventsCalendar(root) {
   const state = {
     year: now.getFullYear(),
     month: now.getMonth(),
-    events: eventsFromFeedPayload(publishedEventsFeed) || [],
+    events: [],
     selectedKey: '',
   };
   const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
@@ -540,8 +534,7 @@ async function loadEventsCalendar(root) {
 
 async function loadHomeEvents(root) {
   const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
-  const state = { events: eventsFromFeedPayload(publishedEventsFeed) || [] };
-  paintHomeEvents(root, state.events);
+  const state = { events: [] };
   await refreshPublicEvents(state, feedUrls);
   paintHomeEvents(root, state.events);
   window.setInterval(async () => {
