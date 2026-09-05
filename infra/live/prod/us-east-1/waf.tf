@@ -23,7 +23,7 @@ resource "aws_wafv2_web_acl" "retreat" {
 
     statement {
       rate_based_statement {
-        limit              = 100
+        limit              = 2000
         aggregate_key_type = "IP"
       }
     }
@@ -112,5 +112,10 @@ resource "aws_wafv2_web_acl" "retreat" {
 
 resource "aws_wafv2_web_acl_association" "retreat" {
   resource_arn = aws_cognito_user_pool.staff.arn
+  web_acl_arn  = aws_wafv2_web_acl.retreat.arn
+}
+
+resource "aws_wafv2_web_acl_association" "retreat_api" {
+  resource_arn = aws_apigatewayv2_stage.default.arn
   web_acl_arn  = aws_wafv2_web_acl.retreat.arn
 }

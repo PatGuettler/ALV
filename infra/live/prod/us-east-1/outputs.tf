@@ -38,3 +38,23 @@ output "retreat_application_audit_table_name" {
   description = "Append-only staff application decision audit table."
   value       = aws_dynamodb_table.application_audit.name
 }
+
+output "site_origin_bucket" {
+  description = "Private S3 origin for the production Astro release. Set GitHub AWS_PRODUCTION_BUCKET to this value."
+  value       = module.static_site.origin_bucket.id
+}
+
+output "site_distribution_id" {
+  description = "CloudFront distribution ID. Set GitHub AWS_PRODUCTION_DISTRIBUTION_ID to this value."
+  value       = module.static_site.distribution.id
+}
+
+output "site_url" {
+  description = "HTTPS origin for the CloudFront distribution until the custom domain is attached."
+  value       = module.static_site.distribution.url
+}
+
+output "github_site_deploy_role_arn" {
+  description = "OIDC role assumed by the production-deploy GitHub Environment. Set AWS_PRODUCTION_DEPLOY_ROLE_ARN to this value."
+  value       = aws_iam_role.github_site_deploy.arn
+}

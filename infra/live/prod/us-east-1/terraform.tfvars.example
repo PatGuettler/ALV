@@ -5,3 +5,5 @@ cost_center         = "customer-approved-value"
 data_classification = "restricted"
 staff_invite_email  = "operator@example.com"
 super_admin_emails  = ["operator@example.com", "director@example.com"]
+alarm_email         = "operator@example.com"
+github_repository   = "PatGuettler/ALV"

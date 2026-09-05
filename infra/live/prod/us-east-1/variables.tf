@@ -121,3 +121,35 @@ variable "data_classification" {
     error_message = "data_classification must be public, internal, confidential, or restricted."
   }
 }
+
+variable "alarm_email" {
+  description = "Email that confirms the operations SNS topic for traffic and intake alarms."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", var.alarm_email))
+    error_message = "alarm_email must be a valid email address."
+  }
+}
+
+variable "github_repository" {
+  description = "GitHub org/repo allowed to assume the production site deploy role through OIDC."
+  type        = string
+  default     = "PatGuettler/ALV"
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", var.github_repository))
+    error_message = "github_repository must be in org/repo form."
+  }
+}
+
+variable "edge_rate_limit_requests" {
+  description = "CloudFront WAF per-IP request limit in a five-minute window."
+  type        = number
+  default     = 2000
+
+  validation {
+    condition     = var.edge_rate_limit_requests >= 100 && var.edge_rate_limit_requests <= 20000000
+    error_message = "edge_rate_limit_requests must be between 100 and 20,000,000."
+  }
+}

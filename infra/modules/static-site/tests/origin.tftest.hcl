@@ -22,11 +22,11 @@ variables {
   access_log_bucket_name            = "alv-test-central-logs"
   deployment_role_arns              = ["arn:aws:iam::111111111111:role/alv-test-deploy"]
   aws_account_id                    = "111111111111"
-  distribution_name                 = "alv-test"
   origin_access_control_name        = "alv-test-origin"
-  domain_aliases                    = ["www.example.com"]
+  aliases                           = ["www.example.com"]
   acm_certificate_arn               = "arn:aws:acm:us-east-1:111111111111:certificate/12345678-1234-1234-1234-123456789abc"
-  web_acl_arn                       = "arn:aws:wafv2:us-east-1:111111111111:global/webacl/alv-test/12345678-1234-1234-1234-123456789abc"
+  web_acl_id                        = "arn:aws:wafv2:us-east-1:111111111111:global/webacl/alv-test/12345678-1234-1234-1234-123456789abc"
+  alarm_sns_topic_arn               = "arn:aws:sns:us-east-1:111111111111:alv-test-alarms"
   cloudfront_log_bucket_domain_name = "alv-test-edge-logs.s3.amazonaws.com"
   content_security_policy           = "default-src 'self'; object-src 'none'; frame-ancestors 'self'"
   tags = {

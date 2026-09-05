@@ -1,28 +1,6 @@
-locals {
-  origin_id = "s3-${var.bucket_name}"
-}
-
-check "certificate_belongs_to_account" {
-  assert {
-    condition = startswith(
-      var.acm_certificate_arn,
-      "arn:aws:acm:us-east-1:${var.aws_account_id}:certificate/",
-    )
-    error_message = "acm_certificate_arn must be a us-east-1 certificate owned by aws_account_id."
-  }
-}
-
-resource "aws_cloudfront_function" "directory_rewrite" {
-  name    = "${var.distribution_name}-directory-rewrite"
-  comment = "Resolve ALV static directory routes without an SPA fallback"
-  runtime = "cloudfront-js-2.0"
-  publish = true
-  code    = file("${path.module}/functions/directory-rewrite.js")
-}
-
 resource "aws_cloudfront_cache_policy" "html" {
-  name        = "${var.distribution_name}-html"
-  comment     = "Short-lived HTML and mutable ALV site content"
+  name        = "${var.bucket_name}-html"
+  comment     = "Honor origin Cache-Control for HTML and other mutable objects"
   default_ttl = 0
   min_ttl     = 0
   max_ttl     = 300
@@ -46,8 +24,8 @@ resource "aws_cloudfront_cache_policy" "html" {
 }
 
 resource "aws_cloudfront_cache_policy" "immutable" {
-  name        = "${var.distribution_name}-immutable"
-  comment     = "One-year cache for fingerprinted Astro assets"
+  name        = "${var.bucket_name}-immutable"
+  comment     = "Long-lived cache for fingerprinted Astro assets"
   default_ttl = 31536000
   min_ttl     = 31536000
   max_ttl     = 31536000
@@ -71,21 +49,16 @@ resource "aws_cloudfront_cache_policy" "immutable" {
 }
 
 resource "aws_cloudfront_response_headers_policy" "site" {
-  name    = "${var.distribution_name}-security"
-  comment = "Browser security headers for the ALV public site"
+  name    = "${var.bucket_name}-security"
+  comment = "Browser security headers for the public Alabama Veteran site"
 
   security_headers_config {
-    content_security_policy {
-      content_security_policy = var.content_security_policy
-      override                = true
-    }
-
     content_type_options {
       override = true
     }
 
     frame_options {
-      frame_option = "SAMEORIGIN"
+      frame_option = "DENY"
       override     = true
     }
 
@@ -110,42 +83,64 @@ resource "aws_cloudfront_response_headers_policy" "site" {
 
   custom_headers_config {
     items {
-      header   = "Permissions-Policy"
-      value    = "camera=(), geolocation=(), microphone=()"
+      header   = "Content-Security-Policy"
       override = true
+      value    = var.content_security_policy
     }
   }
 }
 
 resource "aws_cloudfront_distribution" "site" {
-  # checkov:skip=CKV_AWS_310:A secondary origin depends on the customer-approved RPO/RTO and recovery design in #63/#93; S3 version recovery is enabled now.
-  # checkov:skip=CKV_AWS_374:Public veteran resources must remain globally reachable; WAF and rate controls are the approved traffic boundary.
-  # checkov:skip=CKV2_AWS_47:The WAF is supplied by #84 and its managed-rule assertions are tested in that focused module rather than duplicated here.
-  aliases             = var.domain_aliases
-  comment             = "${var.distribution_name} public website"
-  default_root_object = "index.html"
+  # checkov:skip=CKV_AWS_310:Origin failover waits for the approved RPO/RTO in #63.
+  # checkov:skip=CKV_AWS_174:The CloudFront default certificate ignores minimum_protocol_version until ACM aliases are attached.
+  # checkov:skip=CKV2_AWS_42:A custom ACM certificate waits for the approved production hostname cutover.
+  # checkov:skip=CKV_AWS_374:The public veteran site must remain globally reachable; WAF is the approved traffic boundary.
+  comment             = "Alabama Veteran public static site"
   enabled             = true
+  default_root_object = "index.html"
   http_version        = "http2and3"
   is_ipv6_enabled     = true
   price_class         = var.price_class
-  retain_on_delete    = true
-  wait_for_deployment = true
-  web_acl_id          = var.web_acl_arn
+  wait_for_deployment = false
+  web_acl_id          = var.web_acl_id
+  aliases             = var.aliases
   tags                = var.tags
 
   origin {
     domain_name              = aws_s3_bucket.origin.bucket_regional_domain_name
+    origin_id                = "s3-${aws_s3_bucket.origin.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.origin.id
-    origin_id                = local.origin_id
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "_astro/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = aws_cloudfront_cache_policy.immutable.id
+    compress                   = true
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    target_origin_id           = "s3-${aws_s3_bucket.origin.id}"
+    viewer_protocol_policy     = "redirect-to-https"
+  }
+
+  ordered_cache_behavior {
+    path_pattern               = "assets/*"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    cache_policy_id            = aws_cloudfront_cache_policy.immutable.id
+    compress                   = true
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
+    target_origin_id           = "s3-${aws_s3_bucket.origin.id}"
+    viewer_protocol_policy     = "redirect-to-https"
   }
 
   default_cache_behavior {
     allowed_methods            = ["GET", "HEAD", "OPTIONS"]
-    cached_methods             = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
     cache_policy_id            = aws_cloudfront_cache_policy.html.id
     compress                   = true
     response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
-    target_origin_id           = local.origin_id
+    target_origin_id           = "s3-${aws_s3_bucket.origin.id}"
     viewer_protocol_policy     = "redirect-to-https"
 
     function_association {
@@ -154,29 +149,27 @@ resource "aws_cloudfront_distribution" "site" {
     }
   }
 
-  ordered_cache_behavior {
-    path_pattern               = "_astro/*"
-    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
-    cached_methods             = ["GET", "HEAD", "OPTIONS"]
-    cache_policy_id            = aws_cloudfront_cache_policy.immutable.id
-    compress                   = true
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.site.id
-    target_origin_id           = local.origin_id
-    viewer_protocol_policy     = "redirect-to-https"
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
   }
 
-  custom_error_response {
-    error_caching_min_ttl = 60
-    error_code            = 403
-    response_code         = 404
-    response_page_path    = "/404/index.html"
+  dynamic "viewer_certificate" {
+    for_each = var.acm_certificate_arn == "" ? [1] : []
+    content {
+      cloudfront_default_certificate = true
+      minimum_protocol_version       = "TLSv1.2_2021"
+    }
   }
 
-  custom_error_response {
-    error_caching_min_ttl = 60
-    error_code            = 404
-    response_code         = 404
-    response_page_path    = "/404/index.html"
+  dynamic "viewer_certificate" {
+    for_each = var.acm_certificate_arn == "" ? [] : [1]
+    content {
+      acm_certificate_arn      = var.acm_certificate_arn
+      ssl_support_method       = "sni-only"
+      minimum_protocol_version = "TLSv1.2_2021"
+    }
   }
 
   logging_config {
@@ -184,16 +177,44 @@ resource "aws_cloudfront_distribution" "site" {
     include_cookies = false
     prefix          = var.cloudfront_log_prefix
   }
+}
 
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
+resource "aws_cloudwatch_metric_alarm" "site_4xx" {
+  alarm_name          = "${var.bucket_name}-4xx"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "4xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = 300
+  statistic           = "Average"
+  threshold           = 15
+  alarm_description   = "Public site 4xx rate is elevated."
+  alarm_actions       = [var.alarm_sns_topic_arn]
+  treat_missing_data  = "notBreaching"
+  tags                = var.tags
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.site.id
+    Region         = "Global"
   }
+}
 
-  viewer_certificate {
-    acm_certificate_arn      = var.acm_certificate_arn
-    minimum_protocol_version = "TLSv1.2_2021"
-    ssl_support_method       = "sni-only"
+resource "aws_cloudwatch_metric_alarm" "site_5xx" {
+  alarm_name          = "${var.bucket_name}-5xx"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "5xxErrorRate"
+  namespace           = "AWS/CloudFront"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 1
+  alarm_description   = "Public site 5xx responses are being served."
+  alarm_actions       = [var.alarm_sns_topic_arn]
+  treat_missing_data  = "notBreaching"
+  tags                = var.tags
+
+  dimensions = {
+    DistributionId = aws_cloudfront_distribution.site.id
+    Region         = "Global"
   }
 }

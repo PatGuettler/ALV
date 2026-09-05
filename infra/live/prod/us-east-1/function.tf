@@ -107,7 +107,7 @@ resource "aws_lambda_function" "retreat_api" {
   handler          = "index.handler"
   runtime          = "nodejs22.x"
   timeout          = 15
-  memory_size      = 256
+  memory_size      = 512
   architectures    = ["x86_64"]
 
   environment {

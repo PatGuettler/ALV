@@ -296,6 +296,20 @@ resource "aws_s3_bucket_policy" "edge_logs" {
           }
         }
       },
+      {
+        Sid      = "AllowCloudFrontStandardLogs"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
+        Resource = "${aws_s3_bucket.edge_logs.arn}/*"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = var.aws_account_id
+          }
+        }
+      },
     ]
   })
 

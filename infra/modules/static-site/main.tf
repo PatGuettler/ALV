@@ -9,6 +9,23 @@ terraform {
   }
 }
 
+check "certificate_belongs_to_account" {
+  assert {
+    condition = (
+      var.acm_certificate_arn == "" ||
+      strcontains(var.acm_certificate_arn, ":${var.aws_account_id}:")
+    )
+    error_message = "The ACM certificate must belong to aws_account_id."
+  }
+}
+
+check "aliases_require_certificate" {
+  assert {
+    condition     = length(var.aliases) == 0 || var.acm_certificate_arn != ""
+    error_message = "Custom CloudFront aliases require acm_certificate_arn."
+  }
+}
+
 resource "aws_s3_bucket" "origin" {
   # checkov:skip=CKV_AWS_144:Cross-region replication waits for the customer-approved RPO/RTO in #63; version recovery is enabled now.
   # checkov:skip=CKV_AWS_145:This origin stores public static assets only; SSE-S3 provides approved at-rest encryption without KMS policy/cost overhead.

@@ -1,7 +1,9 @@
 locals {
-  project_name    = "alabama-veteran"
-  environment     = "prod"
-  resource_prefix = "alv-${local.environment}"
+  project_name         = "alabama-veteran"
+  environment          = "prod"
+  resource_prefix      = "alv-${local.environment}"
+  site_bucket_name     = "${local.resource_prefix}-${var.aws_account_id}-web"
+  edge_log_bucket_name = "${local.resource_prefix}-${var.aws_account_id}-edge-logs"
   required_tags = {
     Project            = local.project_name
     Environment        = local.environment
@@ -12,7 +14,5 @@ locals {
   }
 }
 
-# Workload modules remain deliberately unwired until their focused resource issues are implemented.
-# Warrior Retreat intake is provisioned in this root (Cognito, API, DynamoDB) for ALV prod.
-# Media originals/derivatives (#277) live in infra/modules/media and are applied from this root after
-# the logging bucket, uploader role, and alarm topic are issued.
+# Workload modules: Warrior Retreat intake, S3/CloudFront public site, WAF, and launch alarms.
+# Media originals/derivatives (#277) wait for an uploader role after this edge path is applied.
