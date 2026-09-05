@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-04T05:11:51.211Z",
+  "generatedAt": "2026-09-05T16:14:06.616Z",
   "events": [
     {
       "id": "xXBbeAflO92wrU6xTBZI",
@@ -9,6 +9,18 @@
       "endAt": "2026-09-05T15:30:00.000Z",
       "venue": "",
       "summary": "Meet adoptable dogs and cats, talk with fellow veterans, and take a friend home.",
+      "url": "",
+      "imageUrl": "",
+      "category": "event",
+      "status": "published"
+    },
+    {
+      "id": "K6gEU3pcWObj1REBKTFf",
+      "title": "Test - 9/5/2026",
+      "startAt": "2026-09-05T17:00:00.000Z",
+      "endAt": "2026-09-05T17:30:00.000Z",
+      "venue": "",
+      "summary": "Test poll",
       "url": "",
       "imageUrl": "",
       "category": "event",
