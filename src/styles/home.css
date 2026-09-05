@@ -137,3 +137,33 @@
     grid-template-columns: 1fr;
   }
 }
+.avnews-img-navy {
+  background: var(--blue-dp);
+}
+.avnews-img-slate {
+  background: var(--blue);
+}
+.avnews-img-crimson {
+  background: var(--red);
+}
+.avnews-tag-navy {
+  background: var(--blue-dp);
+}
+.ev-intro {
+  font-size: 13px;
+  color: var(--muted-on-dark);
+  margin-bottom: 28px;
+}
+.ev-empty {
+  font-size: 14px;
+  color: var(--muted-on-dark);
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ev-layout-list {
+  grid-template-columns: 1fr;
+}
+a.ev-row {
+  text-decoration: none;
+  color: inherit;
+}

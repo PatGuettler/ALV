@@ -1,0 +1,64 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<div class="wog-modal-overlay" id="wog-team-modal" data-wog-overlay>
+  <div class="wog-modal-box" role="dialog" aria-labelledby="wog-team-title">
+    <div class="wog-modal-header">
+      <span id="wog-team-title">2026 Team Registration</span>
+      <div class="wog-modal-actions">
+        <a
+          class="wog-modal-dl"
+          href={`${base}assets/wog-2026-team.pdf`}
+          download="WOG_Birmingham_TeamRegistration_2026.pdf">Download</a
+        >
+        <button class="wog-modal-close" type="button" data-wog-close aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="wog-modal-body">
+      <img
+        src={`${base}assets/wog-2026-team-flyer.jpg`}
+        alt="War on the Greens 2026 team registration flyer"
+        width="860"
+        height="1100"
+      />
+    </div>
+  </div>
+</div>
+<div class="wog-modal-overlay" id="wog-sponsor-modal" data-wog-overlay>
+  <div class="wog-modal-box" role="dialog" aria-labelledby="wog-sponsor-title">
+    <div class="wog-modal-header">
+      <span id="wog-sponsor-title">2026 Sponsorship Opportunities</span>
+      <div class="wog-modal-actions">
+        <a
+          class="wog-modal-dl"
+          href={`${base}assets/wog-2026-sponsorship.pdf`}
+          download="WOG_Birmingham_Sponsorship_2026.pdf">Download</a
+        >
+        <button class="wog-modal-close" type="button" data-wog-close aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="wog-modal-body">
+      <img
+        src={`${base}assets/wog-2026-sponsorship-flyer.jpg`}
+        alt="War on the Greens 2026 sponsorship flyer"
+        width="860"
+        height="1100"
+      />
+    </div>
+  </div>
+</div>
+
+<script>
+  function closeWogModal(overlay) {
+    overlay.classList.remove('open');
+  }
+  document.querySelectorAll('[data-wog-overlay]').forEach((overlay) => {
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) closeWogModal(overlay);
+    });
+    overlay.querySelectorAll('[data-wog-close]').forEach((button) => {
+      button.addEventListener('click', () => closeWogModal(overlay));
+    });
+  });
+</script>

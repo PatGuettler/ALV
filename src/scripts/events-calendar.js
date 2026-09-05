@@ -187,6 +187,45 @@ export function eventsOnChicagoDate(events, year, month, day) {
   );
 }
 
+export function eventsGroupedByChicagoMonth(events) {
+  const groups = new Map();
+  for (const event of [...events].sort((left, right) =>
+    left.startAt.localeCompare(right.startAt),
+  )) {
+    const parts = chicagoParts(event.startAt);
+    if (!parts) continue;
+    const key = `${parts.year}-${String(parts.month + 1).padStart(2, '0')}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        year: parts.year,
+        month: parts.month,
+        label: monthLabel(parts.year, parts.month),
+        events: [],
+      });
+    }
+    groups.get(key).events.push(event);
+  }
+  return [...groups.values()];
+}
+
+export function upcomingPublicEvents(events, limit = 4) {
+  const now = Date.now();
+  return [...events]
+    .filter((event) => {
+      const end = validDate(event.endAt);
+      return end && end.getTime() >= now;
+    })
+    .sort((left, right) => left.startAt.localeCompare(right.startAt))
+    .slice(0, limit);
+}
+
+export function eventCategoryBadge(category) {
+  if (category === 'fundraiser') return { className: 'bg-a', label: 'Fundraiser' };
+  if (category === 'program') return { className: 'bg-r', label: 'Program' };
+  if (category === 'community') return { className: 'bg-c', label: 'Community' };
+  return { className: 'bg-c', label: 'Event' };
+}
+
 export function formatEventDate(value) {
   const date = validDate(value);
   if (!date) return '';
@@ -258,6 +297,77 @@ function renderDetail(root, events, heading) {
     .join('');
 }
 
+function paintMonthStrip(calendarRoot, state) {
+  const strip = document.querySelector('[data-month-strip]');
+  if (!(strip instanceof HTMLElement)) return;
+  const groups = eventsGroupedByChicagoMonth(state.events);
+  if (!groups.length) {
+    strip.replaceChildren();
+    const empty = document.createElement('p');
+    empty.className = 'evp-month-strip-empty';
+    empty.textContent = 'Public events will appear here as they are published.';
+    strip.append(empty);
+    return;
+  }
+  strip.replaceChildren(
+    ...groups.map((group) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'evp-month-card';
+      card.setAttribute('aria-label', `${group.label} events`);
+      const heading = document.createElement('div');
+      heading.className = 'evp-month-card-month';
+      heading.textContent = group.label;
+      const list = document.createElement('ul');
+      list.className = 'evp-month-card-events';
+      for (const event of group.events.slice(0, 3)) {
+        const item = document.createElement('li');
+        item.textContent = event.title;
+        list.append(item);
+      }
+      card.append(heading, list);
+      card.addEventListener('click', () => {
+        state.year = group.year;
+        state.month = group.month;
+        state.selectedKey = '';
+        paintCalendar(calendarRoot, state);
+        document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return card;
+    }),
+  );
+}
+
+function paintHomeEvents(root, events) {
+  const list = root.querySelector('[data-home-event-list]');
+  if (!(list instanceof HTMLElement)) return;
+  const upcoming = upcomingPublicEvents(events);
+  if (!upcoming.length) {
+    list.innerHTML =
+      '<p class="ev-empty">Public events will appear here as they are published.</p>';
+    return;
+  }
+  list.replaceChildren(
+    ...upcoming.map((event) => {
+      const row = document.createElement('a');
+      row.className = 'ev-row';
+      row.href = `${root.dataset.eventsPath || '/events/'}#calendar`;
+      const parts = chicagoParts(event.startAt);
+      const month = parts
+        ? new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'America/Chicago' }).format(
+            validDate(event.startAt),
+          )
+        : '';
+      const badge = eventCategoryBadge(event.category);
+      row.innerHTML = `
+        <div class="ev-db"><span class="ev-mo">${escapeHtml(month)}</span><span class="ev-dy">${parts ? parts.day : ''}</span></div>
+        <div><div class="ev-t">${escapeHtml(event.title)}</div>${event.venue ? `<div class="ev-w">${escapeHtml(event.venue)}</div>` : ''}</div>
+        <span class="ev-badge ${badge.className}">${escapeHtml(badge.label)}</span>`;
+      return row;
+    }),
+  );
+}
+
 function paintCalendar(root, state) {
   const month = root.querySelector('[data-cal-month]');
   const grid = root.querySelector('[data-cal-grid]');
@@ -320,6 +430,7 @@ function paintCalendar(root, state) {
         : 'Public events will appear here as they are published. This calendar shows dates and details only — it does not book meetings.',
     );
   }
+  paintMonthStrip(root, state);
 }
 
 async function readPublicEvents(url) {
@@ -393,7 +504,22 @@ async function loadEventsCalendar(root) {
   }, EVENTS_CALENDAR_REFRESH_MS);
 }
 
+async function loadHomeEvents(root) {
+  const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
+  const state = { events: [] };
+  await refreshPublicEvents(state, feedUrls);
+  paintHomeEvents(root, state.events);
+  window.setInterval(async () => {
+    const changed = await refreshPublicEvents(state, feedUrls);
+    if (changed) paintHomeEvents(root, state.events);
+  }, EVENTS_CALENDAR_REFRESH_MS);
+}
+
 if (typeof document !== 'undefined') {
-  const root = document.querySelector('[data-events-calendar]');
-  if (root instanceof HTMLElement) loadEventsCalendar(root);
+  document.querySelectorAll('[data-events-calendar]').forEach((root) => {
+    if (root instanceof HTMLElement) loadEventsCalendar(root);
+  });
+  document.querySelectorAll('[data-home-events]').forEach((root) => {
+    if (root instanceof HTMLElement) loadHomeEvents(root);
+  });
 }

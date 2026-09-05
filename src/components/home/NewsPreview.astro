@@ -1,0 +1,55 @@
+---
+const base = import.meta.env.BASE_URL;
+const cards = [
+  {
+    tag: 'Benefits',
+    title: 'How To File A VA Claim In Alabama',
+    body: 'A step-by-step walkthrough for Alabama veterans starting a disability claim, and where to get free help filing it.',
+    tone: 'navy',
+  },
+  {
+    tag: 'Stories',
+    title: 'Inside An Alabama Veteran Warrior Retreat',
+    body: 'What really happens at a Warrior Retreat, told by the veterans and families who lived it.',
+    tone: 'slate',
+  },
+  {
+    tag: 'Advocacy',
+    title: '2026 Legislative Update For Alabama Veterans',
+    body: 'The bills moving in Montgomery this session and what they mean for veterans and their families.',
+    tone: 'crimson',
+    tagTone: 'navy',
+  },
+];
+---
+
+<section class="avnews-section">
+  <div class="container">
+    <div class="avnews-head">
+      <div>
+        <div class="avnews-eyebrow">AV News</div>
+        <h2 class="avnews-title">Latest From Alabama Veteran</h2>
+      </div>
+      <a href={`${base}news/`} class="avnews-all">View All News →</a>
+    </div>
+    <div class="avnews-grid">
+      {
+        cards.map((card) => (
+          <a href={`${base}news/`} class="avnews-card">
+            <div class={`avnews-img avnews-img-${card.tone}`}>
+              <span class={`avnews-tag${card.tagTone ? ` avnews-tag-${card.tagTone}` : ''}`}>
+                {card.tag}
+              </span>
+            </div>
+            <div class="avnews-body">
+              <div class="avnews-date">Not published yet</div>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+              <span class="avnews-read">Read More →</span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>

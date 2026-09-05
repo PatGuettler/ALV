@@ -9,6 +9,7 @@ import {
   buildMonthCells,
   eventsForMonth,
   eventsFromFeedPayload,
+  eventsGroupedByChicagoMonth,
   eventsOnChicagoDate,
   normalizePublicEvent,
   publicEventFromCalendarRecord,
@@ -106,6 +107,21 @@ test('groups events onto America/Chicago month days', () => {
   assert.equal(october.length, 1);
   assert.equal(eventsOnChicagoDate([event()], 2026, 9, 19).length, 1);
   assert.equal(eventsOnChicagoDate([event()], 2026, 9, 18).length, 0);
+});
+
+test('groups public events onto Chicago months for the happening strip', () => {
+  const groups = eventsGroupedByChicagoMonth([
+    event(),
+    event({
+      id: 'event-2',
+      title: 'Motors on Main',
+      startAt: '2026-09-12T17:00:00Z',
+      endAt: '2026-09-12T21:00:00Z',
+    }),
+  ]);
+  assert.equal(groups[0]?.label, 'September 2026');
+  assert.equal(groups[0]?.events[0]?.title, 'Motors on Main');
+  assert.equal(groups[1]?.label, 'October 2026');
 });
 
 test('builds a Sunday-start month grid with event markers', () => {

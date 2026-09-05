@@ -20,14 +20,14 @@ const routes = new Map([
 ]);
 
 const sectionCounts = new Map([
-  ['home', 8],
+  ['home', 11],
   ['news', 1],
   ['warrior', 3],
   ['circle', 9],
   ['about', 4],
   ['active', 6],
   ['topgolf', 2],
-  ['events', 3],
+  ['events', 7],
   ['resources', 5],
 ]);
 

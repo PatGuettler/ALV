@@ -1,0 +1,57 @@
+---
+const photos = [
+  {
+    src: 'https://alabamaveteran.org/wp-content/uploads/2025/02/jon-testimony.png',
+    alt: 'Jon K',
+    body: 'Alabama Veteran through their Warrior and Marriage Retreat have helped me grow as an individual, find self-value and have helped my marriage stay together.',
+    name: 'Jon K.',
+    branch: 'U.S.M.C. Veteran',
+  },
+  {
+    src: 'https://alabamaveteran.org/wp-content/uploads/2025/02/chantel-testimony.png',
+    alt: 'Chantelle Colbert',
+    body: "Alabama Veteran has helped me rediscover appreciation for my time in uniform, giving my service a renewed sense of value. I'm deeply grateful for this organization.",
+    name: 'Chantelle Colbert',
+    branch: 'U.S. Army Veteran',
+  },
+  {
+    src: 'https://alabamaveteran.org/wp-content/uploads/2025/01/daniel-becker-photo.webp',
+    alt: 'John P',
+    body: 'I went through a Warrior Retreat and even brought a friend. To say it was life-changing for both of us is an understatement. The more I dove in, the more I saw where I could grow.',
+    name: 'John P.',
+    branch: 'U.S. Army Veteran',
+  },
+];
+---
+
+<section class="testi-section">
+  <div class="container">
+    <div class="testi-header">
+      <div class="eyebrow ctr">From the Veterans We Serve</div>
+      <h2 class="st bl">Real Stories.<br />Real Impact.</h2>
+      <p>Hear directly from Alabama veterans who have been part of our programs.</p>
+    </div>
+    <div class="testi-grid">
+      {
+        photos.map((quote) => (
+          <article class="tc">
+            <div class="tc-qm" aria-hidden="true">
+              "
+            </div>
+            <img
+              class="tc-photo"
+              src={quote.src}
+              alt={quote.alt}
+              width="110"
+              height="110"
+              loading="lazy"
+            />
+            <p class="tc-body">{quote.body}</p>
+            <div class="tc-name">{quote.name}</div>
+            <div class="tc-branch">{quote.branch}</div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
