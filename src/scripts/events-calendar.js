@@ -1,3 +1,5 @@
+import { publishedEventsFeed } from '../data/published-events.js';
+
 export const EVENTS_CALENDAR_FEED_VERSION = 1;
 export const EVENTS_CALENDAR_LIVE_FEED_URL =
   'https://raw.githubusercontent.com/PatGuettler/ALV/main/public/data/events-calendar.json';
@@ -479,8 +481,11 @@ async function readPublicEvents(url) {
 
 async function refreshPublicEvents(state, urls) {
   const batches = await Promise.all(urls.map((url) => readPublicEvents(url)));
-  const merged = mergePublicEvents(...batches.filter(Boolean));
-  if (!merged.length && !batches.some(Boolean)) return false;
+  const merged = mergePublicEvents(
+    eventsFromFeedPayload(publishedEventsFeed) || [],
+    ...batches.filter(Boolean),
+  );
+  if (!merged.length) return false;
   const next = JSON.stringify(merged);
   const changed = next !== JSON.stringify(state.events);
   if (changed) state.events = merged;
@@ -492,14 +497,10 @@ async function loadEventsCalendar(root) {
   const state = {
     year: now.getFullYear(),
     month: now.getMonth(),
-    events: [],
+    events: eventsFromFeedPayload(publishedEventsFeed) || [],
     selectedKey: '',
   };
-  const feedUrls = [
-    root.dataset.publishedFeedUrl,
-    root.dataset.liveFeedUrl,
-    root.dataset.feedUrl,
-  ].filter(Boolean);
+  const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
 
   document.querySelector('[data-month-strip]')?.addEventListener('click', (event) => {
     const card = event.target instanceof Element ? event.target.closest('[data-month-year]') : null;
@@ -538,12 +539,9 @@ async function loadEventsCalendar(root) {
 }
 
 async function loadHomeEvents(root) {
-  const feedUrls = [
-    root.dataset.publishedFeedUrl,
-    root.dataset.liveFeedUrl,
-    root.dataset.feedUrl,
-  ].filter(Boolean);
-  const state = { events: [] };
+  const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
+  const state = { events: eventsFromFeedPayload(publishedEventsFeed) || [] };
+  paintHomeEvents(root, state.events);
   await refreshPublicEvents(state, feedUrls);
   paintHomeEvents(root, state.events);
   window.setInterval(async () => {

@@ -1,18 +1,11 @@
 ---
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { publishedEventsFeed } from '../../data/published-events.js';
 import {
   eventsFromFeedPayload,
   eventsGroupedByChicagoMonth,
 } from '../../scripts/events-calendar.js';
 
-const publishedFeed = JSON.parse(
-  await readFile(
-    fileURLToPath(new URL('../../../public/data/published-events.json', import.meta.url)),
-    'utf8',
-  ),
-);
-const groups = eventsGroupedByChicagoMonth(eventsFromFeedPayload(publishedFeed) || []);
+const groups = eventsGroupedByChicagoMonth(eventsFromFeedPayload(publishedEventsFeed) || []);
 ---
 
 <section class="evp-month-strip-section">
