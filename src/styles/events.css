@@ -211,13 +211,13 @@
   color: var(--white);
 }
 .evp-fund-card.dark .evp-fund-card-desc {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted-on-dark);
 }
 .evp-fund-card.dark .evp-fund-meta-row {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--muted-on-dark);
 }
 .evp-fund-card.dark .evp-fund-eyebrow {
-  color: var(--red);
+  color: var(--red-on-dark);
 }
 .evp-fund-card.dark .evp-anticipate {
   background: rgba(178, 31, 36, 0.12);
@@ -225,7 +225,7 @@
   padding: 16px 20px;
   margin-bottom: 24px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted-on-dark);
   line-height: 1.65;
 }
 .evp-fund-card.dark .evp-anticipate strong {

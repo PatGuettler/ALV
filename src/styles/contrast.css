@@ -40,6 +40,12 @@ footer .foot-col-head,
 #page-active .ava-app-left h2 .red,
 #page-events .evp-hero h1 .red,
 #page-events .evp-hero .eyebrow,
+#page-home .ev-section .eyebrow,
+.ev-mo,
+.ev-all,
+.ev-row:hover .ev-t,
+.bg-a,
+.evp-fund-card.dark .evp-fund-eyebrow,
 #page-resources .res-hero .eyebrow,
 #page-resources .res-hero-inner h1 .red,
 #page-resources .eyebrow,
@@ -160,4 +166,14 @@ footer .foot-links a.foot-accent {
 
 .wog-hsv-yr {
   color: var(--mg);
+}
+
+.ev-w {
+  color: var(--muted-on-dark);
+}
+
+.evp-fund-card.dark .evp-fund-meta-row,
+.evp-fund-card.dark .evp-fund-card-desc,
+.evp-fund-card.dark .evp-anticipate {
+  color: var(--muted-on-dark);
 }
