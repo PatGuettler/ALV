@@ -24,6 +24,9 @@
   position: relative;
   z-index: 2;
 }
+.evp-hero .eyebrow {
+  margin-bottom: 14px;
+}
 .evp-hero h1 {
   font-family: 'League Gothic', sans-serif;
   font-size: 76px;
@@ -64,6 +67,12 @@
   color: var(--blue-dp);
   letter-spacing: 1px;
   margin-bottom: 10px;
+}
+.evp-fund-header h2 .red {
+  color: var(--red);
+}
+.evp-fund-header .eyebrow {
+  margin-bottom: 14px;
 }
 .evp-fund-header p {
   font-size: 16px;
@@ -232,18 +241,21 @@
   background: var(--white);
   padding: 80px 0;
 }
-.evp-cal-section > .container > h2 {
+.evp-cal-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.evp-cal-header .eyebrow {
+  margin-bottom: 14px;
+}
+.evp-cal-header h2 {
   color: var(--blue-dp);
   font-family: 'League Gothic', sans-serif;
   font-size: 52px;
   letter-spacing: 1px;
-  margin: 0 0 28px;
+  margin: 0;
   text-align: center;
   text-transform: uppercase;
-}
-.evp-cal-header {
-  text-align: center;
-  margin-bottom: 48px;
 }
 .evp-cal-header h2 .red {
   color: var(--red);
@@ -471,9 +483,10 @@
 }
 .evp-subscribe .eyebrow {
   color: var(--red-on-dark);
+  margin-bottom: 14px;
 }
 .evp-subscribe-inner {
-  max-width: 880px;
+  max-width: 720px;
   margin: 0 auto;
   text-align: center;
 }

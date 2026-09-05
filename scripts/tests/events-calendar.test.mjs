@@ -150,6 +150,22 @@ test('reads the live GitHub feed payload used for frequent refresh', async () =>
   assert.equal(eventsFromFeedPayload({ version: 2, events: [event()] }), null);
 });
 
+test('events page ships the Drop fundraising layout, not a calendar-only shell', async () => {
+  const page = await readFile(new URL('../../src/pages/events.astro', import.meta.url), 'utf8');
+  assert.match(page, /EventsFundraising/);
+  assert.match(page, /EventsMonthStrip/);
+  assert.match(page, /EventsSubscribe/);
+  assert.match(page, /WogModals/);
+  assert.doesNotMatch(page, /CalendarStatus/);
+  const fundraising = await readFile(
+    new URL('../../src/components/events/EventsFundraising.astro', import.meta.url),
+    'utf8',
+  );
+  assert.match(fundraising, /Make an/);
+  assert.match(fundraising, /War on the Greens/);
+  assert.match(fundraising, /Salute to Service/);
+});
+
 test('the shipped events feed only contains normalized public records', async () => {
   const feed = JSON.parse(
     await readFile(new URL('../../public/data/events-calendar.json', import.meta.url), 'utf8'),

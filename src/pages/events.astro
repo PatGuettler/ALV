@@ -1,7 +1,11 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Hero from '../components/events/Hero.astro';
-import CalendarStatus from '../components/events/CalendarStatus.astro';
+import EventsFundraising from '../components/events/EventsFundraising.astro';
+import EventsMonthStrip from '../components/events/EventsMonthStrip.astro';
+import EventsCalendar from '../components/events/EventsCalendar.astro';
+import EventsSubscribe from '../components/events/EventsSubscribe.astro';
+import WogModals from '../components/events/WogModals.astro';
 import '../styles/events.css';
 ---
 
@@ -12,6 +16,10 @@ import '../styles/events.css';
 >
   <div id="page-events" class="page active">
     <Hero />
-    <CalendarStatus />
+    <EventsFundraising />
+    <EventsMonthStrip />
+    <EventsCalendar />
+    <EventsSubscribe />
+    <WogModals />
   </div>
 </SiteLayout>

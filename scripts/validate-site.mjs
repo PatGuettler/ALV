@@ -27,7 +27,7 @@ const sectionCounts = new Map([
   ['about', 4],
   ['active', 6],
   ['topgolf', 2],
-  ['events', 7],
+  ['events', 6],
   ['resources', 5],
 ]);
 

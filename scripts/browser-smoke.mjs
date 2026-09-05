@@ -565,6 +565,11 @@ async function assertCustomerReportedLayouts(page, label, width, browserErrors) 
   await assertNoHorizontalOverflow(page, `${label} events`);
   await assertEventsHero(page, label);
   await assertDisplayEventsCalendar(page, label);
+  const fundraiserTitle = await page.getByRole('heading', { name: /war on the greens/i }).count();
+  const saluteTitle = await page.getByRole('heading', { name: /salute to service/i }).count();
+  if (fundraiserTitle < 1 || saluteTitle < 1) {
+    throw new Error(`${label} events page is missing the signature fundraising cards`);
+  }
 
   await loadRoute(page, 'resources', 'resources/', browserErrors);
   await assertNoHorizontalOverflow(page, `${label} resources`);
