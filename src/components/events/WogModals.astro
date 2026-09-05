@@ -50,7 +50,7 @@ const base = import.meta.env.BASE_URL;
 </div>
 
 <script>
-  function closeWogModal(overlay) {
+  function closeWogModal(overlay: Element) {
     overlay.classList.remove('open');
   }
   document.querySelectorAll('[data-wog-overlay]').forEach((overlay) => {
