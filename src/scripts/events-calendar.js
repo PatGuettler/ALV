@@ -158,6 +158,25 @@ export function publicEventFromCalendarRecord(record, { eventsCalendarId = '' } 
   });
 }
 
+export function mergePublicEvents(...lists) {
+  const byId = new Map();
+  const byKey = new Map();
+  for (const list of lists) {
+    if (!Array.isArray(list)) continue;
+    for (const value of list) {
+      const event = normalizePublicEvent(value);
+      if (!event) continue;
+      const key = `${chicagoDateKey(event.startAt)}|${event.title.toLowerCase()}`;
+      if (byId.has(event.id) || byKey.has(key)) continue;
+      byId.set(event.id, event);
+      byKey.set(key, event);
+    }
+  }
+  return [...byId.values()].sort(
+    (left, right) => left.startAt.localeCompare(right.startAt) || left.id.localeCompare(right.id),
+  );
+}
+
 export function eventsFromFeedPayload(feed) {
   if (feed?.version !== EVENTS_CALENDAR_FEED_VERSION || !Array.isArray(feed.events)) return null;
   return feed.events.map(normalizePublicEvent).filter(Boolean);
@@ -297,11 +316,20 @@ function renderDetail(root, events, heading) {
     .join('');
 }
 
+function jumpCalendarToMonth(calendarRoot, state, year, month) {
+  state.year = year;
+  state.month = month;
+  state.selectedKey = '';
+  paintCalendar(calendarRoot, state);
+  document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function paintMonthStrip(calendarRoot, state) {
   const strip = document.querySelector('[data-month-strip]');
   if (!(strip instanceof HTMLElement)) return;
   const groups = eventsGroupedByChicagoMonth(state.events);
   if (!groups.length) {
+    if (strip.querySelector('.evp-month-card')) return;
     strip.replaceChildren();
     const empty = document.createElement('p');
     empty.className = 'evp-month-strip-empty';
@@ -315,6 +343,8 @@ function paintMonthStrip(calendarRoot, state) {
       card.type = 'button';
       card.className = 'evp-month-card';
       card.setAttribute('aria-label', `${group.label} events`);
+      card.dataset.monthYear = String(group.year);
+      card.dataset.monthIndex = String(group.month);
       const heading = document.createElement('div');
       heading.className = 'evp-month-card-month';
       heading.textContent = group.label;
@@ -326,13 +356,6 @@ function paintMonthStrip(calendarRoot, state) {
         list.append(item);
       }
       card.append(heading, list);
-      card.addEventListener('click', () => {
-        state.year = group.year;
-        state.month = group.month;
-        state.selectedKey = '';
-        paintCalendar(calendarRoot, state);
-        document.getElementById('calendar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
       return card;
     }),
   );
@@ -455,16 +478,13 @@ async function readPublicEvents(url) {
 }
 
 async function refreshPublicEvents(state, urls) {
-  for (const url of urls) {
-    const events = await readPublicEvents(url);
-    if (events) {
-      const next = JSON.stringify(events);
-      const changed = next !== JSON.stringify(state.events);
-      state.events = events;
-      return changed;
-    }
-  }
-  return false;
+  const batches = await Promise.all(urls.map((url) => readPublicEvents(url)));
+  const merged = mergePublicEvents(...batches.filter(Boolean));
+  if (!merged.length && !batches.some(Boolean)) return false;
+  const next = JSON.stringify(merged);
+  const changed = next !== JSON.stringify(state.events);
+  if (changed) state.events = merged;
+  return changed;
 }
 
 async function loadEventsCalendar(root) {
@@ -475,7 +495,20 @@ async function loadEventsCalendar(root) {
     events: [],
     selectedKey: '',
   };
-  const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
+  const feedUrls = [
+    root.dataset.publishedFeedUrl,
+    root.dataset.liveFeedUrl,
+    root.dataset.feedUrl,
+  ].filter(Boolean);
+
+  document.querySelector('[data-month-strip]')?.addEventListener('click', (event) => {
+    const card = event.target instanceof Element ? event.target.closest('[data-month-year]') : null;
+    if (!(card instanceof HTMLElement)) return;
+    const year = Number(card.dataset.monthYear);
+    const month = Number(card.dataset.monthIndex);
+    if (!Number.isInteger(year) || !Number.isInteger(month)) return;
+    jumpCalendarToMonth(root, state, year, month);
+  });
 
   root.querySelector('[data-cal-prev]')?.addEventListener('click', () => {
     state.month -= 1;
@@ -505,7 +538,11 @@ async function loadEventsCalendar(root) {
 }
 
 async function loadHomeEvents(root) {
-  const feedUrls = [root.dataset.liveFeedUrl, root.dataset.feedUrl].filter(Boolean);
+  const feedUrls = [
+    root.dataset.publishedFeedUrl,
+    root.dataset.liveFeedUrl,
+    root.dataset.feedUrl,
+  ].filter(Boolean);
   const state = { events: [] };
   await refreshPublicEvents(state, feedUrls);
   paintHomeEvents(root, state.events);

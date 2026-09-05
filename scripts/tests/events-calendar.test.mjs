@@ -11,6 +11,7 @@ import {
   eventsFromFeedPayload,
   eventsGroupedByChicagoMonth,
   eventsOnChicagoDate,
+  mergePublicEvents,
   normalizePublicEvent,
   publicEventFromCalendarRecord,
 } from '../../src/scripts/events-calendar.js';
@@ -164,6 +165,43 @@ test('events page ships the Drop fundraising layout, not a calendar-only shell',
   assert.match(fundraising, /Make an/);
   assert.match(fundraising, /War on the Greens/);
   assert.match(fundraising, /Salute to Service/);
+  assert.match(fundraising, /Date Coming Soon/);
+
+  const monthStrip = await readFile(
+    new URL('../../src/components/events/EventsMonthStrip.astro', import.meta.url),
+    'utf8',
+  );
+  assert.match(monthStrip, /What's Happening/);
+});
+
+test('merges the published events catalog with live public records', () => {
+  const merged = mergePublicEvents(
+    [
+      event({
+        id: 'published-war-on-the-greens-birmingham',
+        title: 'War on the Greens – Birmingham',
+        startAt: '2026-10-19T12:30:00.000Z',
+        endAt: '2026-10-19T20:30:00.000Z',
+      }),
+    ],
+    [
+      event({
+        id: 'published-war-on-the-greens-birmingham',
+        title: 'War on the Greens – Birmingham',
+        startAt: '2026-10-19T12:30:00.000Z',
+        endAt: '2026-10-19T20:30:00.000Z',
+      }),
+      event({
+        id: 'live-pet-day',
+        title: 'Vet to Pet Day',
+        startAt: '2026-09-12T14:00:00Z',
+        endAt: '2026-09-12T16:00:00Z',
+      }),
+    ],
+  );
+  assert.equal(merged.length, 2);
+  assert.equal(merged[0].title, 'Vet to Pet Day');
+  assert.equal(merged[1].id, 'published-war-on-the-greens-birmingham');
 });
 
 test('the shipped events feed only contains normalized public records', async () => {

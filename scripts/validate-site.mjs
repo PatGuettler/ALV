@@ -39,7 +39,7 @@ const forbiddenPrototypeMarkers = [
   'Thanks — you’re on the list',
   'return avSignup',
   'Beta Testing Now',
-  'Coming Soon',
+  'Page Coming Soon',
   'Sarah M., Birmingham',
   'Robert L., Huntsville',
   'David P., Tuscaloosa',

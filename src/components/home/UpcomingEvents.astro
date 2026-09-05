@@ -6,6 +6,7 @@ import {
 
 const base = import.meta.env.BASE_URL;
 const feedUrl = `${base}data/events-calendar.json`;
+const publishedFeedUrl = `${base}data/published-events.json`;
 const liveFeedUrl =
   import.meta.env.PUBLIC_EVENTS_FEED_URL ||
   (import.meta.env.SITE_ENV === 'staging'
@@ -16,6 +17,7 @@ const liveFeedUrl =
 <section
   class="ev-section"
   data-home-events
+  data-published-feed-url={publishedFeedUrl}
   data-feed-url={feedUrl}
   data-live-feed-url={liveFeedUrl}
   data-events-path={`${base}events/`}

@@ -1642,6 +1642,31 @@ body:has(.retreat-status) {
     justify-self: center;
   }
 
+  .retreat-staff-page {
+    padding: 20px 12px 40px;
+  }
+
+  .admin-header {
+    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .retreat-staff-login-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .retreat-staff-login-actions .btn,
+  .retreat-staff-login-actions .button-secondary {
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+    width: 100%;
+  }
+
   .filters .retreat-filter {
     min-width: 100%;
   }
